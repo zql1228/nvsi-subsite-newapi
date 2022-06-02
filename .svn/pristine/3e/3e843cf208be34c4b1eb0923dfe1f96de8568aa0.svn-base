@@ -1,0 +1,110 @@
+<template>
+  <li class="col v-t white tab-container">
+    <div class="tabbar tabbar-tight mb-20 row w">
+      <span class="col v-m">服务时长</span>
+    </div>
+    <div class="tabbar-tips">
+      <p><em>友情提示：</em><br>1.请联系志愿团体真实准确为您记录志愿服务时长。<br>2.请不要购买志愿服务时长，一经查实，该服务时长将被标记为“非法购买”。<br>3.欢迎举报虚假记录或买卖志愿服务时长行为，举报电话：{{servicePhone}}</p>
+    </div>
+    <table class="user-table">
+      <colgroup>
+        <col width="20%">
+        <col width="10%">
+        <col width="10%">
+        <col width="25%">
+        <col width="25%">
+        <col width="10%">
+      </colgroup>
+      <tr>
+        <th>服务时长</th>
+        <th>添加方式</th>
+        <th>状态</th>
+        <th>服务项目</th>
+        <th>服务团体</th>
+        <th>日期</th>
+      </tr>
+      <tr v-show="!serviceTimeList.length"><td colspan="6" style="text-align: center;border-bottom: 1px #F6F3F7;"><img src="../../assets/img/js-wujilu.png"/></td></tr>
+      <tr v-for="(el,index) in serviceTimeList" :key="index">
+        <td class="left" v-html="addZero(el.albx0172) + '小时<br>' + el.albx0179"></td>
+        <td class="left">{{el.addtype}}</td>
+        <td class="left">
+          <span v-if="el.albx0174 == 1">未生效</span>
+          <i v-if="el.albx0174 == 2">已生效</i>
+          <span style="color: #cc0000" v-if="el.albx0174 == 3">已删除</span>
+        </td>
+        <td class="left"><em class="pointer" :title="el.albx0002" @click="$utilroutes.toProjectInfo(el.projectid,el.albx0021)">{{el.albx0002 | ellipsis(18)}}</em></td>
+        <td class="left"><em class="pointer" :title="el.albe0002" @click="$utilroutes.toGroupInfo(el.orgid,el.albe0012)">{{el.albe0002 | ellipsis(18)}}</em></td>
+        <td class="left">{{el.albx0180 | ellipsisNos(10)}}</td>
+      </tr>
+    </table>
+    <paging :pageCount="tolPage"
+            :rangePage="pageSize"
+            :initPage="pageNow"
+            :totals="tolCount"
+            :val="jumpPage"
+            @pageEvent="pageEvent">
+    </paging>
+  </li>
+</template>
+
+<script>
+  const paging =()=>import('@/components/page/paginationRed.vue');//分页
+
+  export default {
+    components : {paging},
+    data(){
+      return {
+        routeDefine: this.$route.params.define,
+        servicePhone:'',//举报电话--民政部电话：010-53975820
+        serviceTimeList:{},//求证列表
+        //分页参数
+        tolCount:0,//总条数
+        tolPage:0,//总页数
+        pageSize:8,//每页条数
+        pageNow:1,//当前页
+        jumpPage:1
+      };
+    },
+    created() {
+      this.getTimeList();
+      this.getdate();
+    },
+    methods:{
+      getdate:function () {//获取当前站点举报电话信息
+        let nowareaid=JSON.parse(window.localStorage.getItem("subsite_areaInfo")).areaid;
+        this.utilscommit.request('nvsi_departmentTel',{areaid:nowareaid},this.dateBack)
+      },
+      dateBack:function (data) {//获取举报电话的结果
+        if(data && data.result){
+          this.servicePhone=data.msg;
+        }
+      },
+      pageEvent:function(e){//分页
+        this.getTimeList();
+      },
+      getTimeList() {//服务时长列表
+        this.utilscommit.request('nvsi_listVolMyServiceTime',{pageNow:this.pageNow,pageSize:this.pageSize},this.timeListBack)
+      },
+      timeListBack(result) {
+        if(result && result.data) {
+          this.serviceTimeList = result.data;
+         this.common.getTolData(this,result);
+        } else {
+          this.serviceTimeList = {};
+          this.common.getTolData(this);
+        }
+      }
+    }
+  }
+
+</script>
+
+<style scoped>
+  .user-table th{
+    text-align: left;
+    padding: 10px;
+  }
+</style>
+
+
+

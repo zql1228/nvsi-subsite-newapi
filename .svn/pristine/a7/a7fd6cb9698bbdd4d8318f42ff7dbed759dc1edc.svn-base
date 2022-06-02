@@ -1,0 +1,549 @@
+<template>
+  <div id="project">
+    <!--中间部分-->
+    <div class="main bannerimg">
+      <div class="mid">
+        <ul class="row w">
+          <li class="col">
+            <div class="router">
+              <span>当前位置：</span>
+              <!-- <a href="javascript:void(0);"> --><router-link tag="a" :to="{name:'home',params:{define:routeDefine}}">首页</router-link><!-- </a> -->
+              <!-- <a href="javascript:void(0);"> --><router-link tag="a" :to="{name:'project',params:{define:routeDefine}}">志愿项目</router-link><!-- </a> -->
+             <!--  <a href="javascript:void(0);" class="recommend" style="display:none;">推荐项目</a> -->
+            </div>
+          </li>
+        </ul>
+        <div class="section">
+          <div class="category">
+            <h2 class="category__title">项目区域</h2>
+            <div class="category__content">
+              <a href="javascript:void(0);" class="category__item active" @click="areaChoose($event)">全部</a>
+              <a href="javascript:void(0);" class="category__item" v-for="item in firstAreaList" :key="item.id" @click="areaChoose($event,item.areaid,1)">{{item.areaname}}</a>
+            </div>
+            <div class="category__wrap" style="display: none;">
+              <div class="category__content">
+                <a href="javascript:void(0);" class="category__item active" @click="areaChoose($event,firstArea,2)">全部</a>
+                <a href="javascript:void(0);" class="category__item" v-for="item in secondAreaList" :key="item.id" @click="areaChoose($event,item.areaid,2)">{{item.areaname}}</a>
+              </div>
+            </div>
+          </div>
+          <div class="category">
+            <h2 class="category__title">服务类别</h2>
+            <div class="category__content">
+              <a href="javascript:void(0);" class="category__item active" @click="serviceTypeChoose($event)">全部</a>
+              <a href="javascript:void(0);" class="category__item" v-for="item in typeList" :key="item.id" @click="serviceTypeChoose($event,item.albe0123)">{{item.albe0122}}</a>
+            </div>
+          </div>
+          <div class="category">
+            <h2 class="category__title">项目状态</h2>
+            <div class="category__content">
+              <a href="javascript:void(0);" class="category__item" @click="projectStateChoose($event)">全部</a>
+              <a href="javascript:void(0);" class="category__item" @click="projectStateChoose($event,'02')">招募待启动</a>
+              <a href="javascript:void(0);" class="category__item active" @click="projectStateChoose($event,'03')">招募中</a>
+              <a href="javascript:void(0);" class="category__item" @click="projectStateChoose($event,'45')">招募已结束</a>
+              <a href="javascript:void(0);" class="category__item" @click="projectStateChoose($event,'67')">已结项</a>
+            </div>
+          </div>
+          <div class="category project-hide">
+            <h2 class="category__title">报名范围</h2>
+            <div class="category__content">
+              <a href="javascript:void(0);" class="category__item active" @click="applyScopeChoose($event,'-4')">全部</a>
+              <a href="javascript:void(0);" class="category__item" v-for="item in scopeList.filter(obj=>obj.codeid!=4)" :key="item.id" @click="applyScopeChoose($event,item.codeid)">{{item.codevalue}}</a>
+            </div>
+          </div>
+          <div class="category project-hide">
+            <h2 class="category__title">服务对象</h2>
+            <div class="category__content">
+              <a href="javascript:void(0);" class="category__item active" @click="serviceObjChoose($event)">全部</a>
+              <a href="javascript:void(0);" class="category__item" v-for="item in objectList" :key="item.id" @click="serviceObjChoose($event,item.codeid)">{{item.codevalue}}</a>
+            </div>
+          </div>
+          <div class="category project-hide">
+            <h2 class="category__title">项目人数</h2>
+            <div class="category__content">
+              <a href="javascript:void(0);" class="category__item active" @click="numChoose($event)">全部</a>
+              <a href="javascript:void(0);" class="category__item"  @click="numChoose($event,'0')">0</a>
+              <a href="javascript:void(0);" class="category__item" @click="numChoose($event,'1-100')">1-100</a>
+              <a href="javascript:void(0);" class="category__item" @click="numChoose($event,'101-200')">101-200</a>
+              <a href="javascript:void(0);" class="category__item" @click="numChoose($event,'201-500')">201-500</a>
+              <a href="javascript:void(0);" class="category__item" @click="numChoose($event,'501-1000')">501-1000</a>
+              <a href="javascript:void(0);" class="category__item" @click="numChoose($event,'1001')">1000以上</a>
+            </div>
+          </div>
+          <div class="category-handle">
+            <span @click="getMoreHide($event)">收起</span>
+            <span class="hidden" @click="getMoreShow($event)">更多条件</span>
+          </div>
+          <ul class="row w">
+            <li class="col v-m" style="width:90%;">
+              <span class="label">项目起止日期</span>
+              <date-picker :lang="lang" v-model="startTime" style="width:120px;" valueType="format"></date-picker>
+              <span class="label">至</span>
+              <date-picker :lang="lang" v-model="endTime" style="width:120px;" valueType="format"></date-picker>
+              <span class="label">项目ID</span>
+              <input type="text" class="input" style="width:180px;height: 34px;"  v-model="projectId" maxlength="18">
+              <span class="label">项目名称</span>
+              <input type="text" class="input" style="width:180px;height: 34px;" v-model="projectName" maxlength="30">
+              <a href="javascript:void(0);" class="button button-small" @click="getProjectList" style="height: 34px;line-height: 34px;">搜索</a>
+              <a href="javascript:void(0);" class="button button-small" style="margin-left: 6px;background-color: #ccc;height: 34px;line-height: 34px;" @click="restSearch($event)">重置</a>
+            </li>
+            <li class="col v-m t-r">
+              <div class="text-tab" style="margin-right:-10px;">
+                <a href="javascript:void(0);" id="list" class="active" @click="getList($event,0)">
+                  列表</a>
+                <a href="javascript:void(0);" id="map" @click="getList($event,1)">地图</a>
+              </div>
+            </li>
+          </ul>
+          <div id="getList">
+            <ul class="panel-list">
+              <li class="panel-list__item"  v-if="!querystatus && tolPage==0" style="width: 100%;text-align: center;"><img src="@/assets/img/js-wujilu.png"/></li>
+              <li class="panel-list__item" v-if="querystatus==1 && tolPage==0" style="width: 100%;text-align: center;">
+                <img src="@/assets/img/loader.png" style="margin-right: 5px;"/><span style="font-size:16px;color:#666666;vertical-align: middle;">加载中...</span>
+              </li>
+              <li class="panel-list__item" style="width:25%;" v-for="item in projectList" :key="item.id" >
+                <div class="panel-card" @click="toProjectInfo(item.id,item.albx0021)">
+                  <img :src="context + item.prophoto" @error="imgError" style="width: 260px;height: 170px;" alt="" v-if="item.prophoto">
+                  <img src="../../assets/img/i3.png" style="width: 260px;height: 170px;" alt="" v-else>
+                  <p class="t-c">
+                    <a href="javascript:void(0);" class="button button-small warning round" v-if="item.albx0015==2">招募待启动</a>
+                    <a href="javascript:void(0);" class="button button-small success round" v-if="item.albx0015==3">招募中</a>
+                    <a href="javascript:void(0);" class="button button-small button-small round" v-if="item.albx0015==4 || item.albx0015==5">招募已结束</a>
+                    <a href="javascript:void(0);" class="button button-small button-small info round" v-if="item.albx0015==6 || item.albx0015==7">已结项</a>
+                  </p>
+                  <h2 class="panel-card__name">
+                    <a href="javascript:void(0);" :title="item.albx0002">{{item.albx0002 | ellipsis(12)}}</a>
+                  </h2>
+                  <ul class="row w panel-card__info">
+                    <li class="col v-m">
+                      <h2>岗位</h2>
+                      <!-- <p>{{item.albx0043 || '0'}}个</p> -->
+                      <p v-text="item.albx0043 && item.albx0043!='null'?item.albx0043+'个':'0个'"></p>
+                    </li>
+                    <li class="col v-m">
+                      <h2>目标</h2>
+                      <!-- <p>{{item.albx0044 || '0'}}人</p> -->
+                      <p v-text="item.albx0044 && item.albx0044!='null'?item.albx0044+'个':'0个'"></p>
+                    </li>
+                    <li class="col v-m">
+                      <h2>报名</h2>
+                      <!-- <p>{{item.albx0016 || '0'}}人</p> -->
+                      <p v-text="item.albx0016 && item.albx0016!='null'?item.albx0016+'个':'0个'"></p>
+                    </li>
+                  </ul>
+                  <div class="progress" style="text-align:left;">
+                    <span class="bar" :style="'width:' + item.progress"></span>
+                  </div>
+                  <p class="row w">
+                    <span class="col v-m">项目进度：<b>{{item.progress}}</b></span>
+                    <span class="col v-m t-r"><em class="danger" v-text="(item.albx0015==2 &&'离招募开始：') || (item.albx0015==3 &&'离招募结束：')|| (item.albx0015==4 && '离项目结束：') || (item.albx0015==5 && '项目已结束：') || ((item.albx0015==7||item.albx0015==6) && '已结项：')"></em><b>{{item.days}}天</b></span>
+                  </p>
+                </div>
+              </li>
+            </ul>
+            <cpaginate
+              :pageCount="tolPage"
+              :rangePage="pageSize"
+              :initPage="pageNow"
+              :totals="tolCount"
+              :val="jumpPage"
+              @pageEvent="pageEvent">
+            </cpaginate>
+          </div>
+          <div id="getMap" style="display: none;">
+            <div class="map" style="height:680px;margin-top:30px;" id="projectMap">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tj-bj" v-lazy:background-image="tjBj" v-if="projectTjList.length" style="height: 440px;">
+        <div class="mid">
+          <div class="tabbar" style="margin-top:40px;background: none;">
+            <span class="active" style="display: block;position: relative;text-align: center;font-size:18px;border-bottom: none;margin-left :0;">推荐项目</span>
+          </div>
+        <!-- <span @click="moreRecommend">更多</span> -->
+          <ul class="panel-list" style="margin-top: 0;">
+            <li class="panel-list__item" style="width:25%;" v-for="item in projectTjList" :key="item.id">
+              <div class="panel-card" @click="toProjectInfo(item.id,item.albx0021)">
+                <img :src="context + item.prophoto" @error="imgError" style="width: 260px;height: 170px;" alt="" v-if="item.prophoto">
+                <img src="../../assets/img/i3.png" style="width: 260px;height: 170px;" alt="" v-else>
+                <p class="t-c">
+                  <a href="javascript:void(0);" class="button button-small warning round" v-if="item.albx0015==2">招募待启动</a>
+                  <a href="javascript:void(0);" class="button button-small success round" v-if="item.albx0015==3">招募中</a>
+                  <a href="javascript:void(0);" class="button button-small button-small round" v-if="item.albx0015==4 || item.albx0015==5">招募已结束</a>
+                  <a href="javascript:void(0);" class="button button-small button-small info round" v-if="item.albx0015==6 || item.albx0015==7">已结项</a>
+                </p>
+                <h2 class="panel-card__name">
+                  <a href="javascript:void(0);" :title="item.albx0002">{{item.albx0002 | ellipsis(12)}}</a>
+                </h2>
+                <ul class="row w panel-card__info">
+                  <li class="col v-m">
+                    <h2>岗位</h2>
+                    <!-- <p>{{item.albx0043 || '0'}}个</p> -->
+                    <p v-text="item.albx0043 && item.albx0043!='null'?item.albx0043+'个':'0个'"></p>
+                  </li>
+                  <li class="col v-m">
+                    <h2>目标</h2>
+                    <!-- <p>{{item.albx0044 || '0'}}人</p> -->
+                    <p v-text="item.albx0044 && item.albx0044!='null'?item.albx0044+'个':'0个'"></p>
+                  </li>
+                  <li class="col v-m">
+                    <h2>报名</h2>
+                    <!-- <p>{{item.albx0016 || '0'}}人</p> -->
+                    <p v-text="item.albx0016 && item.albx0016!='null'?item.albx0016+'个':'0个'"></p>
+                  </li>
+                </ul>
+                <div class="progress" style="text-align:left;">
+                  <span class="bar" :style="'width:' + item.progress"></span>
+                </div>
+                <p class="row w">
+                  <span class="col v-m">项目进度：<b>{{item.progress}}</b></span>
+                  <span class="col v-m t-r"><em class="danger" v-text="(item.albx0015==2 &&'离招募开始：') || (item.albx0015==3 &&'离招募结束：')|| (item.albx0015==4 && '离项目结束：') || (item.albx0015==5 && '项目已结束：') || ((item.albx0015==7||item.albx0015==6) && '已结项：')"></em><b>{{item.days}}天</b></span>
+                </p>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+  //import cpaginate from '@/components/page/paginationRed.vue';//分页
+  const cpaginate =()=>import('@/components/page/paginationRed.vue');//分页
+  import i3 from '../../assets/img/i3.png';
+  import map_pro from '../../assets/img/map_pro.png';
+
+export default {
+  name: 'project',
+  components : {
+    cpaginate//分页
+  },
+  data(){
+    return {
+      context:this.common.getUrl(),
+      routeDefine: this.$route.params.define,
+      areaid:'',
+      firstAreaList:[],//项目区域（一级区域）
+      firstArea:'',//一级所选区域
+      secondAreaList:[],//项目区域（二级区域）
+      projectAreaId:'',//项目区域
+      typeList:[],//服务类别
+      serviceTypeId:'',//服务类型
+      projectStateId:'03',//项目状态
+      scopeList:[],//报名范围
+      applyScope:'',//报名范围
+      objectList:[],//服务对象
+      serviceObj:'',//服务对象
+      minCount:'',//最小人数
+      maxCount:'',//最大人数
+      recommend:'',//是否为推荐
+      startTime:'',
+      endTime:'',
+      projectId:'',//项目id
+      projectName:'',//项目名称
+      projectList:[],//项目集合
+      projectTjList:[],//推荐项目
+      area_pos:[],
+      markerArr:[],
+      type:0,//列表or地图
+      lang :{//配置日期语音环境
+        formatLocale :{
+          firstDayOfWeek :1,
+        },
+        monthBeforeYear :false,
+      },
+      querystatus:0,//查询状态
+      //分页参数
+      tolCount:0,//总条数
+      tolPage:0,//总页数
+      pageSize:12,//每页条数
+      pageNow:1,//当前页
+      jumpPage:1,//记录输入框中的值
+      tjBj:require('@/assets/img/tj-bg-img.png')
+    };
+  },
+  created() {
+    window.Vues=this;
+    if(window.Vueh && Vueh.searchtype==2)this.projectName=Vueh.searchtext;//全局搜索
+    this.getAreaInfo();
+    this.utilscommit.request("nvsi_getCodeValues",{"codename":"nvsi_albx0014"},this.callback_projectFwdx);//服务对象
+    this.utilscommit.request("nvsi_getCodeValues",{"codename":"nvsi_albx0024"},this.callback_projectFwfw);//报名范围
+    window.toProjectInfo = this.toProjectInfo;
+  },
+  mounted(){
+    var type = this.common.getCookie('maptype');
+    if (type) {
+      this.type = type;
+      $('#map').addClass('active').siblings().removeClass('active');
+      this.common.deleteCookie('maptype');
+    }
+    this.getList(null,this.type);
+  },
+  methods:{
+    getAreaInfo:function () {//根据区域查询相关信息
+        var areaInfo = this.$store.getters.getArea;
+        if(areaInfo && areaInfo.enname && areaInfo.enname==Vue.routeDefine){//和当前区域一致
+          this.areaid = areaInfo.areaid;
+          this.getdate();
+        }
+    },
+    pageEvent:function(e){//分页
+      this.getProjectList();
+    },
+    getdate() {
+      this.utilscommit.request("nvsi_getNextAreaListByAreaId",{"areaid":this.areaid},this.callback_projectYjqy);//一级区域
+      this.utilscommit.request("nvsi_listServiceType",{"areaid":this.areaid},this.callback_projectFwlb);//服务类别
+      this.utilscommit.request("nvsi_listRecommendProject",{"areaid":this.areaid,"pageNow":1,"pageSize":4},this.callback_projectTj);//推荐项目
+    },
+    callback_projectYjqy(data) {//一级区域
+      if (data && data.data) {
+        this.firstAreaList= data.data;
+      }
+    },
+    callback_projectSjqy(result) {//二级区域
+      if (result && result.data) {
+        this.secondAreaList = result.data;
+        if (this.projectAreaId) {
+          $('.category__wrap').find('.category__item').first().addClass('active').siblings().removeClass('active');
+          $(".category__wrap").show();
+        }
+      } else {
+        this.secondAreaList = {};
+        $(".category__wrap").hide();
+      }
+    },
+    callback_projectFwlb(data) {//服务类别
+      if (data && data.data) {
+        this.typeList = data.data;
+      }
+    },
+    callback_projectFwdx(data) {//服务对象
+      if (data && data.data) {
+        this.objectList= data.data;
+      }
+    },
+    callback_projectFwfw(data) {//报名范围
+      if (data && data.data) {
+        var ret = data.data;
+        for (var i = 0; i < ret.length; i++) {
+          if (ret[i].codeid == '4' || ret[i].codeid == '5') {
+            ret.splice(i, 1);
+          }
+        }
+        this.scopeList = ret;//报名范围
+      }
+    },
+    callback_projectTj(data){//推荐项目
+      if (data && data.data) {
+        this.projectTjList= data.data;
+      }
+    },
+    areaChoose(e,areaid,layerNumber){//区域选择
+      this.projectAreaId=areaid;
+      $(e.target).addClass('active').siblings().removeClass('active');
+      this.getProjectList();
+      if (!layerNumber) {
+        $(".category__wrap").hide();
+      } else {
+        if(1 == layerNumber){
+          this.firstArea = areaid;
+          this.utilscommit.request("nvsi_getNextAreaListByAreaId",{"areaid":areaid},this.callback_projectSjqy);//二级区域
+        }
+      }
+    },
+    serviceTypeChoose(e,serviceTypeId){//服务类型
+      this.serviceTypeId=serviceTypeId;
+      $(e.target).addClass('active').siblings().removeClass('active');
+      this.pageNow=1;
+      this.getProjectList();
+    },
+    projectStateChoose(e,statusId){//项目状态
+      this.projectStateId=statusId;
+      $(e.target).addClass('active').siblings().removeClass('active');
+      this.pageNow=1;
+      this.getProjectList();
+    },
+    applyScopeChoose(e,applyScope){//报名范围
+      this.applyScope=applyScope;
+      $(e.target).addClass('active').siblings().removeClass('active');
+      this.pageNow=1;
+      this.getProjectList();
+    },
+    serviceObjChoose(e,serviceObj){//服务对象
+      this.serviceObj=serviceObj;
+      $(e.target).addClass('active').siblings().removeClass('active');
+      this.pageNow=1;
+      this.getProjectList();
+    },
+    numChoose(e,num){//项目人数
+      if (num) {
+        if (num == '0') {
+          this.minCount='0';
+          this.maxCount='0';
+        } else if (num == '1001') {
+          this.minCount='1001';
+          this.maxCount=null;
+        } else {
+          this.minCount=num.substring(0,num.indexOf("-"));
+          this.maxCount=num.substring(num.indexOf("-")+1,num.length);
+        }
+      } else {
+        this.minCount=null;
+        this.maxCount=null;
+      }
+      $(e.target).addClass('active').siblings().removeClass('active');
+      this.pageNow=1;
+      this.getProjectList();
+    },
+    restSearch(){//重置
+      this.startTime='';
+      this.endTime='';
+      this.projectId='';
+      this.projectName='';
+    },
+    getProjectList(){//加载项目数据
+      if(this.projectName)Vueh.searchtext=this.projectName;//全局搜索
+      if (this.type == 0) {//列表
+        this.pageSize = 12;
+        var projectParam={
+          "albx0021":this.projectAreaId,//项目区域
+          "albx0009":this.serviceTypeId,//服务类型
+          "albx0015":this.projectStateId,//项目状态
+          "albx0024":this.applyScope,//报名范围
+          "albx0014":this.serviceObj,//服务对象
+          "min":this.minCount,//最小人数
+          "max":this.maxCount,//最大人数
+          "albx0004":this.startTime,//项目日期起
+          "albx0005":this.endTime,//项目日期止
+          "albx0013":this.projectId,//项目ID
+          "albx0002":this.projectName,//项目名称
+          "recommend":this.recommend,//是否是推荐
+          "areaid":this.areaid,
+          "pageNow": this.pageNow,
+          "pageSize":this.pageSize
+        };
+        this.querystatus=1;
+        this.projectList=[];
+        this.common.getTolData(this);
+        this.utilscommit.request("nvsi_listProjectOnWeb",projectParam,this.callback_project);//网站项目
+      } else if (this.type == 1) {//地图
+        this.pageSize = 100;
+        var data = {
+          "albx0021":this.projectAreaId,//项目区域
+          "albx0009":this.serviceTypeId,//服务类型
+          "albx0015":this.projectStateId,//项目状态
+          "albx0024":this.applyScope,//报名范围
+          "albx0014":this.serviceObj,//服务对象
+          "min":this.minCount,//最小人数
+          "max":this.maxCount,//最大人数
+          "albx0004":this.startTime,//项目日期起
+          "albx0005":this.endTime,//项目日期止
+          "albx0013":this.projectId,//项目ID
+          "albx0002":this.projectName,//项目名称
+          "areaid":this.areaid,
+          "pageNow": this.pageNow,
+          "pageSize":this.pageSize
+        };
+        this.utilscommit.request("nvsi_listProjectOnMap",data,this.callback_project);//网站项目
+      }
+    },
+    callback_project(data){//获取项目数据
+      this.querystatus=0;
+      if (data && data.data) {
+        this.projectList= data.data;
+        this.common.getTolData(this,data);
+      }else{
+        this.projectList=[];
+        this.common.getTolData(this);
+      }
+      if (this.type == 1) {
+        this.getMapData()
+      }else{
+        $('html, body').animate({scrollTop: $('#header').offset().top}, 20);//以20毫秒的速度向header标签滚动
+      }
+    },
+    getMoreHide(e){
+      $(".project-hide").hide();
+      $(e.target).addClass('hidden').siblings().removeClass('hidden');
+    },
+    getMoreShow(e){
+      $(".project-hide").show();
+      $(e.target).addClass('hidden').siblings().removeClass('hidden');
+    },
+    getList(e,type){
+      this.type = type;
+      this.getProjectList();
+      if (e) {
+        $(e.target).addClass('active').siblings().removeClass('active');
+      }
+      if (type == 0) {
+        $("#getList").show();
+        $("#getMap").hide();
+      } else {
+        $("#getList").hide();
+        $("#getMap").show();
+      }
+    },
+    getMapData(){
+      this.area_pos = [];
+      this.markerArr = [];
+      if(this.projectList){
+        for(var a = 0;a<this.projectList.length;a++) {
+          var gaddress=this.projectList[a].albx0012;
+          if(!gaddress) gaddress='';
+          this.area_pos.push({
+            title:this.projectList[a].albx0002,
+            content:"联系人："+this.projectList[a].albx0025+"<br>地区："+gaddress+"<br><br>" +
+              "<a href='javascript:void(0);' onclick='toProjectInfo(\"" + this.projectList[a].id + "\",\"" + this.projectList[a].albx0021 +"\")'>查看详情</a>",
+            point:this.projectList[a].albx0035+","+this.projectList[a].albx0036
+          });
+        }
+        for(var i=0;i<this.area_pos.length;i++){
+          this.markerArr.push({title:this.area_pos[i].title,content:this.area_pos[i].content,point:this.area_pos[i].point,isOpen:0,icon:{w:21,h:25,l:46,t:21,x:6,lb:15}});
+        }
+      }
+      this.getMaps.initMap(this.markerArr,"projectMap",this.common.areaInfo().cnname,map_pro);//创建和初始化地图
+    },
+    toProjectInfo(id,areaid){
+      this.$utilroutes.toProjectInfo(id,areaid);
+    },
+    imgError(el) {
+      el.target.src = i3;
+    },
+    moreRecommend(){
+      this.recommend="1";
+      this.getProjectList();
+      $(".tj-bj").hide();
+      $(".recommend").show();
+    }
+  },
+  beforeRouteUpdate (to, from, next) {
+    this.$router.go(0);//刷新页面
+    // 在渲染该组件的对应路由被 confirm 前调用
+    // 不！能！获取组件实例 `this`
+    // 因为当守卫执行前，组件实例还没被创建
+  },
+  watch: {
+    '$route'(to, from) { //监听路由是否变化
+      this.$router.go(0);//刷新页面
+    }
+  }
+}
+
+</script>
+
+
+<style scoped>
+  .hidden{
+    display:none
+  }
+  .tabbar span:before{content: "";position: absolute;top: 62%;height: 2px;width: 46%;left: 0;}
+  .tabbar span:after{content: "";position: absolute;top: 62%;height: 2px;width: 46%;right: 0;}
+  .tabbar span.active:before{background:-webkit-linear-gradient(to right, #fff, #CC0000);background:linear-gradient(to right, #fff, #CC0000);}
+  .tabbar span.active:after{background:-webkit-linear-gradient(to right, #CC0000, #fff);background:linear-gradient(to right, #CC0000, #fff);}
+</style>
+
+
+

@@ -1,0 +1,99 @@
+<template>
+ <li class="col v-t white tab-container">
+    <updatemenu></updatemenu>
+    <div class="tabbar-down">
+      <!-- 身份信息 -->
+      <table class="user-table user-table-single" v-show="userInfo.albp0063">
+        <colgroup>
+          <col width="15%">
+          <col width="10%">
+           <col width="12%">
+          <col width="12%">
+          <!-- <col width="20%"> -->
+          <col width="20%">
+          <col width="20%">
+        </colgroup>
+        <tr>
+          <th>姓名</th>
+          <th>性别</th>
+          <th>出生年月</th>
+          <th>证件类型</th>
+          <!-- <th>证件号码</th> -->
+          <th>实名认证状态</th>
+          <th>操作</th>
+        </tr>
+        <tr>
+          <td v-html="userInfo.albp0064"></td>
+          <td v-text="gender"></td>
+          <td v-html="birthDate"></td>
+          <td v-text="cardType"></td>
+          <!-- <td v-text="userInfo.albp0066"></td> -->
+          <td><em v-show="userInfo.albp0063 == 1">已实名</em><em v-show="userInfo.albp0063 == 0 || userInfo.albp0063 == 3">未实名</em><em v-show="userInfo.albp0063 == 2">认证中</em></td>
+          <td> <em class="pointer"  @click="toAttestation">{{userInfo.albp0063 == 0 || userInfo.albp0063 == 3 ?'实名认证':'修改'}}</em></td>
+        </tr>
+      </table>
+    </div>
+  </li>
+</template>
+
+<script>
+  const updatemenu =()=>import('@/components/usercenter/updatemenu.vue');//横向菜单栏
+
+  export default {
+    components:{ updatemenu},
+    data(){
+      return {
+        routeDefine: this.$route.params.define,
+        userInfo:this.$store.getters.getUser,//用户信息
+        cardType:'',//证件类型
+        birthDate:'',//生日
+        gender:'',//性别
+      };
+    },
+    created() {
+      this.getData();
+    },
+    methods:{
+      getData:function () {
+          this.utilscommit.request('nvsi_getCodeValues',{'codename':'nvsi_albp0065'},this.callback1);
+          this.utilscommit.request('nvsi_getCodeValues',{'codename':'nvsi_albp0067'},this.callback2);
+          this.birthDate = this.userInfo.birthdate; 
+          if(this.birthDate.length>10){
+              this.birthDate = this.birthDate.substring(0,10);
+          }
+          //this.birthDate = result.albp0066.substring(6,10)+"-"+result.albp0066.substring(10,12)+"-"+result.albp0066.substring(12,14);
+      },
+      callback1:function (result) {
+        if (result && result.data) {
+          var cardTypeList = result.data;
+          for(var i=0;i<cardTypeList.length;i++){
+            if(cardTypeList[i].codeid == this.userInfo.albp0065){
+              this.cardType = cardTypeList[i].codevalue;
+              break;
+            }
+          }
+        }
+      },
+      callback2:function (result) {
+        if (result && result.data) {
+          var genderTypeList = result.data;
+          for(var i=0;i<genderTypeList.length;i++){
+            if(genderTypeList[i].codeid == this.userInfo.albp0067){
+              this.gender = genderTypeList[i].codevalue;
+              break;
+            }
+          }
+        }
+      },
+      toAttestation(){//实名认证
+          if(this.userInfo.albp0063 == 0 || this.userInfo.albp0063 == 3){
+            this.$router.push({name: "attestation",params: {define: this.routeDefine,id:this.userInfo.id}});
+          }else{
+            this.$swal('修改实名认证信息后，需再次实名认证，请慎用',{buttons:['取消','确定']}).then(function (value) {
+              if(value)Vue.$router.push({name: "attestation",params: {define: Vue.routeDefine,id:Vue.$store.getters.getUser.id}});
+            })
+          }
+      }
+    }
+  }
+</script>

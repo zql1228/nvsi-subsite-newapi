@@ -1,0 +1,1193 @@
+<template>
+  <div id="updatedata">
+    <!--中右部分-->
+     <li class="col v-t white tab-container" >
+      <updatemenu></updatemenu>
+      <div class="tabbar-down">
+        <!-- 基本信息 -->
+        <div class="grid g-width">
+          <div class="grid-item g-12">
+            <div class="form">
+              <p class="form-label" style="position:relative;top:-20px;margin-bottom: 0px;">用户名：{{userInfo.albp0052}}</p>
+            </div>
+            <div class="form">
+              <p class="form-label"><!-- <em>*</em> -->国家/地区：</p>
+              <div class="select">
+                <select id="countrySelect" v-model="countrySelect">
+                  <option value="0">请选择</option>
+                  <option :value="el.codeid" v-for="el in countryList" :key="el.codeid">{{el.codevalue}}</option>
+                </select>
+              </div>
+              <p class="form-error" id="countryTips"></p>
+            </div>
+            <div class="form">
+              <p class="form-label"><!-- <em>*</em> -->民族：</p>
+              <div class="select">
+                <select id="nationSelect" v-model="nationSelect">
+                  <option value="0">请选择</option>
+                  <option :value="el.codeid" v-for="el in nationList" :key="el.codeid">{{el.codevalue}}</option>
+                </select>
+              </div>
+              <p class="form-error" id="nationTips"></p>
+            </div>
+            <div class="form">
+              <p class="form-label"><!-- <em>*</em> -->政治面貌：<em>(建议填写)</em></p>
+              <div class="select">
+                <select id="politicsSelect" v-model="politicsSelect">
+                  <option value="0">请选择</option>
+                  <option :value="el.codeid" v-for="(el,index) in politicsList" :key="index" >{{el.codevalue}}</option>
+                </select>
+              </div>
+              <p class="form-error" id="politicsTips"></p>
+            </div>
+            <div class="form">
+              <p class="form-label">最高学历：</p>
+              <div class="select">
+                <select id="educationSelect" v-model="educationSelect">
+                  <option value="0">请选择</option>
+                  <option :value="el.codeid" v-for="(el,index) in educationList" :key="index">{{el.codevalue}}</option>
+                </select>
+              </div>
+              <p class="form-error" id="educationTips"></p>
+            </div>
+            <div class="form">
+              <p class="form-label"><!-- <em>*</em> -->电子邮箱：</p>
+              <input type="text" id="email" v-model="basicInfo.albp0081" @blur="emailCheck" maxlength="30" placeholder="请输入电子邮箱">
+              <p class="form-error" id="emailTips"></p>
+            </div>
+            <div class="form">
+              <p class="form-label">固定电话：(格式如XXX-XXXXXXXX)</p>
+              <input type="text" id="telephone" v-model="basicInfo.albp0011" @blur="telephoneCheck" maxlength="12" oninput="this.value=this.value.replace(/[^\d-]/g,'')" placeholder="请输入固定电话">
+              <p class="form-error" id="telephoneTips"></p>
+            </div>
+            <div class="form">
+              <p class="form-label">微信：</p>
+              <input type="text" id="weixin" v-model="basicInfo.albp0015" maxlength="20" placeholder="请输入微信" oninput="this.value=this.value.replace(/[\u4e00-\u9fa5]/g, '')">
+              <p class="form-error"></p>
+            </div>
+            <div class="form">
+              <p class="form-label">从业状况：</p>
+              <div class="select">
+                <select id="jobSelect" v-model="jobSelect">
+                  <option value="0">请选择</option>
+                  <option :value="el.codeid" v-for="(el,index) in jobList" :key="index">{{el.codevalue}}</option>
+                </select>
+              </div>
+              <p class="form-error" id="jobTips"></p>
+            </div>
+          </div>
+          <div class="grid-item g-12 mt-neg19">
+            <div class="form p-rel" style="margin-bottom:2px">
+              <up-image :imgFile="imgFile" style="position:relative;left:-100px;bottom:-7px;"></up-image>
+              <div style="width:209px;font-size: 13px;text-align: left;position:absolute;top:50%;right:40px;transform:translateY(-50%);">宽110像素 X 高150像素，支持JPG,GIF,PNG格式大小不超过2M</div>
+              <p class="form-error"></p>
+            </div>
+
+            <div class="form" id="nativeChoose_div">
+              <p class="form-label">籍贯：</p>
+              <div class="row w">
+                <div class="col v-m">
+                  <input type="text" id="nativeVal" v-model="nativeChooseName" readonly placeholder="请选择籍贯">
+                </div>
+                <div class="col v-m pl-10" style="width:90px;">
+                  <a href="javascript:void(0);" id="chooseNative" @click="chooseNative" class="button button-line">选择</a></div>
+              </div>
+              <p class="form-error" id="nativeTips"></p>
+            </div>
+
+            <div class="form"><!-- albp0075 绑定手机     albp0068 注册手机 -->
+              <p class="form-label"><em>*</em>手机号码：<span style="color: #cc0000" v-if="$store.getters.getUser.albp0079==1">（该手机号码可用于登录）</span><span style="color: #999" v-else>（该手机号码不能用于登录）</span></p>
+              <!--<input type="text" id="mobile" :value="userInfo.albp0075 || basicInfo.albp0010" maxlength="11" readonly>-->
+              <div class="row w">
+                <div class="col v-m">
+                  <input type="text" id="mobile" :value="$store.getters.getUser.albp0068" maxlength="11" readonly>
+                </div>
+                <div class="col v-m pl-10" style="width:90px;">
+                  <a href="javascript:void(0);" @click="showBind()" class="button button-line">修改</a>
+                </div>
+              </div>
+              <p class="form-error"></p>
+            </div>
+
+            <div class="form">
+              <p class="form-label">QQ：</p>
+              <input type="text" id="qq" v-model="basicInfo.albp0012" @blur="qqCheck" maxlength="15" oninput="this.value=this.value.replace(/^[1-9]\\d{4,10}/g,'')" placeholder="请输入QQ">
+              <p class="form-error" id="qqTips"></p>
+            </div>
+
+            <div class="form">
+              <p class="form-label"><em>*</em>居住区域：</p>
+              <div class="row w">
+                <div class="col v-m">
+                  <input type="text" id="liveAddress" v-model="liveAddress" readonly placeholder="请选择居住区域">
+                </div>
+                <div class="col v-m pl-10" style="width:90px;">
+                  <a href="javascript:void(0);" id="chooseLive" @click="chooseLive()" class="button button-line">选择</a></div>
+              </div>
+              <p class="form-error" id="liveAddressTips"></p>
+            </div>
+            
+            <div class="form">
+              <p class="form-label">详细地址：</p>
+              <input type="text" id="detailedAddress" v-model="basicInfo.albp0013" maxlength="50" placeholder="请输入详细地址">
+              <p class="form-error" id="detailedAddressTips"></p>
+            </div>
+            <div class="form">
+              <p class="form-label"><em>*</em>服务区域：</p>
+              <div class="row w">
+                <div class="col v-m">
+                  <input type="text" v-model="serviceAreaName" id="serviceArea" readonly placeholder="请选择服务区域">
+                </div>
+                <div class="col v-m pl-10" style="width:90px;">
+                  <a href="javascript:void(0);" @click="chooseArea" class="button button-line" id="choose">选择</a>
+                </div>
+              </div>
+              <p class="form-error" id="serviceAreaTips"></p>
+            </div>
+          </div>
+          <div class="grid-item g-24">
+            <!-- 服务意愿 -->
+            <div class="form">
+              <p class="form-label">可参与服务时间：</p>
+              <table class="table table-noline">
+                <tr>
+                  <th>星期一</th>
+                  <th>星期二</th>
+                  <th>星期三</th>
+                  <th>星期四</th>
+                  <th>星期五</th>
+                  <th>星期六</th>
+                  <th>星期日</th>
+                  <th>节假日</th>
+                </tr>
+                <tr>
+                  <td v-for="(el,index) in canServiceTimeList.filter((obj,index)=>index<8)" :key="index">
+                    <label class="checkbox" v-bind:for="el.id">
+                      <input type="checkbox" name="time" :value="el.codeid" v-bind:id="el.id"  v-model="canServiceTime">
+                      <span></span>
+                      <i v-show="el.codevalue">{{el.codevalue.substring(3,5)}}</i>
+                    </label>
+                  </td>
+                </tr>
+                <tr>
+                  <td v-for="(el,index) in canServiceTimeList.filter((obj,index)=>index>=8 && index<16)" :key="index">
+                    <label class="checkbox" v-bind:for="el.id">
+                      <input type="checkbox" name="time" v-bind:id="el.id" :value="el.codeid" v-model="canServiceTime">
+                      <span></span>
+                      <i v-show="el.codevalue">{{el.codevalue.substring(3,5)}}</i>
+                    </label>
+                  </td>
+                </tr>
+                <tr>
+                  <td v-for="(el,index) in canServiceTimeList.filter((obj,index)=>index>=16 && index<24)" :key="index">
+                    <label class="checkbox" v-bind:for="el.id">
+                      <input type="checkbox" name="time" v-bind:id="el.id" v-bind:value="el.codeid" v-model="canServiceTime">
+                      <span></span>
+                      <i v-show="el.codevalue">{{el.codevalue.substring(3,5)}}</i>
+                    </label>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+          <div class="grid-item g-24" style="margin-top:22px;">
+            <div class="form">
+              <p class="form-label"><em>*</em>服务类别：<em>（最多选择4项）</em></p>
+              <div class="checkbox-fixed">
+                <label class="checkbox" v-for="(el,index) in serviceTypeList" :key="index" :for="el.id">
+                  <input type="checkbox" name="checkbox" :id="el.id" :value="el.albe0123" v-model="serviceType" @change="serviceTypeCheck" :disabled="serviceType.length>3 && serviceType.indexOf(el.albe0123)==-1">
+                  <span></span>
+                  <i :title="el.albe0122">{{el.albe0122 | truncate(10,'...')}}</i>
+                </label>
+              </div>
+              <p class="form-error" id="serviceTypeTips"></p>
+            </div>
+          </div>
+          <div class="grid-item g-24" v-if="serviceRangeList.length>0">
+            <div class="form">
+              <p class="form-label">服务领域或行业：<em>(建议填写)</em></p>
+              <div class="checkbox-fixed">
+                <label class="checkbox" v-for="(el,index) in serviceRangeList" :key="index" :for="el.id">
+                  <input type="checkbox" name="checkbox" :id="el.id" :value="el.albe0113" v-model="serviceRange">
+                  <span></span>
+                  <i :title="el.albe0112">{{el.albe0112 | truncate(10,'...')}}</i>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="grid-item g-12" v-if="isShowIdcardV"  style="margin-top: 10px;">
+            <div class="form row w">
+              <p class="form-label col v-m" style="width:150px"><em>*</em>是否取得涉税专业资格证书：</p>
+              <div class="col v-m t-l">
+                <label for="yesyes1" class="radio" style="margin-left: 50px;">
+                  <input type="radio" id="yesyes1" name="yesyes1" value="1" v-model="isQualification">
+                  <span></span>
+                  <i>是</i>
+                </label>
+                <label for="nono1" class="radio">
+                  <input type="radio" id="nono1" name="nono1" value="0" v-model="isQualification">
+                  <span></span>
+                  <i>否</i>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="grid-item g-12" v-if="isShowIdcardV" style="margin-top: 10px;">
+            <div class="form">
+              <p class="form-label"><em>*</em>身份认证信息：</p>
+              <div class="select">
+                <select v-model="idcardV" @change="idcardVCheck">
+                  <option value="0">请选择</option>
+                  <option :value="el.codeid" v-for="(el,index) in idcardVList" :key="index">{{el.codevalue}}</option>
+                </select>
+              </div>
+              <p class="form-error" id="idcardVTips"></p>
+            </div>
+          </div>
+          <div class="grid-item g-12" style="margin-top: 10px;" v-if="isQualification==1 && isShowIdcardV">
+            <div class="form">
+              <p class="form-label"><em>*</em>涉税专业资格证书类别：</p>
+              <div class="select">
+                <select v-model="taxRevenue" @change="taxRevenueCheck">
+                  <option value="0" >请选择</option>
+                  <option :value="el.codeid" v-for="(el,index) in taxRevenueList" :key="index">{{el.codevalue}}</option>
+                </select>
+              </div>
+              <p class="form-error" id="taxRevenueTips"></p>
+            </div>
+          </div>
+          <div class="grid-item g-12" style="margin-top: 10px;" v-if="isQualification==1 && isShowIdcardV">
+            <div class="form">
+              <p class="form-label"><em>*</em>涉税专业资格证书编号：</p>
+              <input type="text" id="albp2807" v-model="basicInfoAlbp2807" maxlength="30" oninput="this.value=this.value.replace(/[^\w_.]/g,'').slice(0,30);" placeholder="请输入涉税专业资格证书编号" @click="albp2807Check">
+              <p class="form-error" id="albp2807Tips"></p>
+            </div>
+          </div>
+          <div class="grid-item g-24" style="margin-top:15px;">
+            <div class="form">
+              <p class="form-label"><em>*</em>个人特长：</p>
+              <div class="checkbox-fixed">
+                <label class="checkbox" v-for="(el,index) in strengthList" :key="index" :for="el.id">
+                  <input type="checkbox" name="checkbox" :id="el.id" :value="el.codeid" v-model="strength" @change="strengthCheck">
+                  <span></span>
+                  <i>{{el.codevalue}}</i>
+                </label>
+              </div>
+              <p class="form-error" id="strengthTips"></p>
+            </div>
+          </div>
+          <div class="grid-item g-12">
+            <div class="form row w">
+              <p class="form-label col v-m" style="width:150px">受邀加入志愿项目：</p>
+              <div class="col v-m t-l">
+                <label for="yes" class="radio">
+                  <input type="radio" id="yes" name="radio" value="1" v-model="isInvite">
+                  <span></span>
+                  <i>是</i>
+                </label>
+                <label for="no" class="radio">
+                  <input type="radio" id="no" name="radio" value="0" v-model="isInvite">
+                  <span></span>
+                  <i>否</i>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="grid-item g-12">
+            <div class="form row w">
+              <p class="form-label col v-m" style="width:150px">受邀加入志愿团体：</p>
+              <div class="col v-m t-l">
+                <label for="yesyes" class="radio">
+                  <input type="radio" id="yesyes" name="InviteOrg" value="1" v-model="isInviteOrg">
+                  <span></span>
+                  <i>是</i>
+                </label>
+                <label for="nono" class="radio">
+                  <input type="radio" id="nono" name="InviteOrg" value="0" v-model="isInviteOrg">
+                  <span></span>
+                  <i>否</i>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="pt-30 t-c"><a href="javascript:void(0);" @click="onSubmit" class="button" style="width:200px;">保存修改</a></div>
+        </div>
+      </div>
+    </li>
+
+    <!--区域选择弹窗-->
+    <div class="mask area">
+      <div class="mask-info">
+        <div class="mask-header row w">
+          <div class="col v-m"><h2>{{areaChooseTip}}</h2></div>
+          <div class="col v-m t-r"><a href="javascript:void(0);" @click="closeMask" class="mask-close"><img src="../../assets/img/close.png" alt=""></a></div>
+        </div>
+        <areaDialog ref="areaDialog" :areaType="areaType"></areaDialog>
+      </div>
+    </div>
+
+    <!-- 绑定手机 -->
+    <div class="mask bind">
+      <div class="mask-info" style="width:700px;max-height:705px;margin-left:-350px;">
+        <div class="mask-header row w">
+          <div class="col v-m"><h2>修改手机</h2></div>
+          <div class="col v-m t-r"><a href="javascript:void(0);" class="mask-close" @click="closeBind"><img src="../../assets/img/close.png" alt=""></a></div>
+        </div>
+        <div style="padding:20px 50px 0 50px;">
+          <div class="form">
+            <p class="form-label"><em>*</em>手机号码：</p>
+            <input id="bindPhone" v-model="bindPhone" @blur="bindPhoneCheck" maxlength="11"  placeholder="请输入手机号码"/>
+          </div>
+          <span class="form-error" style="padding-left: 25px;" id="bindPhoneTips"></span>
+          <div class="form">
+            <p class="form-label"><em>*</em>图文验证码：</p>
+            <div class="row w" style="display: inline-table;">
+              <div class="col v-m">
+                <input type="text" id="inputImgCode" v-model="imgcode" maxlength="4" @blur="imgCodeCheck" placeholder="请输入图文验证码">
+              </div>
+              <div class="col v-m pl-10" style="width:130px;" @click="changeImgCode">
+                <img id="reg_image" class="button button-line" style="width: 100%;padding: 1px 1px 2px 5px;">
+              </div>
+            </div>
+          </div>
+          <span class="form-error" style="padding-left: 25px;" id="imgCodeTips"></span>
+          <div class="form">
+            <p class="form-label"><em>*</em>验证码：</p>
+            <div class="row w" style="display: inline-table;">
+              <div class="col v-m">
+                <input type="text" id="code" v-model="code" @blur="codeCheck" oninput="this.value=this.value.replace(/[^\d]/g,'')" maxlength="6" placeholder="请输入验证码">
+              </div>
+              <div class="col v-m pl-10" style="width:130px;"><button class="button button-line" id="codebutton" @click="getPhotoCode" v-text="codeButton" style="font-size: 14px;width: 100%;"></button></div>
+            </div>
+          </div>
+          <span class="form-error" style="padding-left: 25px;" id="codeTips"></span>
+        </div>
+        <div class="form t-c">
+          <a href="javascript:void(0);" class="button" @click="bindSubmit" style="margin-top: 15px;">确定</a>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+</template>
+
+<script>
+  const AreaDialog =()=>import('@/view/home/area.vue');//区域弹出层
+  const updatemenu =()=>import('@/components/usercenter/updatemenu.vue');//横向菜单栏
+  import UpImage from '@/view/home/upimage.vue';
+  import avatar from '../../assets/img/mruser.png';
+
+  export default {
+    name: 'updatedata',
+    components : {
+      AreaDialog,
+      UpImage,
+      updatemenu
+    },
+    data(){
+      return {
+        context:this.common.getUrl(),//"http://192.168.6.131:8003/NVSI",
+        routeDefine: this.$route.params.define,
+        areaid:'',
+        userInfo:this.$store.getters.getUser,//账户信息
+        basicInfo:this.$store.getters.getBasic,//用户信息
+        countryList:{},//国家列表
+        countrySelect:'156',//国家，默认中国
+        nationList:{},//民族列表
+        nationSelect:'01',//民族，默认汉族
+        politicsList:{},//政治面貌列表
+        politicsSelect:'0',//政治面貌
+        educationList:{},//学历列表
+        educationSelect:'0',//学历
+        jobList:{},//从业列表
+        jobSelect:'0',//从业
+        isInvite:'0',//是否受邀加入项目
+        isInviteOrg:'1',//是否受邀加入团体
+        liveAddress:'',//居住区域名
+        nativeChooseName:'',//籍贯区域名
+        photo:{},//头像
+        areaType:'',
+        areaChooseTip:'',
+        imgFile:'',
+        canServiceTimeList:[],//可参与服务时间
+        canServiceTime:[],
+        serviceTypeList:[],//服务类型
+        serviceType:[],
+        serviceRangeList:[],//服务领域或行业
+        idcardV:0,//身份认证
+        idcardVList:[],//身份认证信息
+        isQualification:0,//是否取得涉税专业资格证书
+        taxRevenue:0,//涉税专业资格证书类别
+        taxRevenueList:[],//涉税专业资格证书类别
+        serviceRange:[],
+        basicInfoAlbp2807:'',//涉税专业资格证书编号
+        serviceAreaName:'',//服务区域名
+        strength:[],//个人特长
+        strengthList:[],
+        bindPhone:'',
+        bindPhoneFlag:false,
+        imgcode:'',
+        code:'',
+        codeButton:"获取验证码",
+        countdown:60,
+        imgCodeFlag:false,
+        timer:null,//定时器
+        imgkey:'',//图文验证码key
+        // isLoginphone:false,//是否将手机号用作登录
+      };
+    },
+    created() {
+      window.Vues = this;//主体vue实例挂载
+      window.imgError = this.imgError;
+      this.areaid=this.$store.getters.getArea.areaid;
+      // this.utilscommit.request('nvsi_getCodeValues',{'codename':'nvsi_albp0002'},this.getCountryList);
+      this.utilscommit.request('nvsi_getCodeValuessforRedis',{'tableName':'nvsi_albp0002'},this.getCountryList);
+      this.utilscommit.request('nvsi_getCodeValues',{'codename':'nvsi_albp0008'},this.getNationList);
+      this.utilscommit.request('nvsi_getCodeValues',{'codename':'nvsi_albp0007'},this.getPoliticsList);
+      this.utilscommit.request('nvsi_getCodeValues',{'codename':'nvsi_albp0017'},this.getEducationList);
+      this.utilscommit.request('nvsi_getCodeValues',{'codename':'nvsi_albp0018'},this.getJobList);
+      this.utilscommit.request('nvsi_listServiceType',{'areaid':this.areaid},this.getServiceTypeList);
+      this.utilscommit.request('nvsi_listServiceRange',{'areaid':this.areaid},this.getServiceRangeList);
+      this.utilscommit.request('nvsi_getCodeValues',{'codename':'nvsi_albp0035'},this.getCanServiceTimeList);
+      this.utilscommit.request('nvsi_getCodeValues',{'codename':'nvsi_albp0039'},this.getStrengthList);
+      this.utilscommit.request('nvsi_getCodeValues',{'codename':'nvsi_albp2804'},this.getidcardVList);//身份认证信息
+      this.utilscommit.request('nvsi_getCodeValues',{'codename':'nvsi_albp2806'},this.getTaxRevenueList);//涉税专业资格证书类别
+    },
+    methods:{
+      getCountryList:function (result) {
+        // console.log(result);
+        this.countryList = result.data;
+      },
+      getNationList:function (result) {
+        this.nationList = this.common.orderBy(result.data,'codeid','asc');
+      },
+      getPoliticsList:function (result) {
+        this.politicsList = this.common.orderBy(result.data,'codeid','asc');
+      },
+      getEducationList:function (result) {
+        this.educationList = this.common.orderBy(result.data,'orderid','asc');
+      },
+      getJobList:function (result) {
+        this.jobList = this.common.orderBy(result.data,'codeid','asc');
+      },
+      getServiceTypeList:function (result) {
+        if (result && result.data)this.serviceTypeList = result.data;
+      },
+      getServiceRangeList:function (result) {
+         if (result && result.data) this.serviceRangeList = result.data;//this.common.orderBy(result,'albe0113','asc');
+      },
+      getCanServiceTimeList:function (result) {
+        this.canServiceTimeList = this.common.orderBy(result.data,'orderid','asc');
+      },
+      getStrengthList:function (result) {
+        this.strengthList = this.common.orderBy(result.data,'codeid','asc');
+      },
+      getidcardVList:function (result) {//身份认证信息
+         if (result && result.data) this.idcardVList = result.data;//this.common.orderBy(result,'albe0113','asc');
+      },
+      getTaxRevenueList:function (result) {//涉税专业资格证书类别
+         if (result && result.data) this.taxRevenueList = result.data;//this.common.orderBy(result,'albe0113','asc');
+      },
+      getBasicInfo(){
+          this.basicInfo=this.$store.getters.getBasic;
+          this.countrySelect = this.basicInfo.albp0002 ? this.basicInfo.albp0002 : '156';
+          this.nationSelect = this.basicInfo.albp0008 ? this.basicInfo.albp0008 : '01';
+          this.politicsSelect = this.basicInfo.albp0007 ? this.basicInfo.albp0007.replace(/^\s+|\s+$/g,"") : '0';
+          this.educationSelect = this.basicInfo.albp0017 ? this.basicInfo.albp0017.replace(/^\s+|\s+$/g,"") : '0';
+          this.jobSelect = this.basicInfo.albp0018 ? this.basicInfo.albp0018 : '0';
+          this.isInvite = this.basicInfo.albp0019 ? this.basicInfo.albp0019 : '1';
+          this.isInviteOrg = this.basicInfo.albp0091 ? this.basicInfo.albp0091 : '1';
+          this.serviceRange = this.basicInfo.albp0022 ? this.basicInfo.albp0022.split(',') : [];
+          this.canServiceTime = this.basicInfo.albp0035 ? this.basicInfo.albp0035.split(',') : [];
+          this.strength = this.basicInfo.albp0039 ? this.basicInfo.albp0039.split(',') : [];
+          this.idcardV = this.basicInfo.albp2804? this.basicInfo.albp2804:0;//身份认证信息
+          this.isQualification = this.basicInfo.albp2805?this.basicInfo.albp2805:'0';//是否取得涉税专业资格证书
+          this.taxRevenue = this.basicInfo.albp2806?this.basicInfo.albp2806:'0';//涉税专业资格证书类别
+          this.basicInfoAlbp2807 = this.basicInfo.albp2807?this.basicInfo.albp2807:'';//涉税专业资格证书编号
+          if(this.basicInfo.albp0027) {//设置照片
+           //console.log(this.basicInfo.photo)
+            $('#photo').html('<img style="width: 100%;height: 100%;" alt="" class="w" src="'+ this.context + this.basicInfo.photo +'" onerror="imgError(this)">');
+          }
+          if(this.basicInfo.albp0009) {//设置籍贯
+            this.utilscommit.request('nvsi_getAreaFullName',{"areaid":this.basicInfo.albp0009},this.nativeBack);
+          }
+          if(this.basicInfo.albp0028) {//设置居住区域
+            this.utilscommit.request('nvsi_getAreaFullName',{"areaid":this.basicInfo.albp0028},this.liveBack);
+          }
+           /*console.log(this.basicInfo.albp0011)
+          if(this.basicInfo.albp0011 && this.basicInfo.albp0011.indexOf("*")==-1){//解密固定号码
+            this.basicInfo.albp0011=this.utilscommit.getDecrypt(this.basicInfo.albp0011);
+          } */
+          //设置服务区域
+          var nowareaid=this.$store.getters.getArea.areaid;
+          var nowsitestye=0;//1=非本站
+        if(this.basicInfo.albp0020 && nowareaid && this.basicInfo.albp0020.substring(0,2)!=nowareaid.substring(0,2) && !this.$store.getters.getArea.industrycode){//非本站志愿者\
+            nowsitestye=1;
+            this.serviceAreaName='';
+          }else if(this.basicInfo.albp0020) {
+            this.utilscommit.request('nvsi_getAreaFullName',{"areaid":this.basicInfo.albp0020},this.serviceBack);
+          }
+          if(this.basicInfo.albp0021) {//设置服务类型
+            this.serviceType = this.basicInfo.albp0021.split(',');
+            if(nowsitestye==1 && this.serviceType && this.serviceTypeList){//非本站点的志愿者，地方的服务类别需去除
+                for (let i = 0; i < this.serviceTypeList.length; i++) {
+                  if(this.serviceTypeList[i].albe0124!="0"){//地方的服务类别
+                    for (let j = 0; j < this.serviceType.length; j++) {
+                      if(this.serviceTypeList[i].albe0123==this.serviceType[j]){
+                        this.serviceType.splice(j,1);
+                      }
+                    }
+                  }
+                }
+            }
+          }
+          $('#nativeChoose_div').val('0').css('display','none');
+          switch(this.countrySelect){
+            case '156':
+              $('#nativeChoose_div').val(this.basicInfo.albp0008).css('display','');
+              break;
+            case '344'://香港
+              break;
+            case '446'://澳门
+              break;
+            case '158'://台湾
+              break;
+            default:
+              $('#politicsSelect').val('13').attr('disabled',true);
+              $('#nationSelect').val('97').attr('disabled',true);
+          }
+      },
+      basicInfoCheck:function (result) {
+        if (result && result.data) {
+          
+        } else {
+          this.utilscommit.request('nvsi_loginOut',null,this.loginOutCheck);
+        }
+      },
+      loginOutCheck:function (result) {
+        this.$utilroutes.toLogin();
+      },
+      nativeBack:function (result) {
+        if (result && result.data) {
+          this.nativeChooseName=result.data.areaname;
+        } else {
+          this.nativeChooseName = '';
+        }
+      },
+      liveBack:function (result) {
+        if (result && result.data) {
+          this.liveAddress=result.data.areaname;
+        } else {
+          this.liveAddress = '';
+        }
+      },
+      serviceBack:function (result) {
+        if (result && result.data) {
+          this.serviceAreaName=result.data.areaname;
+        } else {
+          this.serviceAreaName = '';
+        }
+      },
+      onSubmit:function () {
+        if( /* this.emailCheck() && */ this.telephoneCheck()//this.countryCheck() && this.nationCheck() && this.politicsCheck() &&
+          && this.qqCheck() && this.liveAddressCheck() && this.serviceAreaCheck() && this.serviceTypeCheck() && this.strengthCheck()){
+          if(this.serviceRange && this.serviceRange.length>0){
+            let serviceRange=this.serviceRange.toString();
+            if(serviceRange.indexOf("0013")!=-1){
+              if((this.idcardVCheck() && this.isQualification==0) || (this.idcardVCheck() && this.isQualification==1 && this.albp2807Check() && this.taxRevenueCheck())){
+                this.toSubmit();
+              }else{
+                this.$swal('存在未填写或填写错误的信息',{buttons:'确定'});
+              }
+            }else{
+              this.toSubmit();
+            }
+          }else{
+            this.toSubmit();
+          }
+        } else {
+          this.$swal('存在未填写或填写错误的信息',{buttons:'确定'});
+        }
+      },
+      toSubmit(){
+        if($('#nowImg').length>0) {
+          let param = new FormData(); //创建form对象
+          //let files = new window.File([this.imgFile], this.imgFile.name, {type: this.imgFile.type});
+          //param.append('file',files);
+          param.append('file', this.imgFile, this.imgFile.name);
+          let areaid= this.areaid;
+          this.utilscommit.uploadImg(param,areaid,this.uploadImgResult);
+        } else {
+          this.commit(null);
+        }
+      },
+      uploadImgResult:function (result) {
+        if(result!="-1"){
+          this.commit(JSON.stringify(result));
+        }else{
+          this.$swal('图片上传失败',{buttons:'确定'});
+        }
+      },
+      commit:function (serverData) {
+        var data = {
+          "id":this.userInfo.albp0055,
+          "albp0002":this.countrySelect,//国籍
+          "albp0007":this.politicsSelect,//政治面貌
+          "albp0008":this.nationSelect,//民族
+          "albp0009":this.basicInfo.albp0009,//籍贯
+          "albp0010":this.basicInfo.albp0010,//手机
+          "albp0011":this.basicInfo.albp0011,//固话
+          "albp0012":this.basicInfo.albp0012,//QQ
+          "albp0013":this.basicInfo.albp0013,//详细地址
+          "albp0015":this.basicInfo.albp0015,//微信
+          "albp0016":this.basicInfo.albp0016,//邮编
+          "albp0017":this.educationSelect,//最高学历
+          "albp0018":this.jobSelect,//从业状况
+          "albp0019":this.isInvite,//受邀加入志愿项目
+          "albp0020":this.basicInfo.albp0020,//服务区域
+          "albp0021":this.serviceType.join(","),//服务类别
+          "albp0022":this.serviceRange.join(","),//服务领域
+          "albp0025":this.serviceAreaName,//服务区域名
+          "albp0027":serverData?serverData:this.basicInfo.albp0027,//照片
+          "albp0028":this.basicInfo.albp0028,//居住区域ID
+          "albp0035":this.canServiceTime.join(","),//可服务时间
+          "albp0039":this.strength.join(','),//个人特长
+          "albp0047":this.liveAddress,//居住区域名
+          "albp0081":this.basicInfo.albp0081,//邮箱
+          "albp0091":this.isInviteOrg//受邀加入团体
+        };
+        if(this.serviceRange && this.serviceRange.length>0){
+            let serviceRange=this.serviceRange.toString();
+            if(serviceRange.indexOf("0013")!=-1){
+              if(this.idcardV!=0)data.albp2804=this.idcardV;//身份认证信息
+              if(this.isQualification!=0)data.albp2805=this.isQualification;//是否取得涉税专业资格证书
+              if(this.taxRevenue!=0)data.albp2806=this.taxRevenue;//涉税专业资格证书类别
+              if(this.basicInfoAlbp2807)data.albp2807=this.basicInfoAlbp2807;//涉税专业资格证书编号
+            }
+        }
+        this.utilscommit.request("nvsi_modifyVolBasicInfo",data,this.modifyBack);
+      },
+      modifyBack:function (result) {
+        if(result) {
+          if(result.code==0){
+            this.$swal('修改成功',{buttons:'确定'}).then(function (value) {
+              Vuec.getUser();//刷新页面
+            });
+          } else {
+            this.$swal('修改失败',{buttons:'确定'}).then(function (value) {
+              Vuec.getUser();//刷新页面
+            });
+          } 
+        }
+      },
+      countryCheck:function () {
+        var tip='';
+        var flag = true;
+        if(this.countrySelect == '0') {
+          tip='国家/地区不能为空';
+          flag = false;
+        }
+        this.formTip("country",tip);
+        return flag;
+      },
+      nationCheck:function () {
+        var tip='';
+        var flag = true;
+        if(this.nationSelect == '0') {
+          tip='民族不能为空';
+          flag = false;
+        }
+        this.formTip("nation",tip);
+        return flag;
+      },
+      politicsCheck:function () {
+        var tip='';
+        var flag = true;
+        if(this.politicsSelect == '0') {
+          tip='政治面貌不能为空';
+          flag = false;
+        }
+        this.formTip("politics",tip);
+        return flag;
+      },
+      emailCheck:function() {
+        var tip='';
+        var flag = true;
+        /* if(!$('#email').val()) {
+          tip='邮箱不能为空';
+          flag = false;
+        } else  */if ($('#email').val() && !this.common.checkEmail($('#email').val())) {
+          tip='请输入正确的电子邮箱';
+          flag = false;
+        }
+        this.formTip("email",tip);
+        return flag;
+      },
+      /*mobileCheck:function () {
+        var tip='';
+        var flag = true;
+        if(!$('#mobile').val() && !$('#telephone').val()) {
+          tip='手机和固定电话必须填写一个';
+          flag = false;
+        } else if($('#mobile').val()!='' && !this.common.checkPhoneno($('#mobile').val())){
+          tip='请填写正确的手机号码';
+          flag = false;
+        }
+        this.formTip("mobile",tip);
+        return flag;
+      },*/
+      telephoneCheck:function () {
+        var tip='';
+        var flag = true;
+        if($('#telephone').val()!='' && !this.common.checkTelPhoneno($('#telephone').val())){
+          tip='请填写正确的固定电话号码';
+          flag = false;
+        }
+        this.formTip("telephone",tip);
+        return flag;
+      },
+      qqCheck:function () {
+        var tip='';
+        var flag = true;
+        if($('#qq').val()!='' && !this.common.checkqqphoneno($('#qq').val())) {
+          tip='请填写正确的qq号码';
+          flag = false;
+        }
+        this.formTip("qq",tip);
+        return flag;
+      },
+      liveAddressCheck:function () {
+        var tip='';
+        var flag = true;
+        if(!$('#liveAddress').val()) {
+          tip='居住区域不能为空';
+          flag = false;
+        }
+        this.formTip("liveAddress",tip);
+        return flag;
+      },
+      serviceAreaCheck:function () {
+        var tip='';
+        var flag = true;
+        if(this.serviceAreaName == '') {
+          tip='服务区域不能为空';
+          flag = false;
+        }
+        this.formTip("serviceArea",tip);
+        return flag;
+      },
+      serviceTypeCheck:function (el) {
+        var tip = '';
+        var flag = true;
+        if (this.serviceType.length > 0) {
+          var sList = [];
+          var array = [];
+          for (let i = 0; i < this.serviceTypeList.length; i++) {
+            sList.push(this.serviceTypeList[i].albe0123);
+          }
+          for (let i = 0; i < this.serviceType.length; i++) {
+            if (sList.indexOf(this.serviceType[i]) > -1) {
+              array.push(this.serviceType[i]);
+            }
+          }
+          this.serviceType = array;
+          if (array.length > 4) {
+            el.target.checked=false;
+            console.log(el.target)
+            tip = '服务类别最多选择四项';
+            flag = false;
+          }
+        }else{
+           tip='服务类别不能为空';
+           flag = false;
+        }
+        this.formTip('serviceType',tip);
+        return flag;
+      },
+      strengthCheck:function () {
+        var tip='';
+        var flag = true;
+        if(this.strength.length <= 0) {
+          tip='个人特长不能为空';
+          flag = false;
+        }
+        this.formTip("strength",tip);
+        return flag;
+      },
+      idcardVCheck:function () {
+        var tip='';
+        var flag = true;
+        if(this.idcardV== 0) {
+          tip='身份认证信息不能为空';
+          flag = false;
+        }
+        this.formTip("idcardV",tip);
+        return flag;
+      },
+      taxRevenueCheck:function () {
+        var tip='';
+        var flag = true;
+        if(this.taxRevenue == 0) {
+          tip='涉税专业资格证书类别不能为空';
+          flag = false;
+        }
+        this.formTip("taxRevenue",tip);
+        return flag;
+      },
+      albp2807Check:function () {
+        var tip='';
+        var flag = true;
+        if(this.basicInfoAlbp2807.length <= 0) {
+          tip='涉税专业资格证书编号不能为空';
+          flag = false;
+        }
+        this.formTip("albp2807",tip);
+        return flag;
+      },
+      formTip:function (el,tip) {
+        $('#' + el + 'Tips').html(tip).css("color", "red");
+      },
+      chooseNative:function () {
+        $('#preButton').css('display','none');
+        $('.category__content').css('display','none');
+        $('#first').css('display','');
+        $('.mask.area').addClass('active');
+        this.$refs.areaDialog.preAreaId = '';
+        this.$refs.areaDialog.preName = '';
+        this.$refs.areaDialog.listArea('000000000000000000',0,3);
+        this.areaType = 0;
+        this.areaChooseTip = '请选择籍贯';
+      },
+      chooseLive:function () {
+        $('#preButton').css('display','none');
+        $('.category__content').css('display','none');
+        $('#first').css('display','');
+        $('.mask.area').addClass('active');
+        this.$refs.areaDialog.preAreaId = '';
+        this.$refs.areaDialog.preName = '';
+        this.$refs.areaDialog.listArea('000000000000000000',0,3);//到区
+        /* if(this.$store.getters.getArea.industrycode){
+          this.$refs.areaDialog.listArea(null,0);
+        }else{
+          this.$refs.areaDialog.listArea(this.areaid,0);
+        } */
+        this.areaType = 1;
+        this.areaChooseTip = '请选择居住区域';
+      },
+      chooseArea:function () {
+        $('#preButton').css('display','none');
+        $('.category__content').css('display','none');
+        $('#first').css('display','');
+        $('.mask.area').addClass('active');
+        this.$refs.areaDialog.preAreaId = '';
+        this.$refs.areaDialog.preName = '';
+        if(this.$store.getters.getArea.industrycode){
+          this.$refs.areaDialog.listArea(null,0);
+        }else{
+          this.$refs.areaDialog.listArea(this.areaid,0);
+        }
+        this.areaType = 2;
+        this.areaChooseTip = '请选择服务区域'
+      },
+      confirmArea:function (areaid) {
+        if(!areaid)areaid=this.areaid;
+        if (areaid) {
+          if (this.areaType == 0) {
+            this.basicInfo.albp0009 = areaid;
+            this.utilscommit.request('nvsi_getAreaFullName',{"areaid":areaid},this.nativeBack);
+          } else if (this.areaType == 1) {
+            this.basicInfo.albp0028 = areaid;
+            this.utilscommit.request('nvsi_getAreaFullName',{"areaid":areaid},this.liveBack);
+          } else if (this.areaType == 2) {
+            this.basicInfo.albp0020 = areaid;
+            this.utilscommit.request('nvsi_getAreaFullName',{"areaid":areaid},this.serviceBack);
+          }
+        }
+      },
+      closeMask:function () {
+        $('.mask.area').removeClass('active');
+        $('#first').css('display','');
+        $('.category__item').removeClass('active');
+        this.$refs.areaDialog.chooseArea = '';
+        this.$refs.areaDialog.preAreaId = '';
+        this.$refs.areaDialog.preName = '';
+      },
+      showBind:function () {
+        this.changeImgCode();
+        $('.mask.bind').addClass('active');
+      },
+      closeBind:function () {
+        $('.mask.bind').removeClass('active');
+        $('.form-error').html('');
+        this.bindPhone = this.code = this.imgcode = '';
+      },
+      bindPhoneCheck:function () {
+        this.bindPhoneFlag = false;
+        var el = $('#bindPhone');
+        var val = el.val();
+        var tip = '';
+        var type = 1;
+        if(!val) {
+          tip='手机号码不能为空';
+          type = 2;
+          this.formTip("bindPhone",tip,type);
+        } else if (!this.common.checkPhoneno(val)) {
+          tip='请输入正确的手机号码';
+          type = 2;
+          this.formTip("bindPhone",tip,type);
+        }
+        /* 
+        else if (val == this.userInfo.albp0075) {
+          tip='该手机号码已绑定当前账号';
+          type = 2;
+          this.formTip("bindPhone",tip,type);
+        }  */
+        else {
+          this.formTip("bindPhone",tip,type);
+          this.bindPhoneFlag = true;
+          /* if(this.isLoginphone){//是登录手机号码
+              this.bindPhoneFlag = false;
+              this.utilscommit.request('nvsi_getMobileCheck',{"mobile":this.bindPhone},this.checkBindPhoneBack);
+          } */
+        }
+      },
+      /* checkBindPhoneBack:function (result) {
+        if (result) {
+          if (result.data) {
+            if (result.data == 1) {
+               this.bindPhoneFlag = true;
+            } else if (result.data == 2) {
+              Vues.$swal(result.message,{buttons:['取消','确定']}).then(value => Vues.checkBindPhoneBack2(value));
+            }
+          } else {
+            Vues.formTip("bindPhone",result.message,2);
+          }
+        }
+      },
+      checkBindPhoneBack2:function (value) {
+        if (value) {
+          this.bindPhoneFlag = true;
+        } else {
+          this.closeBind();
+           this.bindPhoneFlag = false;
+        }
+      }, */
+      codeCheck:function () {
+        var el = $('#code');
+        var val = el.val();
+        var tip='';
+        var flag = true;
+        var type = 1;
+        if(!val) {
+          tip='验证码不能为空';
+          flag = false;
+          type = 2;
+        } else if (val.length!=6) {
+          tip='请输入6位手机验证码';
+          flag = false;
+          type = 2;
+        }
+        this.formTip("code",tip,type);
+        return flag;
+        
+      },
+      changeImgCode:function () {
+        $('#inputImgCode').val('');
+        if(this.timer){
+          clearTimeout(this.timer);
+          $('#codebutton').removeAttr("disabled");
+          this.codeButton = "获取验证码";
+          this.countdown = 60;
+          this.timer=null;
+        }
+        this.imgcode=this.code='';
+        this.utilscommit.request("nvsi_getImageCode",null,this.changeImgCodeBack);
+      },
+      changeImgCodeBack(data){//图片验证码获取结果
+        if(data && data.data){
+          $('#reg_image').attr('src',data.data.img);
+          this.imgkey=data.data.imgkey;
+        }
+      },
+      imgCodeCheck:function () {
+        this.imgCodeFlag = false;
+        var el = $('#inputImgCode');
+        var tip='';
+        var type = 1;
+        var code = el.val();
+        if(!code) {
+          tip='图文验证码不能为空';
+          type = 2;
+          this.formTip("imgCode",tip,type);
+        }else{
+          code = this.common.trimAll(code).toUpperCase();
+          this.utilscommit.request('nvsi_getImgCodeCheck',{"imgcode":code,imgkey:this.imgkey},function (result) {
+            if (result) {
+              if (result.data) {
+                Vues.imgCodeFlag = true;
+              } else {
+                tip = result.message;
+                type = 2;
+              }
+            }
+            Vues.formTip("imgCode",tip,type);
+          });
+        }
+      },
+      getPhotoCode:function () {
+        this.status = 1;
+        if (!this.bindPhoneFlag || !this.imgCodeFlag) {
+          return null;
+        }
+        var code = this.common.trimAll($('#inputImgCode').val()).toUpperCase();
+        var data = {
+          "name":"NVSI",
+          "phonenum":this.bindPhone,
+          "userflag":"NVSI",
+          "areaid":"0",
+          "imgCode":code,
+          imgkey:this.imgkey
+        };
+        this.utilscommit.request("nvsi_getMobileCode",data,this.getPhoneCodeBack);
+      },
+      getPhoneCodeBack:function (result) {
+        if(result.data) {
+          this.setPhotoTime();
+        }
+      },
+      setPhotoTime:function () {
+        if (this.countdown == 0) {
+          $('#codebutton').removeAttr('disabled');
+          this.codeButton = "获取验证码";
+          this.countdown = 60;
+          return;
+        } else {
+          $('#codebutton').attr('disabled',true);
+          this.codeButton = this.countdown + "s";
+          this.countdown--;
+        }
+        this.timer=setTimeout(function() {
+          Vues.setPhotoTime();
+        },1000);
+      },
+      bindSubmit:function () {
+        if (!this.bindPhoneFlag) {
+          this.bindPhoneCheck();
+        }
+        if (!this.imgCodeFlag) {
+          this.imgCodeCheck();
+        }
+        if(this.bindPhoneFlag && this.imgCodeFlag && this.codeCheck() ) {
+          this.$swal('是否将当前手机号用于登录',{buttons:['取消','确定']}).then(function (value) {
+              var data = {
+                "code":Vues.code,
+                "albp0075":Vues.bindPhone,
+                "imgkey":Vues.imgkey,
+              };
+              if(value){
+                  data.isbind=1;
+              }else{
+                data.isbind=0;
+              }
+              Vues.utilscommit.request("nvsi_modifyVolBindPhone",data,Vues.bindPhoneBack); 
+          })
+        }
+      },
+      bindPhoneBack:function (result) {
+        if(result) {
+          if(result.code==0&&result.data){
+            this.$swal(result.message,{buttons:'确定'}).then(function (value) {
+              Vuec.getUser();//刷新页面
+              Vues.closeBind();//关闭当前弹出层
+            });
+          } else {
+            if(result.message){
+              this.$swal(result.message,{buttons:'确定'}).then(function (value) {
+                Vues.changeImgCode();//刷新图文验证码
+              });
+            }else{
+              this.$swal('修改失败',{buttons:'确定'}).then(function (value) {
+                Vues.changeImgCode();//刷新图文验证码
+              });
+            } 
+          } 
+        }
+      },
+      imgError(el) {
+        el.src = avatar;
+      }
+    },
+    computed:{
+      isShowIdcardV(){
+          if(this.serviceRange && this.serviceRange.length>0){
+            let serviceRange=this.serviceRange.toString();
+            if( serviceRange.indexOf("0013")!=-1)return true;
+          } 
+          this.idcardV=0;//身份认证信息
+          this.isQualification=0;//是否取得涉税专业资格证书
+          this.taxRevenue=0;//涉税专业资格证书类别
+          this.basicInfoAlbp2807='';//涉税专业资格证书编号
+          return false;
+      }
+    },
+    watch:{
+      countrySelect:function (newval,oldval) {
+        $('#nationSelect').attr('disabled',false);
+        $('#politicsSelect').attr('disabled',false);
+        $('#nativeChoose_div').val('0').css('display','none');
+        this.nativeChooseName = '';
+        switch(newval){
+          case '156':
+            $('#nativeChoose_div').val(this.basicInfo.albp0008).css('display','');
+            break;
+          case '344'://香港
+            break;
+          case '446'://澳门
+            break;
+          case '158'://台湾
+            break;
+          default:
+            this.politicsSelect = '13';
+            this.nationSelect = '97';
+            $('#politicsSelect').attr('disabled',true);
+            $('#nationSelect').attr('disabled',true);
+        }
+        this.countryCheck();
+      },
+      nationSelect:function (newval,oldval) {
+        this.nationCheck();
+      }, 
+      politicsSelect:function (newval,oldval) {
+        this.politicsCheck();
+      },
+      serviceAreaName:function (newval,oldval) {
+        this.serviceAreaCheck();
+      },
+      isQualification:function (newval,oldval) {//是否取得涉税专业资格证书
+         if(newval==0){
+           this.taxRevenue=0;
+           this.basicInfoAlbp2807="";
+         }
+      }
+      
+    }
+  }
+
+</script>
+
+<style scoped>
+  p{
+    font-size: 14px;
+  }
+  .form .form-error{
+    padding-top: 5px;
+    height: 17px;
+  }
+  .table tr th{
+    padding-left: 0;
+    text-align: left;
+  }
+  .table td{
+    text-align: left;
+  }
+</style>

@@ -1,0 +1,283 @@
+<template>
+  <div class="zyz-page flex-v">
+    <div class="zyz-header bg2" :style="styleObj ? styleObj : ''">
+      <div class="zyz-header-djs">
+        <p class="flex-h v-m">
+          距报名结束仅剩: <span v-text="days > 0 ? days : '00'"></span
+          ><i style="color: #fff">天</i
+          ><span v-text="hours > 0 ? hours : '00'"></span
+          ><i style="color: #fff">时</i
+          ><span v-text="minutes > 0 ? minutes : '00'"></span
+          ><i style="color: #fff">分</i>
+        </p>
+      </div>
+    </div>
+    <div class="zyz-main flex-1 flex-v">
+      <div class="zyz-main-no h">
+        <h2 v-text="projectInfo.albx0002"></h2>
+        <ul class="flex-h">
+          <li v-for="(item, index) in projectInfo.types" :key="index">
+            {{ item }}
+          </li>
+        </ul>
+        <div class="flex-h zyz-main-no-jl">
+          <!-- <p class="flex-h v-m zyz-main-no-jl-lft">
+                        <img src="../../assets/img/share/icon3.png" alt="">
+                        <span>2.5KM</span>
+                    </p> -->
+          <p class="flex-h v-m">
+            <img src="../../assets/img/share/icon4.png" alt="" />
+            <span v-text="projectInfo.albx0003"></span>
+          </p>
+        </div>
+      </div>
+      <div class="flex-1 zyz-main-se mt-20">
+        <div class="zyz-main-inf">
+          <div class="zyz-main-inf-cod">
+            <p class="flex-h" v-if="projectInfo.albx0013">
+              <span>项目编号:</span>
+              <span v-text="projectInfo.albx0013"></span>
+            </p>
+            <p
+              class="flex-h"
+              v-if="groupInfo.albe0002"
+              @click="toInfo(groupInfo.id, groupInfo.albe0012)"
+            >
+              <span>发起组织:</span>
+              <span
+                v-text="groupInfo.albe0002"
+                style="font-size: 0.7rem; color: #333"
+              ></span>
+              <img
+                src="../../assets/img/share/open.png"
+                style="
+                  height: 0.8rem;
+                  padding: 1rem 0;
+                  position: absolute;
+                  right: 2rem;
+                "
+              />
+            </p>
+            <p class="flex-h">
+              <span>起止时间:</span>
+              <span
+                >{{ projectInfo.albx0004 | ellipsisNos(10) }} 至
+                {{ projectInfo.albx0005 | ellipsisNos(10) }}</span
+              >
+            </p>
+            <p class="flex-h" v-if="projectInfo.albx0025">
+              <span>项目联系人:</span>
+              <span v-text="projectInfo.albx0025"></span>
+            </p>
+            <p
+              class="flex-h"
+              v-if="
+                (projectInfo.albx0027 == 1 && projectInfo.albx0026) ||
+                (projectInfo.albx0039 == 1 && projectInfo.albx0028)
+              "
+            >
+              <span>联系人电话:</span>
+              <span v-if="projectInfo.albx0027 == 1 && projectInfo.albx0026">{{
+                projectInfo.albx0026
+              }}</span>
+              <span v-if="projectInfo.albx0039 == 1 && projectInfo.albx0028">{{
+                projectInfo.albx0028
+              }}</span>
+            </p>
+            <!-- <p class="flex-h" v-if="projectInfo.albx0010">
+                            <span >服务时间:</span>
+                            <span v-text="projectInfo.albx0010"></span>
+                        </p>
+                        <p class="flex-h" v-if="projectInfo.serviceobj">
+                            <span >服务对象:</span>
+                            <span v-text="projectInfo.serviceobj"></span>
+                        </p> -->
+            <p
+              class="flex-h"
+              v-if="projectInfo.zyzbz"
+              :class="{ 'flex-span': projectInfo.zyzbz.length > 25 }"
+            >
+              <span>志愿者保障:</span>
+              <span v-text="projectInfo.zyzbz"></span>
+            </p>
+          </div>
+        </div>
+        <div class="zyz-main-ty">
+          <h2>项目详情</h2>
+          <span class="jij" v-html="projectInfo.albx0018 || '暂无'"></span>
+        </div>
+        <div class="zyz-main-ty">
+          <h2>留言咨询</h2>
+          <p
+            v-if="!mainMessageList.length"
+            style="width: 100%; text-align: center; padding: 0"
+          >
+            <img src="../../assets/img/js-wujilu.png" />
+          </p>
+          <div class="flex-v" v-for="el in mainMessageList" :key="el.id">
+            <div class="flex-h v-m zyz-main-ty-pop">
+              <img
+                :src="common.changeImgsrc(el.photo)"
+                @error="imgError"
+                alt=""
+              />
+              <p v-text="el.showname"></p>
+            </div>
+            <p class="flex-1" v-html="el.albx4003"></p>
+            <p class="zyz-main-ty-data">
+              <span>{{ el.albx4006 | ellipsisNos(19) }}</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import avatar from "../../assets/img/avatar.png";
+export default {
+  name: "proShare",
+  data() {
+    return {
+      areaid: "",
+      projectid: "",
+      projectInfo: {},
+      groupInfo: {},
+      mainMessageList: [], //评论列表
+      days: "",
+      hours: "",
+      minutes: "",
+      pageNo: 1,
+      flag: true,
+      styleObj: {},
+    };
+  },
+  mounted() {
+    this.projectid = window.location.href.slice(
+      window.location.href.indexOf("proShare") + 9,
+      window.location.href.lastIndexOf("/")
+    );
+    this.areaid = window.location.href.slice(
+      window.location.href.lastIndexOf("/") + 1
+    );
+    this.utilscommit.requestapi(
+      "getProjectInfoFortisWeb",
+      { albx0021: this.areaid, proId: this.projectid },
+      this.callback
+    ); //项目详情
+    this.getMessageList();
+    let that = this;
+    window.onscroll = function () {
+      var scrollTop =
+        document.documentElement.scrollTop || document.body.scrollTop; //变量scrollTop是滚动条滚动时，距离顶部的距离
+      var windowHeight =
+        document.documentElement.clientHeight || document.body.clientHeight; //变量windowHeight是可视区的高度
+      var scrollHeight =
+        document.documentElement.scrollHeight || document.body.scrollHeight; //变量scrollHeight是滚动条的总高度
+      if (scrollTop + windowHeight == scrollHeight && !that.flag) {
+        //滚动条到底部的条件
+        that.flag = true;
+        that.pageNo++;
+        that.getMessageList();
+      }
+    };
+  },
+  methods: {
+    callback(result) {
+      if (result && result.data) {
+        if (result.data.fileid) {
+          this.styleObj = {
+            background: `url(${result.data.fileid})`,
+          };
+        }
+        let time = "";
+        if (result.data.albx0015 == 3) {
+          // 计算距离招募时间
+          time = result.data.albx0007;
+        } else if (result.data.albx0015 == 2) {
+          time = result.data.albx0006;
+        }
+        if (time) {
+          this.getDate(time);
+          let that = this;
+          setTimeout(function () {
+            that.getDate(time);
+          }, 60000);
+        }
+        this.projectInfo = result.data;
+        this.utilscommit.request(
+          "nvsi_getProjectGroupInfo",
+          { areaid: this.areaid, projectid: this.projectid },
+          this.callback2
+        ); //获取发布项目团体信息
+      }
+    },
+    getMessageList() {
+      //获取留言列表
+      var data = {
+        ofid: this.projectid,
+        type: "2",
+        areaid: this.areaid,
+        pageNow: this.pageNo,
+        pageSize: 6,
+      };
+      this.utilscommit.request(
+        "nvsi_listMainMessage",
+        data,
+        this.mainMessageBack
+      );
+    },
+    getDate(date) {
+      let startTime = new Date(date.replace(/-/g, "/")).getTime(); // 招募结束时间
+      let endTime = new Date().getTime(); // 当前时间
+      let usedTime = startTime - endTime; // 相差的毫秒数
+      this.days = Math.floor(usedTime / (24 * 3600 * 1000)); // 计算出天数
+      let leavel = usedTime % (24 * 3600 * 1000); // 计算天数后剩余的时间
+      this.hours = Math.floor(leavel / (3600 * 1000)); // 计算剩余的小时数
+      let leavel2 = leavel % (3600 * 1000); // 计算剩余小时后剩余的毫秒数
+      this.minutes = Math.floor(leavel2 / (60 * 1000)); // 计算剩余的分钟数
+    },
+    callback2(result) {
+      //获取发布项目团体信息
+      if (result && result.data) {
+        this.groupInfo = result.data;
+      }
+    },
+    mainMessageBack(result) {
+      if (result && result.data) {
+        this.mainMessageList = [...this.mainMessageList, ...result.data];
+        this.flag = false;
+      }
+    },
+    imgError(el) {
+      el.target.src = avatar;
+    },
+    toInfo(id, data) {
+      //跳转组织分享页
+      window.open(
+        window.location.href.slice(
+          0,
+          window.location.href.indexOf("proShare")
+        ) +
+          "groupShare/" +
+          id +
+          "/" +
+          data
+      );
+    },
+  },
+};
+</script>
+
+<style src="../../assets/css/shareMain.css" scoped></style>
+<style>
+.flex-span {
+  height: fit-content !important;
+  padding: 0.5rem 0 !important;
+}
+.flex-span span:last-child {
+  line-height: normal;
+  width: 75%;
+}
+</style>

@@ -1,0 +1,240 @@
+<template>
+  <div id="infosearch">
+    <!--中间部分-->
+    <div class="main bannerimg">
+      <div class="mid">
+        <ul class="row w">
+          <li class="col">
+            <div class="router">
+              <span>当前位置：</span>
+              <a href="javascript:void(0);"><router-link tag="span" :to="{name:'home',params:{define:routeDefine}}">首页</router-link></a>
+              <span>志愿信息查询</span>
+            </div>
+          </li>
+        </ul>
+        <div class="tabbar">
+          <span class="active">志愿者信息查询</span>
+          <span>志愿服务证书查询</span>
+        </div>
+        <ul class="tabbar-down row w">
+          <li class="col v-t w">
+            <h2 class="subtitle subtitle-margin subtitle-noline">志愿者信息查询</h2>
+            <div class="vote vote-form">
+              <span>姓名</span>
+              <input type="text" class="input" style="width:310px;" @blur="nameCheck" v-model="name" maxlength="20" placeholder="请输入姓名">
+              <span>证件号码</span>
+              <input type="text" class="input" style="width:310px;" @blur="cardCheck" v-model="card" maxlength="18" placeholder="请输入证件号码">
+              <a href="javascript:void(0);" class="button button-bold" @click="searchVol">查询志愿者</a>
+            </div>
+            <h2 class="subtitle subtitle-margin subtitle-noline">查询结果</h2>
+            <span style="color: red;display: inline-block;font-size: 18px;width: 100%;text-align: center;">{{msg1}}</span>
+            <table class="table" v-if="volInfo">
+              <colgroup>
+                <col width="20%">
+                <col width="20%">
+                <col width="20%">
+                <col width="40%">
+              </colgroup>
+              <tr>
+                <th>姓名</th>
+                <th>性别</th>
+                <th>服务时长</th>
+                <th>属地</th>
+              </tr>
+              <tr>
+                <td><a href="javascript:void(0);" @click="toVolDetail(volInfo.albp0029,volInfo.albp0020)"><em>{{volInfo.albp0003}}</em></a></td>
+                <td>{{volInfo.sex}}</td>
+                <td><span>{{volInfo.sum || '0.0'}}</span>小时</td>
+              	<td>{{volInfo.cnname}}<a :href="context + '/LEAP/dist/index.html#/' + volInfo.enname + '/home'" target="_blank" :title="volInfo.cnname+'（' + context + '/LEAP/dist/index.html#/' + volInfo.enname + '/home）' ">{{'（' + context + '/LEAP/dist/index.html#/' + volInfo.enname + '/home）'  | ellipsis(56)}}</a></td>
+              </tr>
+            </table>
+          </li>
+        </ul>
+        <ul class="tabbar-down row w" style="display:none;">
+          <li class="col v-t w">
+            <h2 class="subtitle subtitle-margin subtitle-noline">志愿服务证书查询<em style="color: #cc0000;font-size: 18px;"></em></h2>
+            <div class="vote vote-form">
+              <span>证书编号</span>
+              <input type="text" class="input" style="width:530px;" @blur="frontCheck" v-model="front" maxlength="18" placeholder="请输入证书编号前部分">
+              <span class="gray">—</span>
+              <input type="text" class="input" style="width:250px;" @blur="backCheck" v-model="back" maxlength="11" placeholder="请输入证书编号后部分">
+              <a href="javascript:void(0);" class="button button-bold" @click="searchCer">查询服务证书</a>
+            </div>
+            <h2 class="subtitle subtitle-margin subtitle-noline">查询结果</h2>
+            <span style="color: red;display: inline-block;font-size: 18px;width: 100%;text-align: center;">{{msg2}}</span>
+            <table class="table" v-if="cerInfo">
+              <colgroup>
+                <col width="10%">
+                <col width="15%">
+                <col width="25%">
+                <col width="10%">
+                <col width="10%">
+                <col width="30%">
+              </colgroup>
+              <tr>
+                <th>姓名</th>
+                <th>颁发机构</th>
+                <th>证书编号</th>
+                <th>服务时长</th>
+                <th>颁发时间</th>
+                <th>属地</th>
+              </tr>
+              <tr>
+                <td><a href="javascript:void(0);" @click="toVolDetail(cerInfo.albp1102,cerInfo.albp0020)"><em>{{cerInfo.albp0003}}</em></a></td>
+                <td>{{cerInfo.albp1107}}</td>
+                <td>{{cerInfo.albp1110 + '-' + cerInfo.albp1103}}</td>
+                <td>{{(cerInfo.albp1106 || '0.0') + '小时'}}</td>
+                <td>{{cerInfo.albp1104 | ellipsisNos(10)}}</td>
+                <td>{{cerInfo.cnname}}<a :href="context + '/LEAP/dist/index.html#/' + cerInfo.enname + '/home'" target="_blank" :title="cerInfo.cnname+'（' + context + '/LEAP/dist/index.html#/' + cerInfo.enname + '/home）'">{{'（' + context + '/LEAP/dist/index.html#/' + cerInfo.enname + '/home）' | ellipsis(36)}}</a></td>
+              </tr>
+            </table>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</template>
+
+<script>
+
+  export default {
+    name: 'infosearch',
+    data(){
+      return {
+        context:this.common.getUrl(),
+        routeDefine: this.$route.params.define,
+        areaid:'',
+        volInfo:'',//志愿者查询结果
+        name:'',//姓名
+        card:'',//证件号码
+        msg1:'',//志愿者查询提示信息
+        cerInfo:'',//证书信息
+        front:'',//编号前
+        back:'',//编号后
+        msg2:''//提示
+      };
+    },
+    created() {
+      window.Vues = this;//主体vue实例挂载
+      this.getAreaInfo();
+    },
+    mounted() {
+      this.tabSpanClick();
+    },
+    methods:{
+      getAreaInfo:function () {
+        var areaInfo = this.common.areaInfo();
+        if (!areaInfo) {
+          this.utilscommit.request("nvsi_listWebDocsInfo", {"enname":this.routeDefine}, this.areaInfoBack);//头部信息
+        } else {
+          this.areaid = areaInfo.areaid;
+        }
+      },
+      areaInfoBack:function (result) {
+        if (result && result.result) {
+          this.areaid = result.result.areaid;
+          window.localStorage.setItem("subsite_areaInfo",JSON.stringify(result.result));
+        }
+      },
+      searchVol:function () {
+        this.volInfo = '';
+        if (this.nameCheck() && this.cardCheck()) {
+          this.utilscommit.request('nvsi_getVolByNameAndCard',{'name':this.name,'card':this.card},this.searchVolBack)
+        }
+      },
+      searchVolBack:function (result) {
+        if (result && result.data) {
+          this.volInfo = result.data;
+          this.msg1 = "";
+        } else {
+          this.volInfo = '';
+          this.msg1 = "未查到该志愿者信息";
+        }
+      },
+      nameCheck:function () {
+        var flag = true;
+        this.msg1 = '';
+        if(!this.name) {
+          this.msg1='姓名不能为空';
+          flag = false;
+        }
+        return flag;
+      },
+      cardCheck:function () {
+        var flag = true;
+        this.msg1 = '';
+        if (!this.card) {
+          this.msg1 = '证件号码不能为空';
+          flag = false;
+        }
+        return flag;
+      },
+      searchCer:function () {
+        this.cerInfo = '';
+        if (this.frontCheck() && this.backCheck()) {
+          this.utilscommit.request('nvsi_getCertificateByNum',{'albp1110':this.front,'albp1103':this.back},this.searchCerBack)
+        }
+      },
+      searchCerBack:function (result) {
+        if (result) {
+          if (result.code==0) {
+            this.cerInfo = result.data;
+            this.msg2 = "";
+          }else {
+            this.cerInfo = '';
+            this.msg2 = result.message;
+          }
+        } else {
+          this.cerInfo = '';
+          this.msg2 = "查询失败"
+        }
+      },
+      frontCheck:function () {
+        var flag = true;
+        this.msg2 = '';
+        if(!this.front) {
+          this.msg2='证书编号不能为空';
+          flag = false;
+        }
+        return flag;
+      },
+      backCheck:function () {
+        var flag = true;
+        this.msg2 = '';
+        if(!this.back) {
+          this.msg2='证书编号不能为空';
+          flag = false;
+        }
+        return flag;
+      },
+      toVolDetail:function (volnum,areaid) {
+        window.open(this.$router.resolve({name:'volinfo',params:{define:Vue.$route.params.define,data1:volnum,data2:areaid}}).href);
+      },
+      tabSpanClick:function () {
+        $('.tabbar span').each(function(idx, el){
+          $(el).click(function(){
+            Vues.name = Vues.card=Vues.volInfo=Vues.msg1=
+            Vues.front=Vues.back=Vues.cerInfo=Vues.msg2='';
+            $(this).addClass('active').siblings().removeClass('active');
+            $('.tabbar-down').eq(idx).show().siblings('.tabbar-down').hide()
+          })
+        })
+      }
+    }
+  }
+
+</script>
+
+<style scoped>
+ /*  @import "../../assets/css/base.css";
+  @import "../../assets/css/main.css"; */
+  .table th{
+    padding: 18px;
+    text-align: left;
+  }
+  .table td{
+    padding: 18px;
+    text-align: left;
+  }
+</style>

@@ -1,0 +1,95 @@
+<template>
+  <div id="themeInfo">
+    <!--中间部分-->
+    <div class="main bannerimg">
+      <div class="mid">
+        <ul class="row w">
+          <li class="col">
+            <div class="router">
+              <span>当前位置：</span>
+              <a href="javascript:void(0);"
+                ><router-link
+                  tag="a"
+                  :to="{ name: 'home', params: { define: routeDefine } }"
+                  >首页</router-link
+                ></a
+              >
+              <a href="javascript:void(0);"
+                ><router-link
+                  tag="a"
+                  :to="{
+                    name: 'themeInfo',
+                    params: { define: routeDefine, id: id }
+                  }"
+                  v-text="themeinfo.albx6202"
+                ></router-link
+              ></a>
+            </div>
+          </li>
+        </ul>
+        <ul class="row w">
+          <li class="col v-t g-16">
+            <div class="detail">
+              <h2>{{ themeinfo.albx6202 }}</h2>
+              <ul class="lister list-bold">
+                <li v-show="themeinfo.createtime" style="list-style-type:none;">
+                  日期：
+                  <span>{{ themeinfo.createtime | ellipsisNos(10) }}</span>
+                </li>
+                <li v-show="themeinfo.albx6203" style="list-style-type:none;">
+                  来源： <span>{{ themeinfo.albx6203 }}</span>
+                </li>
+              </ul>
+              <div
+                class="detail-content"
+                style="word-wrap: break-word;word-break: break-all;"
+                v-html="themeinfo.albx6205"
+              ></div>
+            </div>
+          </li>
+          <!--右侧-->
+          <zykxinfo-right></zykxinfo-right>
+        </ul>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+const ZykxinfoRight = () => import("@/view/zykx/zykxinfo_right.vue"); //右侧
+
+export default {
+  name: "zykxinfo",
+  components: {
+    ZykxinfoRight //右侧
+  },
+  data: function() {
+    return {
+      routeDefine: this.$route.params.define,
+      id: this.$route.params.id,
+      themeinfo: {}
+    };
+  },
+  created() {
+    this.getdata();
+  },
+  methods: {
+    getdata() {
+      this.utilscommit.request(
+        "nvsi_themeInfo",
+        { id: this.id },
+        this.callback_themeinfo
+      ); //新闻详情
+    },
+    callback_themeinfo(data) {
+      if (data && data.data) {
+        data.data.albx6205 = data.data.albx6205.replace(
+          /@serveruirl@LEAP/g,
+          this.common.getUrl() + "/LEAP"
+        );
+        this.themeinfo = data.data;
+      }
+    }
+  }
+};
+</script>

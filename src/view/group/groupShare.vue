@@ -1,0 +1,201 @@
+<template>
+  <div class="zyz-page flex-v">
+    <div class="zyz-header">
+      <div class="zyz-header-pro flex-v v-m">
+        <img
+          class="pt1"
+          :src="common.changeImgsrc(groupInfo.orgphoto, 1)"
+          @error="imgError"
+          alt=""
+        />
+        <h2 class="zyz-name" v-text="groupInfo.albe0002"></h2>
+        <div class="flex-h zyz-name-time ">
+          <p class="flex-h v-m zyz-name-time-lft">
+            <img src="../../assets/img/share/icon1.png" alt="" />
+            <span>{{
+              groupInfo.albe0015 || groupInfo.albe0046 | ellipsisNos(10)
+            }}</span>
+          </p>
+          <p class="flex-h v-m">
+            <img src="../../assets/img/share/icon2.png" alt="" />
+            <span v-text="groupInfo.albe0013"></span>
+          </p>
+        </div>
+        <div class="zyz-header-num">
+          <ul class="flex-h">
+            <li class="flex-v flex-1 v-m t-c right">
+              <h2>0</h2>
+              <span>服务时长</span>
+            </li>
+            <li class="flex-v flex-1 v-m t-c right">
+              <h2 v-text="groupInfo.albe0056 || 0"></h2>
+              <span>队伍人数</span>
+            </li>
+            <li class="flex-v flex-1 v-m t-c">
+              <h2>99+</h2>
+              <span>队伍排名</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="zyz-main flex-1 flex-v">
+      <div class="zyz-main-no"></div>
+      <div class="flex-1 zyz-main-se">
+        <div class="zyz-main-inf">
+          <div class="zyz-main-inf-cod">
+            <p class="flex-h">
+              <span>队伍编号:</span>
+              <span v-text="groupInfo.albe0041"></span>
+            </p>
+            <p class="flex-h">
+              <span>联系人:</span>
+              <span v-text="groupInfo.albe0018"></span>
+            </p>
+            <p
+              class="flex-h"
+              v-if="
+                (groupInfo.albe0047 == 1 && groupInfo.albe0019) ||
+                  (groupInfo.albe0048 == 1 && groupInfo.albe0020)
+              "
+            >
+              <span>联系人电话:</span>
+              <span
+                v-if="groupInfo.albe0047 == 1 && groupInfo.albe0019"
+                v-text="groupInfo.albe0019"
+              ></span>
+              <span
+                v-if="groupInfo.albe0048 == 1 && groupInfo.albe0020"
+                v-text="groupInfo.albe0020"
+              ></span>
+            </p>
+            <p class="flex-h" v-if="groupInfo.joinway">
+              <span>加入方式:</span>
+              <span v-text="groupInfo.joinway"></span>
+            </p>
+            <p class="flex-h" v-if="groupInfo.linkgroup">
+              <span>联络组织:</span>
+              <span v-text="groupInfo.linkgroup"></span>
+            </p>
+            <p class="flex-h" v-if="groupInfo.albe0007">
+              <span>登记机关:</span>
+              <span v-text="groupInfo.albe0007"></span>
+            </p>
+          </div>
+        </div>
+        <div class="zyz-main-ty">
+          <h2>队伍简介</h2>
+          <span class="jij" v-html="groupInfo.albe0032 || '暂无'"></span>
+        </div>
+        <div class="zyz-main-ty ">
+          <h2>留言咨询</h2>
+          <p
+            v-if="!mainMessageList.length"
+            style="width: 100%;text-align: center;padding:0;"
+          >
+            <img src="../../assets/img/js-wujilu.png" />
+          </p>
+          <div class="flex-v" v-for="el in mainMessageList" :key="el.id">
+            <div class="flex-h v-m zyz-main-ty-pop">
+              <img
+                :src="common.changeImgsrc(el.photo)"
+                @error="imgError2"
+                alt=""
+              />
+              <p v-text="el.showname"></p>
+            </div>
+            <p class="flex-1" v-html="el.albx4003"></p>
+            <p class="zyz-main-ty-data">
+              <span>{{ el.albx4006 | ellipsisNos(19) }}</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import i1 from "../../assets/img/i1.png";
+import avatar from "../../assets/img/avatar.png";
+export default {
+  name: "groupShare",
+  data() {
+    return {
+      areaid: "",
+      groupid: "",
+      groupInfo: {},
+      mainMessageList: {}, //主留言列表
+      pageNo: 1,
+      flag: true
+    };
+  },
+  mounted() {
+    this.groupid = window.location.href.slice(
+      window.location.href.indexOf("groupShare") + 11,
+      window.location.href.lastIndexOf("/")
+    );
+    this.areaid = window.location.href.slice(
+      window.location.href.lastIndexOf("/") + 1
+    );
+    this.utilscommit.requestapi(
+      "getTeamInfoWeb",
+      { areaid: this.areaid, id: this.groupid },
+      this.callback
+    ); //团体详情
+    this.getMessageList();
+    let that = this;
+    window.onscroll = function() {
+      //监听滚动条是否到底部
+      var scrollTop =
+        document.documentElement.scrollTop || document.body.scrollTop; //变量scrollTop是滚动条滚动时，距离顶部的距离
+      var windowHeight =
+        document.documentElement.clientHeight || document.body.clientHeight; //变量windowHeight是可视区的高度
+      var scrollHeight =
+        document.documentElement.scrollHeight || document.body.scrollHeight; //变量scrollHeight是滚动条的总高度
+      if (scrollTop + windowHeight == scrollHeight && !that.flag) {
+        //滚动条到底部的条件
+        that.flag = true;
+        that.pageNo++;
+        that.getMessageList();
+      }
+    };
+  },
+  methods: {
+    callback(result) {
+      if (result && result.data) {
+        this.groupInfo = result.data;
+      }
+    },
+    getMessageList() {
+      //获取留言列表
+      var data = {
+        ofid: this.groupid,
+        type: "1",
+        areaid: this.areaid,
+        pageNow: this.pageNo,
+        pageSize: 6
+      };
+      this.utilscommit.request(
+        "nvsi_listMainMessage",
+        data,
+        this.mainMessageBack
+      );
+    },
+    mainMessageBack: function(result) {
+      if (result && result.data) {
+        this.mainMessageList = [...this.mainMessageList, ...result.data];
+        this.flag = false;
+      }
+    },
+    imgError(el) {
+      el.target.src = i1;
+    },
+    imgError2(el) {
+      el.target.src = avatar;
+    }
+  }
+};
+</script>
+
+<style src="../../assets/css/shareMain.css" scoped></style>

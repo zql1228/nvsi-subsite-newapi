@@ -1,0 +1,2657 @@
+<template>
+  <div id="orgreg">
+    <!--中间部分-->
+    <div class="main bannerimg">
+      <div class="mid">
+        <ul class="row w">
+          <li class="col">
+            <div class="router">
+              <span>当前位置：</span>
+              <a href="javascript:void(0);"><router-link tag="span" :to="{name:'home',params:{define:routeDefine}}">首页</router-link></a>
+              <span>志愿队伍注册</span>
+            </div>
+          </li>
+        </ul>
+        <ul class="row w">
+          <li class="col v-t w white" style="padding: 0 20px;">
+            <div class="tabbar">
+              <router-link tag="a" :to="{name:'volreg',params:{define:routeDefine}}">志愿者注册</router-link>
+              <router-link class="active" tag="a" :to="{name:'orgreg',params:{define:routeDefine}}">志愿队伍注册</router-link>
+            </div>
+            <ul class="flow">
+              <li class="active">账户信息</li>
+              <li>基本信息</li>
+              <li>登记信息</li>
+              <li>联系人信息</li>
+              <li>负责人信息</li>
+            </ul>
+            <img src="../../assets/img/shadow.png" alt="" style="width:100%;">
+            <!--账号信息-->
+            <div class="tabbar-down">
+              <h2 class="subtitle subtitle-margin subtitle-noline">账户信息</h2>
+              <div class="grid g-16 auto">
+                <div class="grid-item g-14 form">
+                  <p class="form-label"><em>*</em>用户名：</p>
+                  <input type="text" id="username" v-model="newUserInfo.albp0052" @blur="usernameCheck" @focus="usernameTip" maxlength="20" oninput="this.value=this.value.replace(/[^\w_.]/g,'').slice(0,20);" placeholder="请输入用户名">
+                  <p class="form-error w warn-tip right-tip" style="margin-top: 0;" id="usernameTips">用户名长度6～20个字符，以字母a～z（不区分大小写）开头，且只能由字母、数字0～9和下划线组成</p>
+                </div>
+                <div class="grid-item g-14 form">
+                  <p class="form-label"><em>*</em>密码：</p>
+                  <input type="password" id="password" v-model="newUserInfo.albp0053" @blur="passwordCheck" @focus="passwordTip" maxlength="20"  placeholder="请输入密码"><!-- oninput="this.value=this.value.replace(/[^\w_.]/g,'');" -->
+                  <p class="form-error w warn-tip right-tip" id="passwordTips">密码长度为8-20个字符，且必须同时包含数字、大写字母和小写字母</p>
+                </div>
+                <div class="grid-item g-14 form">
+                  <p class="form-label"><em>*</em>确认密码：</p>
+                  <input type="password" id="repeatpw" v-model="newUserInfo.repeatpw" @blur="repeatPWCheck" maxlength="20"  placeholder="请输入确认密码" ><!-- oninput="this.value=this.value.replace(/[^\w_.]/g,'');" -->
+                  <p class="form-error w warn-tip right-tip" id="repeatpwTips"></p>
+                </div>
+                <div class="t-c pt-30">
+                  <a href="javascript:void(0);" @click="firstCheck" class="button">下一步</a>
+                </div>
+              </div>
+            </div>
+            <!--基本信息-->
+            <div class="tabbar-down" style="display: none;"><!-- style="display: none;" -->
+              <h2 class="subtitle subtitle-margin subtitle-noline">基本信息</h2>
+              <ul class="grid" style="margin-top: 10px;">
+                <li class="grid-item g-24">
+                  <div class="form">
+                    <p class="form-label col v-m" style="width:150px"><em>*</em>队伍类型：</p>
+                    <div class="col v-m t-l">
+                      <label for="one" class="radio">
+                        <input type="radio" id="one" name="loginType" value="1" v-model="loginType">
+                        <span></span>
+                        <i>志愿服务团体</i>
+                      </label>
+                      <label for="two" class="radio">
+                        <input type="radio" id="two" name="loginType" value="2" v-model="loginType">
+                        <span></span>
+                        <i>志愿服务组织</i>
+                      </label>
+                     <label for="three" class="radio">
+                        <input type="radio" id="three" name="loginType" value="3" v-model="loginType">
+                        <span></span>
+                        <i>其它开展志愿服务活动的法人组织</i>
+                      </label>
+                    </div>
+                  </div>
+                  <span class="form-error down-tip" id="loginTypeTips"></span>
+                </li>
+                <li class="grid-item g-12">
+                  <div class="form">
+                    <p class="form-label"><em>*</em><span id="orgname">队伍名称：</span> <span style="font-size: 14px;color: #666" id="orgtip">（建议填写为‘XX志愿服务队’的形式）</span></p>
+                    <input type="text" id="groupName" v-model="newUserInfo.albe0002" @blur="groupNameCheck" maxlength="20"  placeholder="请输入队伍名称">
+                  </div>
+                  <span class="form-error down-tip" id="groupNameTips"></span>
+                </li>
+                <li class="grid-item g-12">
+                  <div class="form">
+                    <p class="form-label"><em>*</em>详细地址：</p>
+                    <div class="row w">
+                      <div class="col v-m">
+                        <input type="text" id="address" v-model="detailAddress" maxlength="50" readonly  placeholder="请选择详细地址"><!--  @blur="detailedAddressCheck" -->
+                      </div>
+                      <div class="col v-m pl-10" style="width:90px;">
+                        <a href="javascript:void(0);" class="button button-line" @click="showMap">选择</a>
+                      </div>
+                    </div>
+                  </div>
+                  <span class="form-error down-tip" id="detailAddressTips"></span>
+                </li>
+                <li class="grid-item g-12">
+                  <div class="form">
+                    <p class="form-label"><em>*</em>区域：</p>
+                    <div class="row w">
+                      <div class="col v-m">
+                        <input type="text" v-model="orgAreaName" id="orgArea" readonly  placeholder="请选择区域">
+                      </div>
+                      <div class="col v-m pl-10" style="width:90px;">
+                        <a href="javascript:void(0);" @click="chooseArea" class="button button-line">选择</a>
+                      </div>
+                    </div>
+                  </div>
+                  <span class="form-error down-tip" id="orgAreaTips"></span>
+                </li>
+                <li class="grid-item g-12">
+                  <div class="form">
+                    <p class="form-label"><em>*</em>志愿者人数：</p>
+                    <input type="text" id="volNum" v-model="newUserInfo.albe0016" maxlength="6" @blur="volNumCheck" oninput="this.value=this.value.replace(/[^0-9]/g,'')"   placeholder="请输入志愿者人数">
+                  </div>
+                  <span class="form-error down-tip" id="volNumTips"></span>
+                </li>
+                <li class="grid-item g-12">
+                  <div class="form">
+                    <p class="form-label">队伍微博：</p>
+                    <input type="text"  v-model="newUserInfo.albe0039" maxlength="250"  placeholder="请输入队伍微博">
+                  </div>
+                  <span class="form-error down-tip"></span>
+                </li>
+                <li class="grid-item g-12">
+                  <div class="form">
+                    <p class="form-label">队伍网址：<span style="font-size: 14px;color: #666">（格式如：http://....或者https://....）</span></p>
+                    <input type="text"  v-model="newUserInfo.albe0040" maxlength="250"  placeholder="请输入队伍网址">
+                  </div>
+                  <span class="form-error down-tip" id="orgWebTips"></span>
+                </li>
+                <li class="grid-item g-12">
+                  <div class="form">
+                    <p class="form-label"><em>*</em>
+                    <span id="orgforunit" v-if="loginType==1">同意其成立的单位（社区）名称：</span>
+                    <span v-else>主管单位名称：</span></p>
+                      <input type="text" v-if="loginType==1" id="orgUnit" v-model="newUserInfo.albe0011" @blur="orgunitChange" maxlength="20"  placeholder="请输入同意其成立的单位（社区）名称"/>
+                      <input type="text" v-else id="orgUnit" v-model="newUserInfo.albe0011" @blur="orgunitChange" maxlength="20"  placeholder="请输入主管单位名称"/>
+                    </div>
+                  <span class="form-error down-tip" id="orgUnitTips"></span>
+                </li>
+                <li class="grid-item g-12">
+                  <div class="form">
+                    <p class="form-label">成立日期：</p>
+                    <date-picker style="width: 100%;" :lang="lang" v-model="albe0015" valueType="format"  placeholder="请输入成立日期"></date-picker>
+                  </div>
+                  <span class="form-error down-tip"></span>
+                </li>
+                <li class="grid-item g-12" id="isdirectly" v-if="loginType==1">
+                  <div class="form">
+                    <p class="form-label col v-m" style="width:150px"><em>*</em>是否法人组织直属队：</p>
+                    <div class="col v-m t-l">
+                      <label for="yes1" class="radio">
+                        <input type="radio" id="yes1" name="radio1" value="1" v-model="isDirectly">
+                        <span></span>
+                        <i>是</i>
+                      </label>
+                      <label for="no1" class="radio">
+                        <input type="radio" id="no1" name="radio1" value="0" v-model="isDirectly">
+                        <span></span>
+                        <i>否</i>
+                      </label>
+                    </div>
+                  </div>
+                  <span class="form-error down-tip"></span>
+                </li>
+                 <li class="grid-item g-12" id="directly"  v-if="loginType==1 && isDirectly==1">
+                  <div class="form">
+                    <p class="form-label"><em>*</em>直属法人组织：</p>
+                    <div class="row w">
+                      <div class="col v-m">
+                        <input type="text" id="directlyOrg" v-model="directlyOrgName" maxlength="20" readonly="readonly" @change="directlyOrgCheck"  placeholder="请选择直属法人组织">
+                      </div>
+                      <div class="col v-m pl-10" style="width:90px;">
+                        <a href="javascript:void(0);" class="button button-line" @click="showDirectlyOrg">选择</a>
+                      </div>
+                    </div>
+                  </div>
+                  <span class="form-error down-tip" id="directlyOrgTips"></span>
+                </li>
+                <li class="grid-item g-12" id="islink" v-if="loginType==1 && isDirectly==0">
+                  <div class="form">
+                    <p class="form-label col v-m" style="width:150px"><em>*</em>是否有联络组织：</p>
+                    <div class="col v-m t-l">
+                      <label for="yes" class="radio">
+                        <input type="radio" id="yes" name="radio" value="1" v-model="isLink">
+                        <span></span>
+                        <i>是</i>
+                      </label>
+                      <label for="no" class="radio">
+                        <input type="radio" id="no" name="radio" value="0" v-model="isLink">
+                        <span></span>
+                        <i>否</i>
+                      </label>
+                    </div>
+                  </div>
+                  <span class="form-error down-tip"></span>
+                </li>
+                <li class="grid-item g-12" id="unittype"  v-if="loginType==1 && isDirectly==0 || loginType!=1">
+                  <div class="form">
+                    <p class="form-label"><em>*</em>
+                    <span id="orgfortype" v-if="loginType==1">同意其成立的单位（社区）类型：</span>
+                    <span v-else>组织类型：</span></p>
+                    <div class="select">
+                      <select  id="orgType" v-model="orgType" @change="orgTypeCheck">
+                        <option value="0">请选择</option>
+                        <option :value="el.codeid" v-for="(el,index) in orgTypes" :key="index">{{el.codevalue}}</option>
+                      </select>
+                    </div>
+                  </div>
+                  <span class="form-error down-tip" id="orgTypeTips"></span>
+                </li>
+                <li class="grid-item g-12" id="link" v-if="loginType==1 && isDirectly==0 && isLink==1 ">
+                  <div class="form">
+                    <p class="form-label"><em>*</em>联络组织：</p>
+                    <div class="row w">
+                      <div class="col v-m">
+                        <input type="text" id="linkOrg" v-model="linkOrgName" maxlength="20" readonly="readonly" @change="linkOrgCheck"  placeholder="请选择联络组织">
+                      </div>
+                      <div class="col v-m pl-10" style="width:90px;">
+                        <a href="javascript:void(0);" class="button button-line" @click="showLinkOrg">选择</a>
+                      </div>
+                    </div>
+                  </div>
+                  <span class="form-error down-tip" id="linkOrgTips"></span>
+                </li>
+                <li class="grid-item g-12" v-if="loginType!=1 " id="loginbm">
+                  <div class="form">
+                    <p class="form-label"><em>*</em>登记部门：</p>
+                      <input type="text" id="loginDepart" v-model="loginDepart" maxlength="20" readonly="readonly">
+                    <!-- <div class="select" id="loginse">
+                      <select id="loginDepart" v-model="loginDepart" @change="loginDepartCheck">
+                        <option value="0">请选择</option>
+                        <option :value="el.codeid" v-for="el in loginDepartList" >{{el.codevalue}}</option>
+                      </select>
+                    </div> -->
+                  </div>
+                  <span class="form-error down-tip" id="loginDepartTips"></span>
+                </li>
+                <li class="grid-item g-12" id="loginjg" v-if="loginType==1 && isDirectly==0 && isLink==0 || loginType!=1">
+                  <div class="form">
+                    <p class="form-label"><em>*</em>登记机关：</p>
+                    <div class="row w">
+                      <div class="col v-m">
+                        <input type="text" id="loginOrg" v-model="registerOrgName" maxlength="20"  readonly  placeholder="请选择登记机关"> <!-- @change="loginOrgCheck" -->
+                      </div>
+                      <div class="col v-m pl-10" style="width:90px;">
+                        <a href="javascript:void(0);" class="button button-line" @click="showLoginOrg">选择</a>
+                      </div>
+                    </div>
+                  </div>
+                  <span class="form-error down-tip" id="loginOrgTips"></span>
+                </li>
+                <li class="grid-item g-12" v-if="loginType!=1" ><!-- :style="codeHide" -->
+                  <div class="form">
+                    <p class="form-label"><em>*</em>统一社会信用代码：</p>
+                    <input type="text" id="tyCode" v-model="newUserInfo.albe0008" maxlength="18" @blur="tyCodeCheck"  placeholder="请输入统一社会信用代码">
+                  </div>
+                  <span class="form-error down-tip" id="tyCodeTips"></span>
+                </li>
+                <li class="grid-item g-12" v-if="loginType==1 && isDirectly==0 && isLink==0"><!-- :style="codeHide" -->
+                  <div class="form">
+                    <p class="form-label"><em>*</em>同意其成立的单位（社区）名称：</p>
+                    <input type="text" id="unitName" v-model="albe0057" maxlength="20" readonly="readonly"  placeholder="请输入同意其成立的单位（社区）名称">
+                  </div>
+                  <span class="form-error down-tip" id="unitNameTips"></span>
+                </li>
+                <li class="grid-item g-12" v-if="loginType==1 && isDirectly==0 && isLink==0" ><!-- :style="aHide" -->
+                  <div class="form">
+                    <p class="form-label"><em>*</em>同意其成立的单位（社区）统一社会信用代码：</p>
+                    <input type="text" id="unitCode" v-model="newUserInfo.albe0061" maxlength="20" @blur="forUnitCodeCheck"  placeholder="请输入同意其成立的单位（社区）统一社会信用代码">
+                  </div>
+                  <span class="form-error down-tip" id="unitCodeTips"></span>
+                </li>
+                <li class="grid-item g-12" v-if="loginType==1 && isDirectly==0 && isLink==0" ><!-- :style="aHide" -->
+                  <div class="form">
+                    <p class="form-label"><em>*</em>同意其成立的单位（社区）联系人：</p>
+                    <input type="text" id="unitLink" v-model="newUserInfo.albe0058" maxlength="20" @blur="forUnitLinkNameCheck"  placeholder="请输入同意其成立的单位（社区）联系人">
+                  </div>
+                  <span class="form-error down-tip" id="unitLinkTips"></span>
+                </li>
+                <li class="grid-item g-12"  v-if="loginType==1 && isDirectly==0 && isLink==0"><!-- :style="aHide" -->
+                  <div class="form">
+                    <p class="form-label"><em>*</em>同意其成立的单位（社区）联系电话：</p>
+                    <input type="text" id="unitPhone" v-model="newUserInfo.albe0059" maxlength="12" @blur="forUnitLinkPhoneCheck"  placeholder="请输入同意其成立的单位（社区）联系电话">
+                  </div>
+                  <span class="form-error down-tip" id="unitPhoneTips"></span>
+                </li>
+                <li class="grid-item g-24" v-if="loginType==1 && isDirectly==0 && isLink==0"><!-- :style="aHide" -->
+                  <div class="form">
+                    <label for="agree" class="radio" style="margin-right: 5px;">
+                      <input type="checkbox"  id="agree" name="radioo"  v-model="isOk" >
+                      <span></span>
+                      <i></i>
+                    </label>
+                    <p class="form-label" style="margin: 10px;vertical-align: middle;display:inline-block;color: red;"><em>*</em>本团体郑重承诺所提交的申报材料均真实、合法。如有不实之处，愿负相应的法律责任，并承担由此产生的一切后果</p>
+                  </div>
+                  <span class="form-error down-tip" id="agreeTips"></span>
+                </li>
+                <li class="grid-item g-24">
+                  <div class="form">
+                    <p class="form-label"><em>*</em>服务类别：<em>（最多选择4项）</em></p>
+                    <div class="checkbox-fixed">
+                      <label class="checkbox" v-for="(el,index) in serviceTypeList" :key="index" :for="el.id">
+                        <input type="checkbox" name="checkbox" :id="el.id" :value="el.albe0123" v-model="serviceType" @change="serviceTypeCheck">
+                        <span></span>
+                        <i :title="el.albe0122">{{el.albe0122 | ellipsis(10)}}</i>
+                      </label>
+                    </div>
+                  </div>
+                  <span class="form-error down-tip" id="serviceTypeTips"></span>
+                </li>
+                <li class="grid-item g-24" v-show="industryList.length">
+                  <div class="form">
+                    <p class="form-label">所属行业：</p>
+                    <div class="checkbox-fixed">
+                      <label class="checkbox" v-for="(el,index) in industryList" :key="index" :for="el.id">
+                        <input type="checkbox" name="checkbox" :id="el.id" :value="el.albe2203" v-model="industry" @change="industryCheck">
+                        <span></span>
+                        <i :title="el.albe2202">{{el.albe2202 | ellipsis(10)}}</i>
+                      </label>
+                    </div>
+                  </div>
+                  <span class="form-error down-tip" id="industryTips"></span>
+                </li>
+                <li class="grid-item g-24">
+                  <div class="form">
+                    <p class="form-label">队伍提供：</p>
+                    <div class="checkbox-fixed">
+                      <label class="checkbox" v-for="(el,index) in orgGiveList" :key="index" :for="el.id">
+                        <input type="checkbox" name="checkbox" :id="el.id" :value="el.codeid" v-model="orgGive">
+                        <span></span>
+                        <i :title="el.codevalue">{{el.codevalue | ellipsis(10)}}</i>
+                      </label>
+                    </div>
+                  </div>
+                </li>
+                <li class="grid-item g-24">
+                  <div class="form">
+                    <p class="form-label">队伍需要：</p>
+                    <div class="checkbox-fixed">
+                      <label class="checkbox" v-for="(el,index) in orgNeedList" :key="index" :for="el.id">
+                        <input type="checkbox" name="checkbox" :id="el.id" :value="el.codeid" v-model="orgNeed">
+                        <span></span>
+                        <i :title="el.codevalue">{{el.codevalue | ellipsis(10)}}</i>
+                      </label>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+              <div class="t-c pt-30">
+                <a href="javascript:void(0);" @click="gotoStep(0)" class="button" style="margin-right: 150px;">上一步</a>
+                <a href="javascript:void(0);" @click="secondCheck" class="button">下一步</a>
+              </div>
+            </div>
+            <!--登记信息-->
+            <div class="tabbar-down" style="display: none;">
+              <h2 class="subtitle subtitle-margin subtitle-noline">登记信息</h2>
+              <div class="grid auto">
+                <div class="grid-item form" id="zjphoto1">
+                  <p class="form-label"><em>*</em><span id="filetitle1">注册申请表扫描件：</span></p>
+                  <div class="row w" style="dispaly:flex;position:relative;">
+                    <div class="col v-m pl-10" style="padding:20px 10px;position:relative;">
+                      <a href="javascript:void(0);" @click="upimg1" class="button button-line" style="width: 110px; margin-right:20px;">选择上传</a>
+                      <span id="up_file1" style="font-size: 15px;color:#666;padding: 10px;"></span>
+                      <div style="display: inline-block;">
+                        <p class="form-error w warn-tip" id="file1Tips" style="padding-left:30px;">请上传注册申请表扫描件</p>
+                        <input id="file1" type="file" @change="changeImg1" accept="image/*" hidden />
+                      </div>
+                      <div style="position:absolute;right:20px;top:50%;margin-top:-20px;">
+                        <a href="javascript:void(0);" @click="downfile" class="button button-line" style="width: 90px;margin-right:20px;" id="downfile">下载模板</a>
+                        <a href="javascript:void(0);" @click="showimg1" class="button button-line" style="width: 90px;marign-left:20px;margin-right:20px;">查看</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="grid-item form" id="zjphoto2">
+                  <p class="form-label"><em>*</em><span id="filetitle2">负责人手持身份证照：</span></p>
+                  <div class="row w" style="dispaly:flex;position:relative;">
+                    <div class="col v-m pl-10" style="padding:20px 10px;position:relative;">
+                      <a href="javascript:void(0);" @click="upimg2" class="button button-line" style="width: 110px; margin-right:20px;">选择上传</a>
+                      <span id="up_file2" style="font-size: 15px;color:#666;padding: 10px;"></span>
+                      <div style="display: inline-block;">
+                      <p class="form-error w warn-tip" id="file2Tips" style="padding-left:30px;">请上传负责人手持身份证照</p>
+                      <input id="file2" type="file" @change="changeImg2" accept="image/*" hidden />
+                    </div>
+                    </div>
+                  </div> 
+                    <div style="position:absolute;right:20px;top:50%;margin-top:-20px;">
+                      <a href="javascript:void(0);" @click="showHoldIdCard" class="button button-line" style="width: 90px;margin-right:20px;">示例图片</a>
+                      <a href="javascript:void(0);" @click="showimg2" class="button button-line" style="width: 90px;margin-right:20px;">查看</a>
+                      <!-- <a href="javascript:void(0);" @click="downimg2" class="button button-line" style="width: 90px;marign-left:20px;">下载模板</a> -->
+                    </div>
+                </div>
+                <!-- <div class="grid-item form" id="zjphoto3" style="display:none;">
+                  <p class="form-label"><em>*</em>统一社会信用代码证</p>
+                  <div class="row w" style="dispaly:flex;position:relative;">
+                    <div class="col v-m pl-10" style="padding:20px 10px;position:relative;">
+                      <a href="javascript:void(0);" @click="upimg3" class="button button-line" style="width: 110px; margin-right:20px;">选择上传</a>
+                      <span id="up_file3" style="font-size: 15px;color:#666;padding: 10px;"></span>
+                      <div style="display: inline-block;">
+                        <p class="form-error w warn-tip" id="file3Tips" style="padding-left:30px;">请上传统一社会信用代码证</p>
+                        <input id="file3" type="file" @change="changeImg3" accept="image/*" hidden />
+                      </div>
+                      <div style="position:absolute;right:20px;top:50%;margin-top:-20px;">
+                        <a href="javascript:void(0);" @click="showimg3" class="button button-line" style="width: 90px;margin-right:20px;">查看</a>
+                        <a href="javascript:void(0);" @click="downimg4" class="button button-line" style="width: 90px;marign-left:20px;">下载模板</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="grid-item form" id="zjphoto4" style="display:none;">
+                  <p class="form-label"><em>*</em>有效的队伍印章</p>
+                  <div class="row w" style="dispaly:flex;position:relative;">
+                    <div class="col v-m pl-10" style="padding:20px 10px;position:relative;">
+                      <a href="javascript:void(0);" @click="upimg4" class="button button-line" style="width: 110px; margin-right:20px;">选择上传</a>
+                      <span id="up_file4" style="font-size: 15px;color:#666;padding: 10px;"></span>
+                      <div style="display: inline-block;">
+                      <p class="form-error w warn-tip" id="file4Tips" style="padding-left:30px;">请上传有效的队伍印章</p>
+                      <input id="file4" type="file" @change="changeImg4" accept="image/*" hidden />
+                    </div>
+                    </div>
+                  </div> 
+                    <div style="position:absolute;right:20px;top:50%;margin-top:-20px;">
+                      <a href="javascript:void(0);" @click="showimg2" class="button button-line" style="width: 90px;margin-right:20px;">查看</a>
+                      <a href="javascript:void(0);" @click="downimg2" class="button button-line" style="width: 90px;marign-left:20px;">下载模板</a>
+                    </div>
+                </div> -->
+              </div>
+              <div class="t-c pt-30">
+                <a href="javascript:void(0);" @click="gotoStep(1)" class="button" style="margin-right: 150px;">上一步</a>
+                <a href="javascript:void(0);" @click="thirdCheck" class="button">下一步</a>
+              </div>
+            </div>
+            <!--联系人信息-->
+            <div class="tabbar-down" style="display: none;">
+              <h2 class="subtitle subtitle-margin subtitle-noline">联系人信息</h2>
+              <div class="grid g-16 auto">
+                <div class="grid-item g-14 form">
+                  <p class="form-label"><em>*</em>联系人姓名：</p>
+                  <input type="text" id="linkName" v-model="newUserInfo.albe0018" @blur="linkNameCheck" @focus="linkNameTip" maxlength="20"  placeholder="请输入联系人姓名">
+                  <p class="form-error w warn-tip right-tip" id="linkNameTips">联系人姓名不能为空</p>
+                </div>
+                <div class="grid-item g-14 form">
+                  <p class="form-label"><em>*</em>联系人手机：</p>
+                  <div class="row w" style="display: inline-table;">
+                    <div class="col v-m">
+                      <input type="text" id="linkPhone" v-model="newUserInfo.albe0019" @blur="linkPhoneCheck" @focus="linkPhoneTip" maxlength="11" placeholder="请输入联系人手机">
+                    </div>
+                    <div class="col v-m pl-10" style="width:130px;">
+                      <div class="select">
+                        <select v-model="albe0047">
+                          <option value="0">不公开</option>
+                          <option value="1">公开</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="form-error w warn-tip right-tip" id="linkPhoneTips">联系人手机号码不能为空</p>
+                </div>
+                <div class="grid-item g-14 form">
+                  <p class="form-label">联系人电话：</p>
+                  <div class="row w" style="display: inline-table;">
+                    <div class="col v-m">
+                      <input type="text" id="linkTelPhone" v-model="newUserInfo.albe0020" @blur="linkTelPhoneCheck" maxlength="12" placeholder="请输入联系人电话">
+                    </div>
+                    <div class="col v-m pl-10" style="width:130px;">
+                      <div class="select">
+                        <select v-model="albe0048">
+                          <option value="0">不公开</option>
+                          <option value="1">公开</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="form-error w warn-tip right-tip" id="linkTelPhoneTips"></p>
+                </div>
+                <div class="grid-item g-14 form">
+                  <p class="form-label"><!-- <em>*</em> -->电子邮箱：</p>
+                  <!-- <input type="text" id="linkEmail" v-model="newUserInfo.albe0049" @blur="linkEmailCheck" @focus="linkEmailTip" maxlength="30"> -->
+                  <input type="text" id="linkEmail" v-model="newUserInfo.albe0049" @blur="linkEmailCheck" maxlength="30" placeholder="请输入电子邮箱">
+                  <p class="form-error w warn-tip right-tip" id="linkEmailTips"><!-- 电子邮箱不能为空 --></p>
+                </div>
+                <div class="grid-item g-14 form">
+                  <p class="form-label">联系人QQ</p>
+                  <input type="text" id="linkQQ" v-model="newUserInfo.albe0021" @blur="linkQQCheck" maxlength="12" placeholder="请输入联系人QQ">
+                  <p class="form-error w warn-tip right-tip" id="linkQQTips"></p>
+                </div>
+              </div>
+              <div class="t-c pt-30">
+                <a href="javascript:void(0);" @click="gotoStep(2)" class="button" style="margin-right: 150px;">上一步</a>
+                <a href="javascript:void(0);" @click="forthCheck" class="button">下一步</a>
+              </div>
+            </div>
+            <!--负责人信息-->
+            <div class="tabbar-down" style="display: none;">
+              <h2 class="subtitle subtitle-margin subtitle-noline">负责人信息</h2>
+              <div class="grid g-16 auto">
+                <div class="grid-item g-14 form">
+                  <p class="form-label"><em>*</em>负责人姓名：</p>
+                  <input type="text" id="mainName" v-model="newUserInfo.albe0022" @blur="mainNameCheck" @focus="mainNameTip" maxlength="20" placeholder="请输入负责人信息">
+                  <p class="form-error w warn-tip right-tip" id="mainNameTips">负责人姓名不能为空</p>
+                </div>
+                <div class="grid-item g-14 form">
+                  <p class="form-label"><em>*</em>负责人身份证：</p>
+                  <input type="text" id="mainCard" v-model="newUserInfo.albe0023" @blur="mainCardCheck" @focus="mainCardTip" maxlength="18" placeholder="请输入负责人身份证">
+                  <p class="form-error w warn-tip right-tip" id="mainCardTips">负责人身份证不能为空</p>
+                </div>
+                <div class="grid-item g-14 form">
+                  <p class="form-label"><em>*</em>负责人手机：</p>
+                  <input type="text" id="mainPhone" v-model="newUserInfo.albe0024" @blur="mainPhoneCheck" @focus="mainPhoneTip" maxlength="11" placeholder="请输入负责人手机">
+                  <p class="form-error w warn-tip right-tip" id="mainPhoneTips">负责人手机不能为空</p>
+                </div>
+                <div class="grid-item g-14 form">
+                  <p class="form-label"><em>*</em>图文验证码：</p>
+                  <div class="row w" style="display: inline-table;">
+                    <div class="col v-m">
+                      <input type="text" id="inputImgCode" maxlength="4" v-model="imgcode" @blur="imgCodeCheck" oninput="value=value.replace(/[^0-9a-zA-Z]/g,'').slice(0,4);" placeholder="请输入图文验证码">
+                    </div>
+                    <div class="col v-m pl-10" style="width:130px;" @click="changeImgCode">
+                      <img id="reg_image" class="button button-line" style="width: 100%;padding: 1px 1px 2px 5px;">
+                    </div>
+                  </div>
+                  <p class="form-error w warn-tip right-tip" id="imgCodeTips"></p>
+                </div>
+                <div class="grid-item g-14 form">
+                  <p class="form-label"><em>*</em>手机验证码：</p>
+                  <div class="row w" style="display: inline-table;">
+                    <div class="col v-m">
+                      <input type="text" id="code" v-model="code" @blur="codeCheck" oninput="value=value.replace(/[^\d]/g,'').slice(0,6);" maxlength="6" placeholder="请输入手机验证码">
+                    </div>
+                    <div class="col v-m pl-10" style="width:130px;"><button class="button button-line" id="codebutton" @click="getCode" v-text="codeButton" style="font-size: 14px;width: 100%"></button></div>
+                  </div>
+                  <p class="form-error w warn-tip right-tip" id="codeTips"></p>
+                </div>
+              </div>
+              <div class="t-c pt-30">
+                <a href="javascript:void(0);" @click="gotoStep(3)" class="button" style="margin-right: 150px;">上一步</a>
+                <a href="javascript:void(0);" @click="fifthCheck" class="button" id="register">提交注册</a>
+              </div>
+              <div class="agreement" style="height: 110px;line-height: 22px;margin: 20px auto 0;overflow-y: scroll;">
+                <p>
+                  本网站及与本网站链接的网站，仅提供志愿者、志愿服务队伍、志愿服务机构及其它与此相关联之志愿服务项目。志愿者、志愿服务队伍、志愿服务机构以及因其它任何目的进入本网站的访问者接受本协议书条款，注册成为中国志愿服务网网站用户，并遵守本协议所述之条款使用本网站所提供之服务。如果您不接受本声明之条款，请勿使用本网站。接受本声明之条款，您将遵守本协议之规定。
+                </p><br>
+                <p>1.信息的发布</p><br>
+                <p>·不得发布任何违反有关法律规定信息；</p>
+                <p>·不得发布任何与本网站志愿服务目的不适之信息；</p>
+                <p>·不得发布任何不完整、虚假的信息；</p>
+                <p>·用户对所发布的信息承担完全责任。</p><br>
+                <p>2.信息的使用</p><br>
+                <p>·志愿服务队伍、志愿服务机构仅可就志愿服务目的使用志愿者之个人信息；</p>
+                <p>·志愿者仅可因参加某志愿服务项目，使用志愿服务队伍、志愿服务机构发布之项目招募信息；</p>
+                <p>·本网站提供的其它信息，仅与其相应内容有关的目的而被使用；</p>
+                <p>·不得将任何本网站的信息用作任何商业目的。</p><br>
+                <p>3.信息的公开</p><br>
+                <p>在本网站所登录的任何信息，均有可能被任何本网站的访问者浏览，也可能被错误使用。本网站对此将不予承担任何责任。</p><br>
+                <p>4.信息的准确性</p><br>
+                <p>任何在本网站发布的信息，均必须符合合法、准确、及时、完整的原则。但本网站将不能保证所有由第三方提供的信息，或本网站自行采集的信息完全准确。使用者了解，对这些信息的使用，需要经过进一步核实。本网站对访问者未经自行核实误用本网站信息造成的任何损失不予承担任何责任。</p><br>
+                <p>5.信息更改与删除</p><br>
+                <p>除了信息的发布者外，任何访问者不得更改或删除他人发布的任何信息。本网站有权根据其判断保留修改或删除任何不适信息之权利。</p><br>
+                <p>6.版权、商标权</p><br>
+                <p>本网站的图形、图像、文字及其程序等均属中国志愿服务网网站之版权，受商标法及相关知识产权法律保护，未经中国志愿服务网网站书面许可，任何人不得下载、复制、再使用。在本网发布信息之商标，归其相应的商标所有权人，受商标法保护。</p><br>
+                <p>7、注册信息使用</p><br>
+                <p>注册会员所提供的个人信息将会被中国志愿服务网网站统计、汇总，在我们的严格管理下，为中国志愿服务网网站的合作者提供依据。中国志愿服务网网站会不定期地通过注册会员留下的电子邮件、电话或通信地址同该会员保持联系。</p><br>
+                <p>中国志愿服务网网站承诺：在未经访问者授权同意的情况下，中国志愿服务网网站不会将访问者的个人资料泄露给第三方。但以下情况除外。</p>
+                <p>·根据执法单位之要求或为公共之目的向相关单位提供个人资料；</p>
+                <p>·由于您将用户密码告知他人或与他人共享注册帐户，由此导致的任何个人资料泄露；</p>
+                <p>·由于计算机2000年问题、黑客攻击、计算机病毒侵入或发作、因政府管制而造成的暂时性关闭等影响网络正常经营之不可抗力而造成的个人资料泄露、丢失、被盗用或被窜改等；</p>
+                <p>·由于与中国志愿服务网网站链接的其它网站所造成之个人资料泄露及由此而导致的任何法律争议和后果；</p>
+                <p>·为免除访问者在生命、身体或财产方面之急迫危险。</p><br>
+                <p>8.自责</p><br>
+                <p>所有使用本网站的用户，对使用本网站信息和在本网站发布信息的被使用，承担完全责任。本网站对任何因使用本网站而产生的第三方之间的纠纷，不负任何责任。</p><br>
+                <p>9.服务终止</p><br>
+                <p>本网站有权在预先通知或不予通知的情况下终止任何免费服务。</p><br>
+                <p>10.争议处理</p><br>
+                <p>本网站因正常的系统维护、系统升级，或者因网络拥塞而导致网站不能访问，本网站不承担任何责任。</p><br>
+                <p>11.免责条款</p><br>
+                <p>本网并无随时监视此网址，但保留对其实施实时监视的权利。对于他方输入的，不是本网发布的材料，本网概不负任何法律责任。对于其他网址链接在本网址的内容，本网概不负法律责任。</p>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!--联络团体选择弹窗-->
+    <div class="mask linkorg">
+      <div class="mask-info" style="max-height: 702px;">
+        <div class="mask-header row w">
+          <div class="col v-m"><h2>请选择联络队伍</h2></div>
+          <div class="col v-m t-r"><a href="javascript:void(0);" @click="closeLinkOrg" class="mask-close"><img src="../../assets/img/close.png" alt=""></a></div>
+        </div>
+        <div class="vote-form" style="padding:25px 0;">
+          <span>队伍名称：</span>
+          <input type="text" class="input" style="width:220px;margin: 0px 20px 0px 0px;" v-model="searchOrgName" maxlength="30" placeholder="请输入队伍名称">
+          <span>队伍联络编号：</span>
+          <input type="text" class="input" style="width:190px;margin: 0px 20px 0px 0px;" v-model="searchOrgID" maxlength="30" placeholder="请输入队伍联络编号">
+          <a href="javascript:void(0);" class="button button-large"  @click="searchGroup">查找</a>
+        </div>
+        <div class="tabbar-down">
+          <!-- 团体信息 -->
+          <table class="user-table" >
+            <colgroup>
+              <col width="10%">
+              <col width="30%">
+              <col width="45%">
+              <col width="15%">
+            </colgroup>
+            <tr>
+              <th>序号</th>
+              <th>队伍联络编号</th>
+              <th>队伍名称</th>
+              <th>操作</th>
+            </tr>
+            <tr v-if="tolPage==0 && (searchOrgName || searchOrgID) && querystatus==0">
+              <td colspan="4"> <img src="@/assets/img/loader.png" style="margin-right: 5px;"/><span style="font-size:16px;color:#666666;vertical-align: middle;">加载中...</span>
+              </td>
+            </tr>
+            <tr v-if="tolPage==0 && querystatus==1">
+              <td colspan="4"> 
+                <img src="@/assets/img/js-wujilu.png"/>
+              </td>
+            </tr>
+            <tr v-for="(el,index) in linkOrgList" :key="index">
+              <td class="left">{{index+1}}</td>
+              <td class="left">{{el.albe0041}}</td>
+              <td class="left">{{el.albe0002}}</td>
+              <td class="left">
+                <em  @click="toGroupInfo(el.id,el.albe0012)" class="pointer" style="margin-right: 10px;">查看</em>
+                <em  @click="chooseOrg(el.id,el.albe0002)" class="pointer">选择</em>
+              </td>
+            </tr>
+          </table>
+          <paging :pageCount="tolPage"
+                  :rangePage="pageSize"
+                  :initPage="pageNow"
+                  :totals="tolCount"
+                  :val="jumpPage"
+                  @pageEvent="pageEvent">
+          </paging>
+        </div>
+      </div>
+    </div>
+
+    <!--直属法人组织选择弹窗-->
+    <div class="mask directlyorg">
+      <div class="mask-info" style="max-height: 702px;">
+        <div class="mask-header row w">
+          <div class="col v-m"><h2>请选择直属法人组织</h2></div>
+          <div class="col v-m t-r"><a href="javascript:void(0);" @click="closeDirectlyOrg" class="mask-close"><img src="../../assets/img/close.png" alt=""></a></div>
+        </div>
+        <div class="vote-form" style="padding:25px 0;">
+          <span>组织名称：</span>
+          <input type="text" class="input" style="width:220px;margin: 0px 20px 0px 0px;" v-model="searchOrgName1" maxlength="30" placeholder="请输入组织名称">
+          <span>组织联络编号：</span>
+          <input type="text" class="input" style="width:190px;margin: 0px 20px 0px 0px;" v-model="searchOrgID1" maxlength="30" placeholder="请输入组织联络编号">
+          <a href="javascript:void(0);" class="button button-large"  @click="searchGroup1">查找</a>
+        </div>
+        <div class="tabbar-down">
+          <!-- 组织信息 -->
+          <table class="user-table" >
+            <colgroup>
+              <col width="10%">
+              <col width="30%">
+              <col width="45%">
+              <col width="15%">
+            </colgroup>
+            <tr>
+              <th>序号</th>
+              <th>组织联络编号</th>
+              <th>组织名称</th>
+              <th>操作</th>
+            </tr>
+            <tr v-if="tolPage1==0 && (searchOrgName1 || searchOrgID1) && querystatus!=1">
+              <td colspan="4"> 
+                <img src="@/assets/img/loader.png" style="margin-right: 5px;"/><span style="font-size:16px;color:#666666;vertical-align: middle;">加载中...</span>
+              </td>
+            </tr>
+            <tr v-if="tolPage1==0 && querystatus==1">
+              <td colspan="4"> 
+                <img src="@/assets/img/js-wujilu.png"/>
+              </td>
+            </tr>
+            <tr v-for="(el,index) in directlyOrgList" :key="index">
+              <td class="left">{{index+1}}</td>
+              <td class="left">{{el.albe0041}}</td>
+              <td class="left">{{el.albe0002}}</td>
+              <td class="left">
+                <em  @click="toGroupInfo(el.id,el.albe0012)" class="pointer" style="margin-right: 10px;">查看</em>
+                <em  @click="chooseOrg1(el.id,el.albe0002,el.albe0005)" class="pointer">选择</em>
+              </td>
+            </tr>
+          </table>
+          <paging :pageCount="tolPage1"
+                  :rangePage="pageSize1"
+                  :initPage="pageNow1"
+                  :totals="tolCount1"
+                  :val="jumpPage1"
+                  @pageEvent="pageEvent1">
+          </paging>
+        </div>
+      </div>
+    </div>
+
+     <!--图片预览窗口-->
+    <div class="mask showimg">
+      <div class="mask-info">
+        <div class="mask-header row w">
+          <div class="col v-m"><h2>查看文件</h2></div>
+          <div class="col v-m t-r"><a href="javascript:void(0);" @click="closeImg" class="mask-close"><img src="../../assets/img/close.png" alt=""></a></div>
+        </div>
+        <div style="text-align:center;">
+          <div id="filesrc"></div>
+        </div>
+      </div>
+    </div>
+
+   <!--手持证件照片预览窗口-->
+    <div class="mask holdIdCard">
+      <div class="mask-info">
+        <div class="mask-header row w">
+          <div class="col v-m"><h2>示例图片</h2></div>
+          <div class="col v-m t-r"><a href="javascript:void(0);" @click="closeImg" class="mask-close"><img src="../../assets/img/close.png" alt=""></a></div>
+        </div>
+        <div style="text-align:center;margin-top: 30px;">
+          <div><img src="../../assets/img/holdidcard.jpg" alt=""></div>
+        </div>
+      </div>
+    </div>
+
+    
+
+    <!--登记机关选择弹窗-->
+    <div class="mask loginorg">
+      <div class="mask-info">
+        <div class="mask-header row w">
+          <div class="col v-m"><h2>请选择登记机关</h2></div>
+          <div class="col v-m t-r"><a href="javascript:void(0);" @click="closeLoginOrg" class="mask-close"><img src="../../assets/img/close.png" alt=""></a></div>
+        </div>
+        <register-org ref="registerOrg"></register-org>
+      </div>
+    </div>
+
+    <!--区域选择弹窗-->
+    <div class="mask area">
+      <div class="mask-info">
+        <div class="mask-header row w">
+          <div class="col v-m"><h2>请选择区域</h2></div>
+          <div class="col v-m t-r"><a href="javascript:void(0);" @click="closeArea" class="mask-close"><img src="../../assets/img/close.png" alt=""></a></div>
+        </div>
+        <areaDialog ref="areaDialog"></areaDialog>
+      </div>
+    </div>
+
+    <!-- 地图 -->
+    <div class="mask map">
+      <div class="mask-info" style="max-height: 659px;">
+        <div class="mask-header row w">
+          <div class="col v-m"><h2>地图定位</h2></div>
+          <div class="col v-m t-r"><a href="javascript:void(0);" @click="closeMap" class="mask-close"><img src="../../assets/img/close.png" alt=""></a></div>
+        </div>
+      <div style="margin:10px;">
+          <input type="text" class="input" style="width:300px;" placeholder="请输入详细地址或点击地图选中" id="mapValue">
+          <a href="javascript:void(0);" id="searchAddress" class="button">搜索</a>
+          <div id="searchResultPanel" style="border:1px solid #C0C0C0;width:150px;height:auto; display:none;"></div>
+      </div>
+        <div>
+          <div id="map" style="height:450px"></div>
+        </div>
+        <div style="text-align:center;margin:0 auto;">
+          <a href="javascript:void(0);" @click="saveAddress" class="button button-line">设置完成</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</template>
+
+<script>
+  const AreaDialog =()=>import('@/view/home/area.vue');//区域弹出层
+  const paging =()=>import('@/components/page/paginationRed.vue');//分页
+  const RegisterOrg =()=>import('@/view/home/registerorg.vue');//登记机关弹出层
+
+  export default {
+    name: 'orgreg',
+    components : {
+      AreaDialog,
+      paging,
+      RegisterOrg
+    },
+    data(){
+      return {
+        context:this.common.getUrl(),
+        routeDefine: this.$route.params.define,
+        areaid:'',
+        areaName:'',
+        newUserInfo:{},//注册信息
+        nowIndex:'0',//当前步数
+        usernameFlag:false,//用户名校验
+        code:'',//手机验证码
+        imgcode:'',//图文验证吗
+        file1:'',//上传图片1
+        file2:'',//上传图片2
+        photo1:'',//上传图片返回值1
+        photo2:'',//上传图片返回值2
+        albe0047:'1',
+        albe0048:'1',
+        albe0057:'', //同意其成立的单位（社区）名称
+        imgCodeFlag:false,//图文验证码校验
+        status:0,//聚焦状态
+        countdown:60,//倒计时
+        codeButton:"获取验证码",
+        detailAddress:'',//详细地址
+        isSelected:false,//是否通过地图选择地址
+        mapInfo:'',//地图上选择的地址
+        lng:'',//经度
+        lat:'',//纬度
+        allLng:'',
+        allLat:'',
+        orgAreaName:'',//服务区域
+        tip:'',//提示
+        type:'',//类型
+        albe0015:'',//成立日期
+        loginType:'1',//登记类型
+        isLink:'0',//是否联络团体
+        isDirectly:'1',//是否法人组织直属队
+        aHide:'display:none',
+        codeHide:'display:none',
+        loginDepart:'民政部门',//登记部门
+        loginDepartList:[],
+        orgTypeList:[],//团体类型列表   志愿服务组织:zzlist、其他组织类型:qtzzList、服务团体:nomalList
+        orgTypes:[],
+        orgType:'0',
+        serviceTypeList:[],//服务类型
+        serviceType:[],
+        industryList:[],//所属行业
+        industry:[],
+        orgGiveList:[],//团体提供
+        orgGive:[],
+        orgNeedList:[],//团体需要
+        orgNeed:[],
+        isOk:false,//是否同意
+        groupNameFlag:false,//团体名校验
+        linkOrgList:[],//联络团体
+        directlyOrgList:[],//直属法人组织
+        searchOrgName:'',//查询团体名
+        searchOrgID:'',//查询团体id
+        searchOrgName1:'',//查询法人组织名
+        searchOrgID1:'',//查询法人组织id
+        linkOrgName:'',//选中的联络团体名
+        directlyOrgName:'',//选中的直属法人组织名
+        loginOrgList:[],//登记机关
+        subGroup:[],//次级团体
+        firstLoginOrgName:'',
+        registerOrgName:'',
+        registerOrgId:'',
+        tolCount:0,//总条数
+        tolPage:0,//总页数
+        pageSize:5,//每页条数
+        pageNow:1,//当前页
+        jumpPage:1,
+        tolCount1:0,//总条数
+        tolPage1:0,//总页数
+        pageSize1:5,//每页条数
+        pageNow1:1,//当前页
+        jumpPage1:1,
+        mapValue:"",
+        imgkey:'',//图文验证码的key
+        //文件
+        filesrc:"",
+        filesrc1:"",
+        lang :{//配置日期语音环境
+          formatLocale :{
+            firstDayOfWeek :1,
+          },
+          monthBeforeYear :false ,
+        },
+        isClick:true,//注册按钮状态，是否点击
+        timer:'',//时间
+        querystatus:0,//直属组织列表|| 联络组织列表 查询状态  0=未查询   1=已查询
+      };
+    },
+    beforeCreate(){
+
+    },
+    created() {
+      window.Vues = this;//主体vue实例挂载
+      this.getAreaInfo();
+      this.utilscommit.request('nvsi_listServiceValues',{'tableName':'nvsi_albe0005'},this.orgTypeInfo);
+      this.utilscommit.request('nvsi_getCodeValues',{'codename':'nvsi_albe0006'},this.loginDepartInfo);
+      this.utilscommit.request('nvsi_listIndustryType',null,this.industryInfo);//所属行业
+      this.utilscommit.request('nvsi_getCodeValues',{'codename':'nvsi_albe0042'},this.orgGiveInfo);
+      this.utilscommit.request('nvsi_getCodeValues',{'codename':'nvsi_albe0043'},this.orgNeedInfo);
+    },
+    mounted() {
+      this.changeImgCode();
+    },
+    methods:{
+      getAreaInfo:function () {
+        var areaInfo = this.$store.getters.getArea;
+        if(areaInfo && areaInfo.enname && areaInfo.enname==this.routeDefine){
+          this.areaid = areaInfo.areaid;
+          this.areaName=areaInfo.cnname;
+          this.utilscommit.request('nvsi_listServiceType',{'areaid':this.areaid},this.serviceTypeInfo);//服务类型
+        }
+      },
+      gotoStep:function (step) {
+        if (step < 6) {
+          $('.flow li').each(function (idx, el) {
+            if(Vues.nowIndex >= 0) {
+              $(el).removeClass('active');
+              if(idx == step){
+                $(el).addClass('active');
+                Vues.nowIndex = step;
+              }
+              $('.tabbar-down').eq(step).show().siblings('.tabbar-down').hide();
+            }
+          });
+        } else {
+          this.$swal('注册完成',{buttons: "确定"});
+        }
+      },
+      firstCheck:function () {//账户信息校验
+        this.status = 1;
+        if (!this.usernameFlag) {
+          this.usernameCheck();
+        } else if (this.passwordCheck() && this.repeatPWCheck()) {
+          this.gotoStep(1);
+        }
+        //this.gotoStep(1);
+      },
+      secondCheck:function () {//基本信息校验
+        this.status = 1;
+          if (!this.groupNameFlag) {
+            this.groupNameCheck();
+           return;
+         }
+        if (this.detailedAddressCheck() && this.orgAreaCheck() && this.volNumCheck() && this.orgunitChange() && this.orgTypeCheck()
+          && this.linkOrgCheck() && this.directlyOrgCheck() && this.loginOrgCheck() && this.tyCodeCheck() && this.forUnitNameCheck()
+          && this.forUnitCodeCheck() && this.forUnitLinkNameCheck() && this.forUnitLinkPhoneCheck() && this.forUnitAgreeCheck()
+          && this.serviceTypeCheck() ) {
+            if(this.loginType=="2" || this.loginType=="3"){
+              $('#filetitle1').html("统一社会信用代码证：");
+              $('#file1Tips').html("请上传统一社会信用代码证");
+              $('#zjphoto2').hide();
+             /*  $('#filetitle2').html("有效的队伍印章：");
+              $('#file2Tips').html("请上传有效的队伍印章"); */
+              $('#downfile').hide();
+            }else{
+              $('#downfile').show();
+              $('#filetitle1').html("注册申请表扫描件：");
+              $('#file1Tips').html("请上传注册申请表扫描件");
+              $('#filetitle2').html("负责人手持身份证照：");
+              $('#file2Tips').html("请上传负责人手持身份证照");
+            }
+          this.gotoStep(2);
+        }
+        //this.gotoStep(2);
+      },
+      thirdCheck:function () {//登记信息校验
+        this.status = 1;
+        if (this.file1Check() && this.file2Check()) {
+          this.gotoStep(3);
+        }
+        //this.gotoStep(3);
+      },
+      forthCheck:function () {//联系人信息校验
+        this.status = 1;
+        if (this.linkNameCheck() && this.linkPhoneCheck() && this.linkTelPhoneCheck()  && this.linkEmailCheck()  && this.linkQQCheck()) {
+          this.gotoStep(4);
+        }
+        //this.gotoStep(4);
+      },
+      fifthCheck:function () {//负责人信息校验
+          this.status = 1;
+          if (this.mainNameCheck() && this.mainCardCheck() && this.mainPhoneCheck() && this.imgCodeFlag && this.codeCheck() && this.file1 && this.isClick) {
+                let param = new FormData(); //创建form对象
+              //let files1 = new window.File([this.file1], this.file1.name, {type: this.file1.type});
+              //let files2 = new window.File([this.file2], this.file2.name, {type: this.file2.type});
+              //param.append('file1',files1);//统一社会信用代码证
+              //param.append('file2',files2);//队伍印章
+              param.append('file1', this.file1, this.file1.name);//统一社会信用代码证
+              if(this.file2)param.append('file2', this.file2, this.file2.name);//队伍印章
+              param.append('code',this.code);//手机验证码
+              param.append('areaid',this.areaid);//站点区域id
+              param.append('userinfo',JSON.stringify({//账户信息
+                                        albp0052:this.newUserInfo.albp0052,//用户名
+                                        albp0053:this.newUserInfo.albp0053,//密码
+                                        albp0056:"3",//用户类型
+                                        albp0058:"1",//是否有效
+                                      }));
+              param.append('orginfo',JSON.stringify({//团体信息
+                                      albe0002:this.newUserInfo.albe0002,//团体名
+                                      albe0003:this.loginType,//团体类型
+                                      albe0004:this.newUserInfo.albe0004,//联络团体
+                                      albe0005:this.orgType,//团体类型
+                                      albe0006:this.newUserInfo.albe0006,//登记部门
+                                      albe0007:this.registerOrgName,//登记机关
+                                      albe0008:this.newUserInfo.albe0008,//统一社会信用代码
+                                      albe0009:this.registerOrgId,//登记机关区域id
+                                      //albe0010:'',//团体编号
+                                      albe0011:this.newUserInfo.albe0011,//单位名称
+                                      albe0012:this.newUserInfo.albe0012,//服务区域
+                                      albe0013:this.detailAddress,//详细地址
+                                      //albe0014:'',//邮编
+                                      albe0015:this.albe0015,//成立日期
+                                      albe0016:this.newUserInfo.albe0016,//规模人数
+                                      albe0017:this.serviceType.join(','),//服务类别
+                                      albe0018:this.newUserInfo.albe0018,//联系人
+                                      albe0019:this.newUserInfo.albe0019,//联系人手机
+                                      albe0020:this.newUserInfo.albe0020,//联系人电话
+                                      albe0021:this.newUserInfo.albe0021,//联系人QQ
+                                      albe0022:this.newUserInfo.albe0022,//负责人
+                                      albe0023:this.newUserInfo.albe0023,//负责人身份证
+                                      albe0024:this.newUserInfo.albe0024,//负责人手机
+                                      //albe0025:''this.newUserInfo.'',//团体头像
+                                      albe0026:'2',//团体状态
+                                      albe0027:'0',//团体是否公开
+                                      albe0028:'1',//成员加入方式
+                                      //albe0029:'',//免审密码
+                                    //albe0030:'',//用户名优先列
+                                      //albe0031:'',//是否有下级团体权限
+                                      //albe0032:this.newUserInfo.albe0032,//团体简介
+                                      //albe0033:'',//
+                                      //albe0034:'',//
+                                      //albe0035:'',//
+                                      albe0036:'0',//是否推荐
+                                      //albe0037:'',//账户id
+                                      //albe0038:'',//服务区域名
+                                      albe0039:this.newUserInfo.albe0039,//微博
+                                      albe0040:this.newUserInfo.albe0040,//网址
+                                      //albe0041:'',//团体联络编号
+                                      albe0042:this.orgGive.join(','),//团体提供
+                                      albe0043:this.orgNeed.join(','),//团体需要
+                                      albe0044:this.photo1,//注册申请表扫描件
+                                      albe0045:this.photo2,//负责人手持身份证照
+                                      //albe0046:,//注册日期
+                                      albe0047:this.albe0047,//联系人手机是否公开
+                                      albe0048:this.albe0048,//联系人座机是否公开
+                                      albe0049:this.newUserInfo.albe0049,//联系人邮箱
+                                      albe0050:this.lng,//经度
+                                      albe0051:this.lat,//纬度
+                                      //albe0052:'',//管理单位id
+                                      //albe0053:'',//是否为管理单位
+                                      albe0054:'1',//是否提交审核
+                                      //albe0055:'',//服务类别是否属于全国其他
+                                      //albe0056:'',//团体正式成员数
+                                      albe0057:this.albe0057,//同意成立的单位
+                                      albe0058:this.newUserInfo.albe0058,//同意成立单位联系人
+                                      albe0059:this.newUserInfo.albe0059,//同意成立单位联系电话
+                                      //albe0060:'',//未发布项目提醒日期
+                                      albe0061:this.newUserInfo.albe0061,//同意成立单位统一社会信用代码
+                                      //albe0062:'',//其他服务类型
+                                      albe0063:this.isLink,//是否有联络团体
+                                      //albe0064:'',//岗位权限变更时间
+                                      albe0065:this.isDirectly,//是否直属法人组织
+                                      albe0066:this.newUserInfo.albe0066,//直属上级法人组织
+                                      albe2203:this.industry//所属行业
+                                      }));
+              this.isClick=false;
+              $("#register").css({"background":"gray","opacity":"1"})//修改注册按钮状态
+              this.utilscommit.orgRegister(param,this.areaid,this.regCommitBack);
+            /* if (this.file1 && this.file2) {
+              let param = new FormData(); //创建form对象
+              let files = new window.File([this.file1], this.file1.name, {type: this.file1.type});
+              param.append('file',files);
+              this.utilscommit.uploadImg(param,this.areaid,this.uploadImgResult1);
+            }
+            if (this.file2) {
+              let param = new FormData(); //创建form对象
+              let files = new window.File([this.file2], this.file2.name, {type: this.file2.type});
+              param.append('file',files);
+              this.utilscommit.uploadImg(param,this.areaid,this.uploadImgResult2);
+            } */
+          }
+      },
+      /*uploadImgBack:function(result){//多张图片上传成功
+        if(result){
+          if(result!="-1" && result.file1 && result.file2){
+            this.photo1=JSON.stringify(result.file1);
+            this.photo2=JSON.stringify(result.file2);
+            this.regCommit();
+          }else{
+            this.$swal({title: '文件上传失败',confirmButtonText: '确定'});
+          }
+        }
+      },
+       uploadImgResult1:function (result) {//第一张图片上传结果
+        this.photo1 =JSON.stringify(result);
+        if (this.photo1 && this.photo2) {
+          this.regCommit();
+        }
+      },
+      uploadImgResult2:function (result) {//第二张图片上传结果
+        this.photo2 =JSON.stringify(result);
+        if (this.photo1 && this.photo2) {
+          this.regCommit();
+        }
+      }, */
+      orgTypeInfo:function(data){
+        this.orgTypeList =data.data;
+        this.orgTypes=this.orgTypeList.nomallist;
+      },
+      loginDepartInfo:function(result){
+        this.loginDepartList = this.common.orderBy(result.data,'codeid','asc');
+      },
+      orgGiveInfo:function(result){
+        this.orgGiveList = this.common.orderBy(result.data,'codeid','asc');
+      },
+      orgNeedInfo:function(result){
+        this.orgNeedList = this.common.orderBy(result.data,'codeid','asc');
+      },
+      serviceTypeInfo:function(result){//服务类型
+        if (result && result.data) {
+          this.serviceTypeList = result.data;
+        }
+      },
+      industryInfo:function(result){//所属行业
+        if (result && result.data) {
+          this.industryList = result.data;
+        }
+      },
+      groupNameCheck:function () {
+        this.groupNameFlag = false;
+        var el = $('#groupName');
+        var val = el.val();
+        this.tip='';
+        if (!val) {
+          this.tip='团体名称不能为空';
+          if(this.loginType=="2" || this.loginType=="3"){
+            this.tip='组织名称不能为空';
+          }
+          if(this.status==1){
+            el.focus();
+            this.status=0;
+          }
+          this.formTip("groupName",this.tip);
+        }else {
+          this.utilscommit.request('nvsi_getGroupNameCheck',{"groupname":val},this.groupNameCheckBack);
+        }
+      },
+      groupNameCheckBack: function (result) {
+        if (result) {
+          if (result.data) {
+            this.groupNameFlag = true;
+          } else {
+            this.tip = result.message;
+          }
+        }
+        if(this.status==1){
+          $('#groupName').focus();
+          this.status = 0;
+        }
+        this.formTip("groupName",this.tip);
+      },
+      detailedAddressCheck:function () {
+        var val = this.detailAddress;
+        var tip='';
+        var flag = true;
+        if(!val) {
+          tip='详细地址不能为空';
+          flag = false;
+        }/* else{
+          this.utilscommit.request('nvsi_getAreaInMap',{location:this.detailAddress},function (result) {
+              if (!result && !result.data && !result.data.location) {
+                tip='详细地址有误，请重新填写或者在地图上标记！';
+                flag = false;
+              }
+            });
+        } */
+        if (!flag && this.status == 1){
+          $('#detailAddress').focus();
+          this.status = 0;
+        }
+        this.formTip("detailAddress",tip);
+        return flag;
+      },
+      orgAreaCheck:function(){
+        var val = this.orgAreaName;
+        var tip='';
+        var flag = true;
+        if(!val) {
+          tip='区域不能为空';
+          flag = false;
+        }
+        if (!flag && this.status == 1){
+          $('#orgArea').focus();
+          this.status = 0;
+        }
+        this.formTip("orgArea",tip);
+        return flag;
+      },
+      volNumCheck:function(){
+        var el = $('#volNum');
+        var val = el.val();
+        var tip='';
+        var flag = true;
+        if(!val) {
+          tip='请填写志愿者人数';
+          flag = false;
+        }
+        if (!flag && this.status == 1){
+          el.focus();
+          this.status = 0;
+        }
+        this.formTip("volNum",tip);
+        return flag;
+      },
+      orgunitChange:function(){
+         if(this.isLink==0){
+          this.albe0057=this.newUserInfo.albe0011;
+        } 
+        var el = $('#orgUnit');
+        var val = el.val();
+        var tip='';
+        var flag = true;
+        if(!val) {
+          if(this.loginType=="1"){
+            tip='同意其成立的单位（社区）名称不能为空';
+          }else if(this.loginType=="2"){
+            tip='主管单位名称不能为空';
+          }
+          flag = false;
+        }
+        if (!flag && this.status == 1){
+          el.focus();
+          this.status = 0;
+        }
+        this.formTip("orgUnit",tip);
+        return flag;
+      },
+      orgTypeCheck:function(){
+        var el = $('#orgType');
+        var val = this.orgType;
+        var tip='';
+        var flag = true;
+        if(this.isDirectly == "0" && val==0) {
+          if(this.loginType=="1"){
+            tip='同意其成立的单位（社区）类型不能为空';
+          }else if(this.loginType=="2" || this.loginType=="3"){
+            tip='组织类型不能为空';
+          }
+          flag = false;
+        }
+        if (!flag && this.status == 1){
+          el.focus();
+          this.status = 0;
+        }
+        this.formTip("orgType",tip);
+        return flag;
+      },
+      linkOrgCheck:function(){
+        var val = this.linkOrgName;
+        var tip='';
+        var flag = true;
+        if(this.isDirectly == "0" && this.loginType == 1 && this.isLink==1 && !val) {
+          tip='请选择联络团体';
+          flag = false;
+        }
+        if (!flag && this.status == 1){
+          $('#linkOrg').focus();
+          this.status = 0;
+        }
+        this.formTip("linkOrg",tip);
+        return flag;
+      },
+      directlyOrgCheck:function(){
+        var val = this.directlyOrgName;
+        var tip='';
+        var flag = true;
+        if(this.isDirectly==0 &&this.loginType == 1 && this.isDirectly=="1" && !val) {
+          tip='请选择直属法人组织';
+          flag = false;
+        }
+        if (!flag && this.status == 1){
+          $('#directlyOrg').focus();
+          this.status = 0;
+        }
+        this.formTip("directlyOrg",tip);
+        return flag;
+      },
+      loginDepartCheck:function(){
+        var val = this.loginDepart;
+        var tip='';
+        var flag = true;
+        if(this.loginType == 2 && val==0) {
+          tip='请选择登记部门';
+          flag = false;
+        }
+        if (!flag && this.status == 1){
+          $('#loginDepart').focus();
+          this.status = 0;
+        }
+        this.formTip("loginDepart",tip);
+        return flag;
+      },
+      loginOrgCheck:function(){
+        var val = this.registerOrgName;
+        var tip='';
+        var flag = true;
+        if(this.loginType == 2 && !val) {
+          tip='请选择登记机关';
+          flag = false;
+        }
+        if (!flag && this.status == 1){
+          $('#loginOrg').focus();
+          this.status = 0;
+        }
+        this.formTip("loginOrg",tip);
+        return flag;
+      },
+      tyCodeCheck:function(){
+        var el = $('#tyCode');
+        var val = el.val();
+        var tip='';
+        var flag = true;
+        if(this.loginType == 2 && !val) {
+          tip='统一社会信用代码不能为空';
+          flag = false;
+        }
+        if (!flag && this.status == 1){
+          el.focus();
+          this.status = 0;
+        }
+        this.formTip("tyCode",tip);
+        return flag;
+      },
+      forUnitNameCheck:function(){
+        var el = $('#unitName');
+        var val = el.val();
+        var tip='';
+        var flag = true;
+        if(this.isDirectly == "0" && this.isLink == 0 && this.loginType == 1 && !val) {
+          tip='同意其成立的单位（社区）名称不能为空';
+          flag = false;
+        }
+        if (!flag && this.status == 1){
+          el.focus();
+          this.status = 0;
+        }
+        this.formTip("unitName",tip);
+        return flag;
+      },
+      forUnitCodeCheck:function(){
+        var el = $('#unitCode');
+        var val = el.val();
+        var tip='';
+        var flag = true;
+        if(this.loginType == 1 && this.isLink == 0 &&this.loginType != 1 && !val) {//loginType   登记类型为
+          tip='同意其成立的单位（社区）统一社会性用代码不能为空';
+          flag = false;
+        }
+        if (!flag && this.status == 1){
+          el.focus();
+          this.status = 0;
+        }
+        this.formTip("unitCode",tip);
+        return flag;
+      },
+      forUnitLinkNameCheck:function(){
+        var el = $('#unitLink');
+        var val = el.val();
+        var tip='';
+        var flag = true;
+        if(this.isDirectly==0 &&this.isLink==0 && this.loginType == 1 && !this.newUserInfo.albe0058) {
+          tip='同意其成立的单位（社区）联系人名称不能为空';
+          flag = false;
+        }
+        if (!flag && this.status == 1){
+          el.focus();
+          this.status = 0;
+        }
+        this.formTip("unitLink",tip);
+        return flag;
+      },
+      forUnitLinkPhoneCheck:function(){
+        var el = $('#unitPhone');
+        var val = el.val();
+        var tip='';
+        var flag = true;
+        if(this.isDirectly==0 &&this.isLink == 0 && this.loginType == 1 && !val) {
+          tip='同意其成立的单位（社区）联系人电话不能为空';
+          flag = false;
+        }
+        if (!flag && this.status == 1){
+          el.focus();
+          this.status = 0;
+        }
+        this.formTip("unitPhone",tip);
+        return flag;
+      },
+      forUnitAgreeCheck:function(){
+        var el = $('#agree');
+        var val = this.isOk;
+        var tip='';
+        var flag = true;
+        if(this.isDirectly==0 && this.isLink == 0 && this.loginType == 1 && !val) {
+          tip='请同意以上协议';
+          flag = false;
+        }
+        if (!flag && this.status == 1){
+          el.focus();
+          this.status = 0;
+        }
+        this.formTip("agree",tip);
+        return flag;
+      },
+      serviceTypeCheck:function () {//服务类型
+        var tip = '';
+        var flag = true;
+        if (this.serviceType.length > 0) {
+          var sList = [];
+          var array = [];
+          for (let i = 0; i < this.serviceTypeList.length; i++) {
+            sList.push(this.serviceTypeList[i].albe0123);
+          }
+          for (let i = 0; i < this.serviceType.length; i++) {
+            if (sList.indexOf(this.serviceType[i]) > -1) {
+              array.push(this.serviceType[i]);
+            }
+          }
+          this.serviceType = array;
+          if (array.length > 4) {
+            tip = '服务类别最多选择四项';
+            flag = false;
+          }
+        }else{
+          tip = '请选择服务类别！';
+          flag = false;
+        }
+        this.formTip('serviceType',tip);
+        return flag;
+      },
+      industryCheck:function () {//所属行业
+        var tip = '';
+        var flag = true;
+        if (this.industry.length > 0) {
+          var sList = [];
+          var array = [];
+          for (let i = 0; i < this.industryList.length; i++) {
+            sList.push(this.industryList[i].albe2203);
+          }
+          for (let i = 0; i < this.industry.length; i++) {
+            if (sList.indexOf(this.industry[i]) > -1) {
+              array.push(this.industry[i]);
+            }
+          }
+          this.industry = array;
+        }else{
+          tip = '请选择所属行业！';
+          flag = false;
+        }
+        this.formTip('industry',tip);
+        return flag;
+      },
+      showLoginOrg:function () {
+        $('#preButton1').css('display','none');
+        $('.category__content').css('display','none');
+        $('#first1').css('display','');
+        $('.mask.loginorg').addClass('active');
+        this.$refs.registerOrg.preAreaId = '';
+        this.$refs.registerOrg.preName = '';
+        this.$refs.registerOrg.listArea(this.areaid,0);
+      },
+      closeLoginOrg:function () {
+        $('.mask.loginorg').removeClass('active');
+        $('#first1').css('display','');
+        $('.category__item').removeClass('active');
+        this.$refs.registerOrg.chooseArea = '';
+        this.$refs.registerOrg.preAreaId = '';
+        this.$refs.registerOrg.preName = '';
+      },
+      closeImg:function () {
+        $('.mask.showimg').removeClass('active');
+        $('.mask.holdIdCard').removeClass('active');
+      },
+      showimg1:function () {
+        if(!this.filesrc){
+            this.$swal("请先上传文件",{buttons: "确定"});
+            return false;
+        }
+        $("#filesrc").html(this.filesrc);
+        $('.mask.showimg').addClass('active');
+      },
+      showimg2:function () {
+        if(!this.filesrc1){
+            this.$swal("请先上传文件",{buttons: "确定"});
+            return false;
+        }
+        $("#filesrc").html(this.filesrc1);
+        $('.mask.showimg').addClass('active');
+      },
+      showHoldIdCard:function () {
+        $('.mask.holdIdCard').addClass('active');
+      },
+      downfile:function () {
+        var href = window.location.href;
+        var pos = href.indexOf("N");
+        var localhostPath = href.substring(0,pos);
+        //志愿服务团队账号申请表
+        var url = localhostPath+"NVSI/LEAP/NVSIModule/NVSIResource/Templet/VolunteerTeamApplication.doc";
+         window.open(url);
+      },
+      registerOrg:function (areaid,areaname) {
+        if (areaid && areaname) {
+          this.registerOrgName = areaname;
+          this.registerOrgId = areaid;
+        }else{
+          this.registerOrgName =this.areaName;
+          this.registerOrgId = this.areaid;
+          this.loginOrgCheck();
+        }
+      },
+      searchGroup:function () {
+        this.showLinkOrg();
+      },
+      searchGroup1:function () {
+        this.showDirectlyOrg();
+      },
+      showLinkOrg:function () {
+        $('.mask.linkorg').addClass('active');//nvsi_listLinkOrg
+        this.linkOrgList = {};
+        this.tolCount = 0;
+        this.tolPage = 0;
+        this.querystatus=0;
+        this.utilscommit.request('nvsi_listDirectlyOrg',{areaid:this.areaid,orgname:this.searchOrgName,orgID:this.searchOrgID,pageSize:this.pageSize,pageNow:this.pageNow},this.linkOrgInfo);
+      },
+      showDirectlyOrg:function () {
+        $('.mask.directlyorg').addClass('active');
+        this.directlyOrgList = {};
+        this.querystatus=0;
+        this.tolCount1 = 0;
+        this.tolPage1 = 0;
+        this.utilscommit.request('nvsi_listDirectlyOrg',{orgname:this.searchOrgName1,orgID:this.searchOrgID1,pageSize:this.pageSize1,pageNow:this.pageNow1},this.directlyOrgInfo);
+      },
+      linkOrgInfo:function(result){
+        this.querystatus=1;
+        if(result && result.data) {
+          this.linkOrgList = result.data;
+          this.tolCount = result.datacount;
+          this.tolPage =result.pagecount;// Math.ceil(result.result.count / this.pageSize);
+        } else {
+          this.linkOrgList = {};
+          this.tolCount = 0;
+          this.tolPage = 0;
+        }
+      },
+      directlyOrgInfo:function(result){
+        this.querystatus=1;
+        if(result && result.data) {
+          this.directlyOrgList =result.data;// result.result.result;
+          this.tolCount1 = result.datacount;//result.result.count;
+          this.tolPage1 = result.pagecount;//Math.ceil(result.result.count / this.pageSize1);
+        } else {
+          this.directlyOrgList = {};
+          this.tolCount1 = 0;
+          this.tolPage1 = 0;
+        }
+      },
+      chooseOrg:function (id,name) {
+        this.linkOrgName = name;
+        this.newUserInfo.albe0004=id;
+        this.newUserInfo.albe0066=null;
+        //console.log("法人组织信息",this.newUserInfo.albe0004)
+        this.closeLinkOrg();
+        this.linkOrgCheck();
+      },
+      chooseOrg1:function (id,name,type) {
+        this.directlyOrgName = name;
+        this.newUserInfo.albe0066=id;
+        this.newUserInfo.albe0004=null;
+        this.orgType=type;
+        this.closeDirectlyOrg();
+        this.directlyOrgCheck();
+      },
+      closeLinkOrg:function () {
+        $('.mask.linkorg').removeClass('active');
+        this.searchOrgID = '';
+        this.searchOrgName = '';
+      },
+      closeDirectlyOrg:function () {
+        $('.mask.directlyorg').removeClass('active');
+        this.searchOrgID1 = '';
+        this.searchOrgName1 = '';
+      },
+      pageEvent:function(e){//分页
+        if(e>this.tolPage){
+          this.pageNow=this.tolPage;
+        }else if(e<1){
+          this.pageNow=1;
+        }else{
+          this.pageNow=e;
+        }
+        this.showLinkOrg();
+      },
+      pageEvent1:function(e){//分页
+        if(e>this.tolPage1){
+          this.pageNow1=this.tolPage1;
+        }else if(e<1){
+          this.pageNow1=1;
+        }else{
+          this.pageNow1=e;
+        }
+        this.showDirectlyOrg();
+      },
+      formTip:function (el,tip) {
+        $('#' + el + 'Tips').html(tip).css("color", "red");
+      },
+      usernameCheck:function () {
+        this.usernameFlag = false;
+        var el = $('#username');
+        var val = el.val();
+        this.tip='';
+        this.type = 1;
+        if (!this.common.checkUsername(val)) {
+          this.tip='用户名长度6～20个字符，以字母a～z（不区分大小写）开头，且只能由字母、数字0～9和下划线组成';
+          this.type = 2;
+          if(this.status==1){
+            el.focus();
+            this.status=0;
+          }
+          this.formTip2("username",this.tip,this.type);
+        }else {
+          this.utilscommit.request('nvsi_getUserNameCheck',{"username":val},this.usernameBack);
+        }
+      },
+      usernameBack:function (result) {
+        if (result) {
+          if (result.data == 0) {
+            $('#usernameTips').css('margin-top','10px');
+            this.usernameFlag = true;
+          } else {
+            this.type = 2;
+            this.tip = result.message;
+            $('#usernameTips').css('margin-top','10px');
+          }
+        }
+        if(this.status==1){
+          $('#username').focus();
+          this.status = 0;
+        }
+        this.formTip2("username",this.tip,this.type);
+      },
+      usernameTip:function () {
+        var tip='用户名长度6～20个字符，以字母a～z（不区分大小写）开头，且只能由字母、数字0～9和下划线组成';
+        $('#usernameTips').css('margin-top','0');
+        this.formTip2("username",tip,3);
+      },
+      passwordCheck:function () {
+        var el = $('#password');
+        var val = el.val();
+        var tip='';
+        var flag = true;
+        var type = 1;
+        if (!this.common.checkPW(val)) {
+          tip='密码长度为8-20个字符，且必须同时包含数字、大写字母和小写字母';
+          flag = false;
+          type = 2;
+        }
+        if(!flag&&this.status==1){
+          el.focus();
+          this.status = 0;
+        }
+        this.formTip2("password",tip,type);
+        return flag;
+      },
+      passwordTip:function () {
+        var tip = "密码长度为8-20个字符，且必须同时包含数字、大写字母和小写字母";
+        this.formTip2("password",tip,3);
+      },
+      repeatPWCheck:function () {
+        var el = $('#repeatpw');
+        var val = el.val();
+        var tip='';
+        var flag = true;
+        var type = 1;
+        if(!val) {
+          tip='确认密码不能为空';
+          flag = false;
+          type = 2;
+        } else if (val!=$('#password').val()) {
+          tip='两次输入密码不一致';
+          flag = false;
+          type = 2;
+        }
+        if(!flag&&this.status==1){
+          el.focus();
+          this.status = 0;
+        }
+        this.formTip2("repeatpw",tip,type);
+        return flag;
+      },
+      linkNameCheck:function () {
+        var el = $('#linkName');
+        var val = el.val();
+        var tip='';
+        var flag = true;
+        var type = 1;
+        if (!val) {
+          tip='联系人姓名不能为空';
+          flag = false;
+          type = 2;
+        } else if (!this.common.checkName(val)) {
+          tip='请正确填写姓名';
+          flag = false;
+          type = 2;
+        }
+        if (!flag && this.status == 1) {
+          el.focus();
+          this.status = 0;
+        }
+        this.formTip2("linkName",tip,type);
+        return flag;
+      },
+      linkNameTip:function () {
+        var tip = "联系人姓名不能为空";
+        this.formTip2("linkName",tip,3);
+      },
+      linkPhoneCheck:function () {
+        var el = $('#linkPhone');
+        var val = el.val();
+        var tip='';
+        var flag = true;
+        var type = 1;
+        if (!val) {
+          tip='联系人手机不能为空';
+          flag = false;
+          type = 2;
+        } else if (!this.common.checkPhoneno(val)) {
+          tip='请正确填写手机号码';
+          flag = false;
+          type = 2;
+        }
+        if (!flag && this.status == 1) {
+          el.focus();
+          this.status = 0;
+        }
+        this.formTip2("linkPhone",tip,type);
+        return flag;
+      },
+      linkPhoneTip:function () {
+        var tip = "联系人手机不能为空";
+        this.formTip2("linkPhone",tip,3);
+      },
+      linkTelPhoneCheck:function () {
+        var el = $('#linkTelPhone');
+        var val = el.val();
+        var tip='';
+        var flag = true;
+        var type = 1;
+        if (val && !this.common.checkTelPhoneno(val)) {
+          tip='请正确填写电话号码';
+          flag = false;
+          type = 2;
+        }
+        if (!flag && this.status == 1) {
+          el.focus();
+          this.status = 0;
+        }
+        this.formTip2("linkTelPhone",tip,type);
+        return flag;
+      },
+      linkEmailCheck:function () {
+        var el = $('#linkEmail');
+        var val = el.val();
+        var tip='';
+        var flag = true;
+        var type = 1;
+        /* if (!val) {
+          tip='电子邮箱不能为空';
+          flag = false;
+          type = 2;
+        } else  */if (val && !this.common.checkEmail(val)) {
+          tip='请正确填写电子邮箱';
+          flag = false;
+          type = 2;
+        }
+        if (!flag && this.status == 1) {
+          el.focus();
+          this.status = 0;
+        }
+        this.formTip2("linkEmail",tip,type);
+        return flag;
+      },
+      /*linkEmailTip:function () {
+        var tip = "电子邮箱不能为空";
+        this.formTip2("linkEmail",tip,3);
+      },*/
+      linkQQCheck:function () {
+        var el = $('#linkQQ');
+        var val = el.val();
+        var tip='';
+        var flag = true;
+        var type = 1;
+        if (val && !this.common.checkqqphoneno(val)) {
+          tip='请正确填写QQ';
+          flag = false;
+          type = 2;
+        }
+        if (!flag && this.status == 1) {
+          el.focus();
+          this.status = 0;
+        }
+        this.formTip2("linkQQ",tip,type);
+        return flag;
+      },
+      mainNameCheck:function () {
+        var el = $('#mainName');
+        var val = el.val();
+        var tip='';
+        var flag = true;
+        var type = 1;
+        if (!val) {
+          tip='负责人姓名不能为空';
+          flag = false;
+          type = 2;
+        } else if (!this.common.checkName(val)) {
+          tip='请正确填写姓名';
+          flag = false;
+          type = 2;
+        }
+        if (!flag && this.status == 1) {
+          el.focus();
+          this.status = 0;
+        }
+        this.formTip2("mainName",tip,type);
+        return flag;
+      },
+      mainNameTip:function () {
+        var tip = "负责人姓名不能为空";
+        this.formTip2("mainName",tip,3);
+      },
+      mainCardCheck:function () {
+        var el = $('#mainCard');
+        var val = el.val();
+        var tip='';
+        var flag = true;
+        var type = 1;
+        if(!val) {
+          tip='负责人身份证不能为空';
+          flag = false;
+          type = 2;
+        } else if(!this.common.checkCardNo(val)) {
+          tip='请填写正确的身份证号码';
+          flag = false;
+          type = 2;
+        }
+        if(!flag&&this.status==1){
+          el.focus();
+          this.status = 0;
+        }
+        this.formTip2("mainCard",tip,type);
+        return flag;
+      },
+      mainCardTip:function () {
+        var tip = "负责人身份证不能为空";
+        this.formTip2("mainCard",tip,3);
+      },
+      mainPhoneCheck:function () {
+        var el = $('#mainPhone');
+        var val = el.val();
+        var tip='';
+        var flag = true;
+        var type = 1;
+        if (!val) {
+          tip='负责人手机不能为空';
+          flag = false;
+          type = 2;
+        } else if (!this.common.checkPhoneno(val)) {
+          tip='请正确填写手机号码';
+          flag = false;
+          type = 2;
+        }
+        if (!flag && this.status == 1) {
+          el.focus();
+          this.status = 0;
+        }
+        this.formTip2("mainPhone",tip,type);
+        return flag;
+      },
+      mainPhoneTip:function () {
+        var tip = "负责人手机不能为空";
+        this.formTip2("mainPhone",tip,3);
+      },
+      imgCodeCheck:function () {
+        this.tip='';
+        this.type = 1;
+        if(!this.imgcode) {
+          this.tip='图文验证码不能为空';
+          this.type = 2;
+          /* if(this.status==1){
+            el.focus();
+            this.status = 0;
+          } */
+          this.formTip2("imgCode",this.tip,this.type);
+        }else{
+          var code = this.common.trimAll(this.imgcode).toUpperCase();
+          this.utilscommit.request('nvsi_getImgCodeCheck',{"imgcode":code,imgkey:this.imgkey},this.getImgCodeBack);
+        }
+      },
+      codeCheck:function () {
+        var el = $('#code');
+        var val = el.val();
+        var tip='';
+        var flag = true;
+        var type = 1;
+        if(!val) {
+          tip='手机验证码不能为空';
+          flag = false;
+          type = 2;
+        } else if (val.length!=6) {
+          tip='请输入6位手机验证码';
+          flag = false;
+          type = 2;
+        }
+        if(!flag && this.status == 1){
+          el.focus();
+          this.status = 0;
+        }
+        this.formTip2("code",tip,type);
+        return flag;
+      },
+      getCode:function () {
+        this.status = 1;
+        if (this.mainNameCheck() && this.mainCardCheck() && this.mainPhoneCheck() && this.imgCodeFlag) {
+          var code = this.common.trimAll(this.imgcode).toUpperCase();
+          var data = {
+            "name":"NVSI",
+            "phonenum":this.newUserInfo.albe0024,
+            "userflag":"NVSI",
+            "areaid":"0",
+            "imgCode":code,
+            imgkey:this.imgkey
+          };
+          this.utilscommit.request("nvsi_getMobileCode",data,this.getPhoneCodeBack);
+        }
+      },
+      getPhoneCodeBack:function (result) {
+        if(result) {
+          this.setTime();
+        }
+      },
+      setTime:function () {
+        if (this.countdown == 0) {
+          $('#codebutton').removeAttr("disabled");
+          this.codeButton = "获取验证码";
+          this.countdown = 60;
+          return;
+        } else {
+          $('#codebutton').attr("disabled", true);
+          this.codeButton = this.countdown + "s";
+          this.countdown--;
+          let _this=this;
+          this.timer=setTimeout(function() {
+            _this.setTime();
+          },1000);
+        }
+      },
+      changeImgCode:function () {
+        this.imgcode=""
+        this.formTip2("imgCode","图文验证码不能为空",3);//置空图文验证码及其验证
+        if(this.timer){
+          clearTimeout(this.timer)
+          $('#codebutton').removeAttr("disabled");
+          this.timer=null
+        }
+        this.code=""
+        this.formTip2("code",'验证码不能为空',3);//置空手机验证码及其验证
+        this.codeButton = "获取验证码";
+        this.countdown = 60;
+        this.utilscommit.request("nvsi_getImageCode",null,this.changeImgCodeBack);
+      },
+      changeImgCodeBack(data){//图片验证码获取结果
+        if(data && data.data){
+          $('#reg_image').attr('src',data.data.img);
+          this.imgkey=data.data.imgkey;
+        }
+      },
+      getImgCodeBack:function (result) {
+        if (result) {
+          if (result.data) {
+            this.imgCodeFlag = true;
+            this.type = 1;
+          } else {
+            this.tip = result.message;
+            this.type = 2;
+          }
+        }
+        if(this.status==1){
+          $('#inputImgCode').focus();
+          this.status = 0;
+        }
+        this.formTip2("imgCode",this.tip,this.type);
+      },
+      formTip2:function (el,tip,type) {
+        if(type == 1) {
+          $('#' + el + 'Tips').html("&nbsp").removeClass('warn-tip').removeClass('wrong-tip').addClass('right2-tip');
+        }else if(type ==2) {
+          $('#' + el + 'Tips').html(tip).removeClass('right2-tip').removeClass('warn-tip').addClass('wrong-tip');
+        }else if(type ==3) {
+          $('#' + el + 'Tips').html(tip).removeClass('right2-tip').removeClass('wrong-tip').addClass('warn-tip');
+        }
+      },
+      upimg1:function() {
+        $('#file1').val('');
+        $('#file1').click();
+      },
+      upimg2:function() {
+        $('#file2').val('');
+        $('#file2').click();
+      },
+      changeImg1:function (e) {
+        var file = e.target.files[0];
+        let fileVal=this.common.checkFile(file,2048);
+        if(fileVal)return this.$swal(fileVal,{buttons: "确定"});
+        /*var fileName = file.name;
+         if (!file.size){
+            return; 
+        }else{
+          let filesize = (file.size / 1024).toFixed(2);
+          if(filesize > 2048)return this.$swal('图片大小不能超过2M！',{buttons: "确定"});
+        }  
+        //文件后缀
+        let ext=file.name.substring(file.name.lastIndexOf(".")+1,file.name.length);
+        if(!/gif|png|jpg|jpeg/i.test(ext)){
+          return this.$swal('您只能上传格式为jpg、png、jpeg、gif的图片！',{buttons: "确定"});
+        } */
+        let that=this;
+        //获取浏览器图片
+        let reader = new FileReader();
+        // 调用reader.readAsDataURL()方法，把图片转成base64
+        reader.readAsDataURL(file);
+        //监听reader对象的onload事件，当图片加载完成时，把base64编码賦值给预览图片
+        reader.onload = function () {
+          file.src=this.result;
+          that.filesrc='<img src="'+file.src+'" alt="" width="500" height="700">';
+        }
+        $('#up_file1').html('<span id="img1">'+file.name+'</span>');
+        this.file1 = file;
+        this.file1Check();
+      },
+      changeImg2:function (e) {
+        var file = e.target.files[0];
+        let fileVal=this.common.checkFile(file,2048);
+        if(fileVal)return this.$swal(fileVal,{buttons: "确定"});
+        /* if (!file.size){
+            return; 
+        }else{
+          let filesize = (file.size / 1024).toFixed(2);
+          if(filesize > 2048)return this.$swal('图片大小不能超过2M！',{buttons: "确定"});
+        }  
+        //文件后缀
+        let ext=file.name.substring(file.name.lastIndexOf(".")+1,file.name.length);
+        if(!/gif|png|jpg|jpeg/i.test(ext)){
+          return this.$swal('您只能上传格式为jpg、png、jpeg、gif的图片！',{buttons: "确定"});
+        } */
+        let that = this;
+        //获取浏览器图片
+        let reader = new FileReader();
+        // 调用reader.readAsDataURL()方法，把图片转成base64
+        reader.readAsDataURL(file);
+        //监听reader对象的onload事件，当图片加载完成时，把base64编码賦值给预览图片
+        reader.onload = function () {
+          file.src=this.result;
+          that.filesrc1='<img src="'+file.src+'" alt="" width="460" height="322" style="margin-top: 30px;">';
+        }
+         $('#up_file2').html('<span id="img2">'+file.name+'</span>');
+         this.file2 = file;
+         this.file2Check();
+      },
+      file1Check:function () {
+        var tip='';
+        var flag = true;
+        var type = 1;
+        if (!this.file1) {
+          if(this.loginType=="2" || this.loginType=="3"){
+            tip='请上传统一社会信用代码证';
+          }else{
+            tip='请上传注册申请表扫描件';
+          }
+          flag = false;
+          type = 2;
+        }
+        this.formTip2("file1",tip,type);
+        return flag;
+      },
+      file2Check:function () {
+        var tip='';
+        var flag = true;
+        var type = 1;
+        if (!this.file2 && this.loginType=="1") {
+          tip='请上传负责人手持身份证照';
+          flag = false;
+          type = 2;
+        }
+        /* if (!this.file2) {
+          if(this.loginType=="2" || this.loginType=="3"){
+            tip='请上传有效队伍印章';
+          }else{
+            tip='请上传负责人手持身份证照';
+          }
+          tip='请上传负责人手持身份证照';
+          flag = false;
+          type = 2;
+        } */
+        this.formTip2("file2",tip,type);
+        return flag;
+      },
+      showMap:function () {
+        if(!this.isSelected && this.detailAddress) {
+          if(!(this.detailAddress === this.mapInfo)) {
+            this.mapInfo = this.detailAddress;
+            this.utilscommit.request('nvsi_getAreaInMap',{location:this.detailAddress},function (result) {
+              if (result && result.data && result.data.location) {
+                Vues.allLng = Vues.lng = result.data.location.lng;
+                Vues.allLat = Vues.lat = result.data.location.lat;
+                Vues.setMap();
+              }
+            });
+          } else {
+            this.lng = this.allLng;
+            this.lat = this.allLat;
+            this.setMap();
+          }
+        } else {
+          this.setMap();
+        }
+      },
+      setMap:function () {
+        var address = null;
+        var local=null;
+        var Lng=null;
+        var Lat=null;
+        var ac=null;
+        var point = null;
+        var map = new BMap.Map("map");
+        var mkr = new BMap.Marker();
+        if(this.lng && this.lat){
+          point = new BMap.Point(this.lng,this.lat);
+          mkr = new BMap.Marker(point);
+          map.addOverlay(mkr);
+        } else {
+          point = new BMap.Point(116.404,39.915);
+        }
+        map.centerAndZoom(point, 12);
+        map.enableDragging();//启用地图拖拽事件
+        map.enableScrollWheelZoom();//启用地图滚轮放大缩小
+        map.enableKeyboard();//启用键盘上下左右键移动地图
+        map.addControl(new BMap.NavigationControl());// 添加平移缩放控件
+        map.addControl(new BMap.ScaleControl());// 添加比例尺控件
+        map.addEventListener("click", showInfo);
+        $('.mask.map').addClass('active');
+        var geoc = new BMap.Geocoder();
+        ac = new BMap.Autocomplete({
+            "input": "map",
+            "location": map
+        });
+        ac.addEventListener("onhighlight", function(e) { //鼠标放在下拉列表上的事件
+       
+            var str = "";
+            var _value = e.fromitem.value;
+            var value = "";
+            if(e.fromitem.index > -1) {
+                value = _value.province + _value.city + _value.district + _value.street + _value.business;
+            }
+            str = "FromItem<br />index = " + e.fromitem.index + "<br />value = " + value;
+            value = "";
+            if(e.toitem.index > -1) {
+                _value = e.toitem.value;
+                value = _value.province + _value.city + _value.district + _value.street + _value.business;
+            }
+            str += "<br />ToItem<br />index = " + e.toitem.index + "<br />value = " + value;
+            document.getElementById("searchResultPanel").innerHTML = str;
+        });
+        ac.addEventListener("onconfirm", function(e) { //鼠标点击下拉列表后的事件
+            var _value = e.item.value;
+            myValue = _value.province + _value.city + _value.district + _value.street + _value.business;
+            document.getElementById("searchResultPanel").innerHTML = "onconfirm<br />index = " + e.item.index + "<br />myValue = " + myValue;
+            //setPlace();
+        });
+        function myFun() {
+            var pp = local.getResults().getPoi(0).point; //获取第一个智能搜索的结果
+            map.centerAndZoom(pp, 18);
+            Lng = pp.lng;
+            Lat = pp.lat;
+            Vues.allLng = pp.lng;
+            Vues.allLat = pp.lat;
+            map.addOverlay(new BMap.Marker(pp)); //添加标注
+            getMapAddress(pp,"搜索");//获取经纬度地址
+        }
+         function setPlace() {
+            map.clearOverlays(); //清除地图上所有覆盖物
+            local = new BMap.LocalSearch(map, { //智能搜索
+                onSearchComplete: myFun
+            });
+            local.search(myValue);
+        } 
+        document.getElementById("searchAddress").addEventListener("click", function() {//点击搜索
+            map.clearOverlays(); //清除地图上所有覆盖物
+             local = new BMap.LocalSearch(map, { //智能搜索
+                onSearchComplete: myFun
+            }); 
+            address = document.getElementById("mapValue").value;
+            local.search(address);
+        });
+       // map.addEventListener("click", showInfo);//搜索事件
+        function showInfo(e){
+          map.removeOverlay(mkr);
+          Vues.allLng = e.point.lng;
+          Vues.allLat = e.point.lat;
+          mkr = new BMap.Marker(new BMap.Point(e.point.lng,e.point.lat));
+          map.addOverlay(mkr);
+           getMapAddress(e.point,"设置");
+        }
+        function getMapAddress(point,type){//获取经纬度地址
+            geoc.getLocation(point, function(rs){
+                var addComp = rs.addressComponents;
+                var site = "";
+                if(addComp.province=="北京市"||addComp.province=="上海市"||addComp.province=="天津市"||addComp.province=="重庆市"){
+                    site = addComp.city + addComp.district + addComp.street + addComp.streetNumber;
+                }else{
+                    site = addComp.province + addComp.city + addComp.district + addComp.street + addComp.streetNumber;
+                }
+                Vues.$swal( "您"+type+"的地址是：" + site,{buttons: "确定"});
+                document.getElementById("mapValue").value = site;
+                Vues.mapInfo = site;
+            });
+        }
+
+      },
+      saveAddress:function () {//提交选中地址
+        if(this.mapInfo){
+          this.detailAddress = document.getElementById("mapValue").value;
+          this.lng = this.allLng;
+          this.lat = this.allLat;
+          this.mapValue="";
+          this.isSelected = true;
+          $('.mask.map').removeClass('active');
+          this.detailedAddressCheck();
+        }else{
+          this.$swal( "对不起，您还未进行地图定位",{buttons: "确定"});
+        }
+      },
+      closeMap:function () {
+        $('.mask.map').removeClass('active');
+      },
+      chooseArea:function () {
+        $('#preButton').css('display','none');
+        $('.category__content').css('display','none');
+        $('#first').css('display','');
+        $('.mask.area').addClass('active');
+        this.$refs.areaDialog.preAreaId = '';
+        this.$refs.areaDialog.preName = '';
+        this.$refs.areaDialog.listArea(this.areaid,0);
+      },
+      confirmArea:function (areaid) {
+        if (areaid) {
+          this.newUserInfo.albe0012 = areaid;
+          this.utilscommit.request('nvsi_getAreaFullName',{"areaid":areaid},this.areaBack);
+        } else {
+          this.newUserInfo.albe0012 = this.areaid;
+          this.orgAreaName=this.areaName;
+          this.orgAreaCheck();
+        }
+      },
+      areaBack:function (result) {
+        if (result && result.data) {
+          this.orgAreaName=result.data.areaname;
+        } else {
+          this.orgAreaName = '';
+        }
+      },
+      closeArea:function () {
+        $('.mask.area').removeClass('active');
+        $('#first').css('display','');
+        $('.category__item').removeClass('active');
+        this.$refs.areaDialog.chooseArea = '';
+        this.$refs.areaDialog.preAreaId = '';
+        this.$refs.areaDialog.preName = '';
+      },
+      regCommit:function () {
+        var filephoto1 = "";
+        var filephoto2 = "";
+        if(this.loginType=="2" || this.loginType=="3"){
+            filephoto1 = this.photo1;
+            filephoto2 = this.photo2;
+            this.photo1 = "";
+            this.photo2 = "";
+        }
+        var data = {
+          code:this.code,//手机验证码
+          areaid:this.areaid,//站点区域id
+          userinfo:{//账户信息
+            albp0052:this.newUserInfo.albp0052,//用户名
+            albp0053:this.newUserInfo.albp0053,//密码
+            albp0056:"3",//用户类型
+            albp0058:"1",//是否有效
+          },
+          orginfo:{//团体信息
+            albe0002:this.newUserInfo.albe0002,//团体名
+            albe0003:this.loginType,//团体类型
+            albe0004:this.newUserInfo.albe0004,//联络团体
+            albe0005:this.orgType,//团体类型
+            albe0006:this.newUserInfo.albe0006,//登记部门
+            albe0007:this.registerOrgName,//登记机关
+            albe0008:this.newUserInfo.albe0008,//统一社会信用代码
+            albe0009:this.registerOrgId,//登记机关区域id
+            //albe0010:'',//团体编号
+            albe0011:this.newUserInfo.albe0011,//单位名称
+            albe0012:this.newUserInfo.albe0012,//服务区域
+            albe0013:this.detailAddress,//详细地址
+            //albe0014:'',//邮编
+            albe0015:this.albe0015,//成立日期
+            albe0016:this.newUserInfo.albe0016,//规模人数
+            albe0017:this.serviceType.join(','),//服务类别
+            albe0018:this.newUserInfo.albe0018,//联系人
+            albe0019:this.newUserInfo.albe0019,//联系人手机
+            albe0020:this.newUserInfo.albe0020,//联系人电话
+            albe0021:this.newUserInfo.albe0021,//联系人QQ
+            albe0022:this.newUserInfo.albe0022,//负责人
+            albe0023:this.newUserInfo.albe0023,//负责人身份证
+            albe0024:this.newUserInfo.albe0024,//负责人手机
+            //albe0025:''this.newUserInfo.'',//团体头像
+            albe0026:'2',//团体状态
+            albe0027:'0',//团体是否公开
+            albe0028:'1',//成员加入方式
+            //albe0029:'',//免审密码
+           //albe0030:'',//用户名优先列
+            //albe0031:'',//是否有下级团体权限
+            //albe0032:this.newUserInfo.albe0032,//团体简介
+            //albe0033:'',//
+            //albe0034:'',//
+            //albe0035:'',//
+            albe0036:'0',//是否推荐
+            //albe0037:'',//账户id
+            //albe0038:'',//服务区域名
+            albe0039:this.newUserInfo.albe0039,//微博
+            albe0040:this.newUserInfo.albe0040,//网址
+            //albe0041:'',//团体联络编号
+            albe0042:this.orgGive.join(','),//团体提供
+            albe0043:this.orgNeed.join(','),//团体需要
+            albe0044:this.photo1,//注册申请表扫描件
+            albe0045:this.photo2,//负责人手持身份证照
+            //albe0046:,//注册日期
+            albe0047:this.albe0047,//联系人手机是否公开
+            albe0048:this.albe0048,//联系人座机是否公开
+            albe0049:this.newUserInfo.albe0049,//联系人邮箱
+            albe0050:this.lng,//经度
+            albe0051:this.lat,//纬度
+            //albe0052:'',//管理单位id
+            //albe0053:'',//是否为管理单位
+            albe0054:'1',//是否提交审核
+            //albe0055:'',//服务类别是否属于全国其他
+            //albe0056:'',//团体正式成员数
+            albe0057:this.albe0057,//同意成立的单位
+            albe0058:this.newUserInfo.albe0058,//同意成立单位联系人
+            albe0059:this.newUserInfo.albe0059,//同意成立单位联系电话
+            //albe0060:'',//未发布项目提醒日期
+            albe0061:this.newUserInfo.albe0061,//同意成立单位统一社会信用代码
+            //albe0062:'',//其他服务类型
+            albe0063:this.isLink,//是否有联络团体
+            //albe0064:'',//岗位权限变更时间
+            albe0065:this.isDirectly,//是否直属法人组织
+            albe0066:this.newUserInfo.albe0066,//直属上级法人组织
+            albe0067:filephoto1,//统一社会信用代码证
+            albe0068:filephoto2,//队伍印章
+          }
+        };
+        this.utilscommit.request('nvsi_insertOrgRegisterInfo',data,this.regCommitBack);
+      },
+      regCommitBack:function(result) {
+        if(result && result.message) {
+          if(result.data) {
+            var path = this.leaplogin.login(this.newUserInfo.albp0052, this.newUserInfo.albp0053);
+            if (path) {
+              this.common.addCookie('mgpath',path,1);
+              window.open(path);
+              this.$router.push({name: "home", params: {define: this.routeDefine}});
+              window.sessionStorage.setItem("nvsi_loginstatus",1);
+              Vueh.getUserInfo();//打开页眉中的用户信息
+            } else {
+              this.$swal('注册成功，请前往登录页面进行登录！',{buttons: "确定"}).then(function (value) {
+                Vue.$router.push({name: "login",params: {define: Vue.$route.params.define,type:0}});
+              });
+            }
+          }else {
+            this.$swal(result.message,{buttons: "确定"});
+            this.getFailRegist();
+          }
+        }else {
+          this.$swal('注册失败！',{buttons: "确定"});
+          this.getFailRegist();
+        }
+      },
+      getFailRegist(){//注册失败处理
+          this.changeImgCode();
+          this.isClick=true;
+          $("#register").css({"background":"#cc0000","opacity":"1"});//修改注册按钮状态
+      },
+      toGroupInfo:function (id,areaid){
+        window.open(this.$router.resolve({ name:'groupInfo',params:{define:this.routeDefine,data1:id,data2:areaid}}).href);
+      },
+      clearLoginType(){//清除数据
+        this.newUserInfo.albe0011=null;  //主管单位名称，同意其成立的单位（社区）名称
+        this.newUserInfo.albe0008=null;//统一社会信用代码
+        this.registerOrgName=null;  //登记机关
+        this.registerOrgId=null;//登记机关id
+        this.albe0015=null;  //成立日期
+        this.isDirectly=0;   //是否法人组织直属队
+        this.directlyOrgName=null;   //直属法人组织
+        this.newUserInfo.albe0066=null;  //直属法人组织id
+        this.isLink=0;//联络组织
+        this.linkOrgName=null;   //联络组织
+        this.newUserInfo.albe0004=null;   //联络组织id
+        this.orgType=0,//同意其成立的单位（社区）类型
+        this.albe0057 =null;  //同意其成立的单位（社区）名称
+        this.newUserInfo.albe0061=null;  //同意其成立的单位（社区）统一社会信用代码
+        this.newUserInfo.albe0058=null;  //同意其成立的单位（社区）联系人
+        this.newUserInfo.albe0059=null;   //同意其成立的单位（社区）联系电话
+        this.isOk=false;//不同意协议
+      }
+    },
+    watch: {
+      detailAddress:function (newval,oldval) {
+        if(!this.detailAddress){
+          this.lng = "";
+          this.lat = ""; 
+        }
+        this.isSelected = false;
+      },
+      loginType:function (newval,oldval) {
+        if(newval==1){//志愿服务团体
+          this.orgTypes=this.orgTypeList.nomallist;//团体类型下拉框
+          this.isDirectly=1;//默认为法人组织直属队
+          this.isLink=0;//默认不为联络组织
+          //默认清除相关数据
+          this.newUserInfo.albe0011=null;  //主管单位名称
+          this.albe0015=null;  //成立日期
+          this.orgType=0;  //组织类型
+          this.loginDepart=null;//登记部门
+          this.registerOrgName=null;  //登记机关
+          this.registerOrgId=null;//登记机关id
+          this.newUserInfo.albe0008=null;//统一社会信用代码
+          this.newUserInfo.albe0006 = '0';
+         /*   $('#orgname').html('团体名称');
+          $('#orgforunit').html('同意其成立的单位（社区）名称');
+          $('#orgfortype').html('同意其成立的单位（社区）类型');
+          this.isLink='1';
+          $('#isdirectly').show();
+          if(this.isDirectly=="0"){
+            $('#link').show();
+            $('#islink').show();
+            $('#directly').hide();
+            $('#unittype').show();
+          }else if(this.isDirectly=="1"){
+            $('#link').hide();
+            $('#islink').hide();
+            $('#unittype').hide();
+            $('#directly').show();
+          }
+
+          $('#loginbm').hide();
+          $('#loginjg').hide();
+          $('#orgtip').html('(建议填写为“XX志愿服务队”的形式)');
+          this.registerOrgName = '';
+          this.registerOrgId = '';
+          this.loginDepart = '';
+          this.codeHide = 'display:none';
+          $('#linkOrgTips').html(''); */
+        }else if(newval==2){//志愿服务组织
+          this.orgTypes=this.orgTypeList.zzlist;//团体类型下拉框
+          this.clearLoginType();
+          this.loginDepart = '民政部门';
+          this.newUserInfo.albe0006 = '1';
+          //清除默认数据
+         /*   this.loginDepart = '民政部门';
+          this.newUserInfo.albe0006 = '1';
+          this.isDirectly = "0";
+          $('#orgname').html('组织名称：');
+          $('#orgforunit').html('主管单位名称：');
+          $('#orgfortype').html('组织类型：');
+          $('#orgtip').html('(建议填写为“XX志愿者协会、联合会、基金会、组织”等形式)');
+          $('#link').hide();
+          $('#islink').hide();  
+          $('#directly').hide();
+          $('#isdirectly').hide();  
+          $('#loginbm').show();
+          $('#loginjg').show();
+          this.aHide='display:none';
+          this.codeHide = '';
+          this.isLink='';
+          $('#loginDepartTips').html('');
+          $('#loginOrgTips').html('');
+           $('#unittype').show();  */
+        }else if(newval==3){//其它开展志愿服务活动的法人组织
+          this.orgTypes=this.orgTypeList.qtzzlist;//团体类型下拉框
+          this.clearLoginType();
+          this.loginDepart = '其他';
+          this.newUserInfo.albe0006 = '2';
+          /*  this.loginDepart = '其他';
+          this.newUserInfo.albe0006 = '2';
+          this.isDirectly = "0";
+          $('#orgname').html('组织名称：');
+          $('#orgforunit').html('主管单位名称：');
+          $('#orgfortype').html('组织类型：');
+          $('#orgtip').html('(建议填写为“XX机关、单位、组织、村委会、居委会”等形式)');
+          $('#link').hide();
+          $('#islink').hide(); 
+          $('#directly').hide();
+          $('#isdirectly').hide();   
+          $('#loginbm').show();
+          $('#loginjg').show();
+          this.aHide='display:none';
+          this.codeHide = '';
+          this.isLink='';
+          $('#loginDepartTips').html('');
+          $('#loginOrgTips').html('');
+          $('#unittype').show();  */
+        }
+      },
+      isLink:function (newval,oldval) {//是否联络组织
+        this.linkOrgName=null;   //联络组织
+        this.newUserInfo.albe0004=null;   //联络组织id
+        this.registerOrgName=null;  //登记机关
+        this.registerOrgId=null;//登记机关id
+        this.newUserInfo.albe0061=null;  //同意其成立的单位（社区）统一社会信用代码
+        this.newUserInfo.albe0058=null;  //同意其成立的单位（社区）联系人
+        this.newUserInfo.albe0059=null;   //同意其成立的单位（社区）联系电话
+        this.isOk=false;//不同意协议
+        if(newval==0 && this.loginType==1){//不为联络组织
+          this.albe0057=this.newUserInfo.albe0011;
+        }else{
+          this.albe0057 =null;  //同意其成立的单位（社区）名称
+        }
+        /* if(this.loginType==1){
+          if(this.isLink=="0" && this.isDirectly=="0"){//this.isLink
+            this.aHide='';
+            $('#link').hide();
+            this.albe0057 =  this.newUserInfo.albe0011;
+            this.linkOrgName =null;
+            this.newUserInfo.albe0004 = null;
+            $('#linkOrgTips').html('');
+            $('#orgTypeTips').html('');
+          }else if(this.isLink=="1"){//this.isLink
+            this.aHide='display:none';
+            this.albe0057 = null;
+            this.newUserInfo.albe0058 = null;
+            this.newUserInfo.albe0059 = null;
+            this.newUserInfo.albe0061 = null;
+            if(this.isDirectly=="0"){
+              $('#link').show();
+            }
+            $('#orgTypeTips').html('');
+            $('#unitNameTips').html('');
+            $('#unitCodeTips').html('');
+            $('#unitLinkTips').html('');
+            $('#unitPhoneTips').html('');
+          } 
+        }*/
+      },
+      isDirectly:function (newval,oldval) {//是否直属组织
+       if(newval==0 && this.loginType==1){//不是直属组织时，默认是联络组织
+          this.isLink=1;//默认是联络组织
+       }else{//为直属组织
+            this.isLink=0;//联络组织
+       } //默认清除相关数据
+        this.directlyOrgName=null;   //直属法人组织
+        this.newUserInfo.albe0066=null;  //直属法人组织id
+        this. linkOrgName=null;   //联络组织
+        this.newUserInfo.albe0004=null;   //联络组织id
+        this.registerOrgName=null;  //登记机关
+        this.registerOrgId=null;//登记机关id
+        this.orgType=0,//同意其成立的单位（社区）类型
+        this.albe0057 =null;  //同意其成立的单位（社区）名称
+        this.newUserInfo.albe0061=null;  //同意其成立的单位（社区）统一社会信用代码
+        this.newUserInfo.albe0058=null;  //同意其成立的单位（社区）联系人
+        this.newUserInfo.albe0059=null;   //同意其成立的单位（社区）联系电话
+        this.isOk=false;//不同意协议
+        /* if(this.loginType==1){
+          if(this.isDirectly=="0"){
+              this.directlyOrgName = "";
+              this.newUserInfo.albe0066 = "";
+              this.isLink="1";//有联络团体
+              $('#islink').show();
+              $('#link').show();
+              $('#unittype').show();
+              $('#directly').hide();
+          }else if(this.isDirectly=="1"){
+            this.isLink="0";//无联络团体
+            $('#link').hide();
+            $('#unittype').hide();
+            $('#islink').hide();
+            $('#directly').show();
+            this.newUserInfo.albe0004 = "";
+            //去除无联络团体的数据
+            this.aHide='display:none';
+            this.albe0057 = "";
+            this.newUserInfo.albe0058 = "";
+            this.newUserInfo.albe0059 = "";
+            this.newUserInfo.albe0061 = "";
+            $('#orgTypeTips').html('');
+            $('#unitNameTips').html('');
+            $('#unitCodeTips').html('');
+            $('#unitLinkTips').html('');
+            $('#unitPhoneTips').html('');
+          }
+        } */
+      }
+    }
+  }
+</script>
+
+<style scoped>
+  p{
+    font-size: 14px;
+  }
+  .warn-tip{
+    background: url('../../assets/img/warn.png') 10px no-repeat;
+    color: #666;
+  }
+  .wrong-tip{
+    background: url('../../assets/img/wrong.png') 10px no-repeat;
+    color: #cc0000;
+  }
+  .right2-tip{
+    background: url('../../assets/img/right2.png') 10px no-repeat;
+    color: #666;
+  }
+  .form{
+    padding: 5px 0 5px 20px;
+  }
+  .form .right-tip{
+    display: inline-block;
+    font-size: 14px;
+    margin-top: 10px;
+    width: 330px;
+    position: absolute;
+    left: 100%;
+    padding-left: 30px;
+  }
+  .down-tip{
+    font-size: 14px;
+    height: 17px;
+    padding-left: 20px;
+  }
+  .user-table th{
+    text-align: left;
+    padding: 10px;
+  }
+  .user-table .pointer{
+    cursor: pointer;
+  }
+</style>

@@ -1,0 +1,73 @@
+<template>
+  <div class="mask" :class="{active:showtype>0}">
+      <div class="mask-info" style="overflow: unset;width:350px;max-height:450px;margin-left:0;transform: translate(-50%,-50%);">
+        <div class="mask-header row w">
+          <div class="col v-m"><h2 v-text="stitle"></h2></div>
+          <div class="col v-m t-r"><a href="javascript:void(0);" class="mask-close" @click="closeMask"><img src="@/assets/img/close.png" alt=""></a></div>
+        </div>
+        <div class="VX_code" style="margin-top: 10px;" >
+          <div class="qrcode" ref="qrcodeproject" v-if="showtype!=3"></div>
+          <div v-else style="text-align:center;"><img src="@/assets/img/erwei.jpg" width="200px" height="200px"></div>
+          <p style="text-align: center;margin-top: 10px;" v-text="sremark"></p>
+        </div>
+        
+      </div>
+    </div>
+</template>
+
+<script>
+  import QRCode from 'qrcodejs2';
+    export default {
+        props:['showtype','type'],
+        data:function(){
+            return{
+              stitle: '',
+              sremark:'',
+              url:'',
+            }
+        },
+        methods:{
+          get(){//获取url
+              if(this.type=='pro'){//项目
+                  this.url=window.location.href.slice(0,window.location.href.indexOf('projectInfo'))+'proShare'+window.location.href.slice(window.location.href.indexOf('projectInfo')+11)
+              }else if(this.type=='group'){//队伍
+                  this.url=window.location.href.slice(0,window.location.href.indexOf('groupInfo'))+'groupShare'+window.location.href.slice(window.location.href.indexOf('groupInfo')+9)
+              }
+          },
+          closeMask() {
+            this.$parent.showtype=0;
+          },
+          showMask(){
+            if(this.showtype==3){
+              this.stitle='在线客服公众号';
+              this.sremark='打开微信扫一扫关注';
+            }else{
+              this.get();
+              if(!this.$refs.qrcodeproject.innerHTML){
+                // window.open(this.url)
+                var qrcode = new QRCode(this.$refs.qrcodeproject, {
+                  text: this.url,
+                  width : 290,
+                  height : 290,
+                  src:'https://download.yxybb.com/project/MZ/resource/hdImg_112f7f7dd72d1902289cc23ea36bbbaf16151757040.jpg'
+                });
+              }
+              if(this.showtype==1){//微信分享
+                  this.stitle='微信分享';
+                  this.sremark='打开微信扫一扫分享';
+              }else if(this.showtype==2){//QQ分享
+                  this.stitle='QQ分享';
+                  this.sremark='手机QQ扫描二维码，点击右上角 ··· 按钮分享到QQ好友或QQ空间';
+              }
+            }
+          }
+        },
+         watch: {
+          showtype: function(to,from){ //监听路由是否变化
+            this.showMask();
+          },
+        } 
+
+    }
+</script>
+

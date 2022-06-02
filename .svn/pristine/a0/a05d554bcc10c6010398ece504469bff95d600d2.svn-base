@@ -1,0 +1,360 @@
+<template>
+  <li class="col v-t white tab-container">
+    <div class="tabbar tabbar-tight mb-20 row w">
+      <span class="active col v-m">我的好友</span>
+      <span class="col v-m">我申请的</span>
+      <span class="col v-m">申请我的</span>
+      <div class="col v-m t-r"><a href="javascript:void(0);" @click="showfriendMask" class="button button-normal">添加好友</a></div>
+    </div>
+    <div class="tabbar-down">
+      <table class="user-table">
+        <colgroup>
+          <col width="30%">
+          <col width="40%">
+          <col width="30%">
+        </colgroup>
+        <tr>
+          <th>姓名</th>
+          <th>用户名</th>
+          <th>操作</th>
+        </tr>
+        <tr v-if="!friendsList.length"><td colspan="3" style="text-align: center;border-bottom: 1px #F6F3F7;"><img src="../../assets/img/js-wujilu.png"/></td></tr>
+        <tr v-for="(el,index) in friendsList" :key="index">
+          <td class="left">
+            <em @click="toUserDetail(el.albp1802,el.albp1803)" class="pointer">{{el.albp1808 == userInfo.albp0064 ? el.albp1809 : el.albp1808}}</em>
+          </td>
+          <td class="left">{{el.albp1802 == userInfo.albp0052 ? el.albp1803 : el.albp1802}}</td>
+          <td class="left">
+            <em class="pointer" @click="sendMessage(el.albp1802,el.albp1803)" style="margin-right: 12px;">发站内信</em>
+            <em class="pointer" @click="deleteFriend(el.id)">删除好友</em>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div class="tabbar-down" style="display:none;">
+      <table class="user-table">
+        <colgroup>
+          <col width="25%">
+          <col width="25%">
+          <col width="15%">
+          <col width="20%">
+          <col width="15%">
+        </colgroup>
+        <tr>
+          <th>姓名</th>
+          <th>用户名</th>
+          <th>状态</th>
+          <th>申请时间</th>
+          <th>操作</th>
+        </tr>
+        <tr v-if="!myOutList.length"><td colspan="5" style="text-align: center;border-bottom: 1px #F6F3F7;"><img src="../../assets/img/js-wujilu.png"/></td></tr>
+        <tr v-for="(el,index) in myOutList" :key="index">
+          <td class="left">
+            <em @click="toUserDetail(el.albp1802,null)" class="pointer">{{el.albp1808}}</em></td>
+          <td class="left">{{el.albp1802}}</td>
+          <td class="left">{{el.state}}</td>
+          <td class="left">{{el.albp1804 | ellipsisNos(10)}}</td>
+          <td class="left">
+            <em class="pointer" @click="updateState(el.id,4)">{{(el.albp1806 == '1' && '取消申请') || (el.albp1806 == '3' && '删除')}}</em>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div class="tabbar-down" style="display:none;">
+      <table class="user-table">
+        <colgroup>
+          <col width="25%">
+          <col width="25%">
+          <col width="15%">
+          <col width="20%">
+          <col width="15%">
+        </colgroup>
+        <tr>
+          <th>姓名</th>
+          <th>用户名</th>
+          <th>状态</th>
+          <th>申请时间</th>
+          <th>操作</th>
+        </tr>
+        <tr v-if="!myInList.length"><td colspan="5" style="text-align: center;border-bottom: 1px #F6F3F7;"><img src="../../assets/img/js-wujilu.png"/></td></tr>
+        <tr v-for="(el,index) in myInList" :key="index">
+          <td class="left"><em @click="toUserDetail(null,el.albp1803)" class="pointer">{{el.albp1809}}</em></td>
+          <td class="left">{{el.albp1803}}</td>
+          <td class="left">{{el.state}}</td>
+          <td class="left">{{el.albp1804 | ellipsisNos(10)}}</td>
+          <td class="left">
+            <em class="pointer" style="margin-right: 12px" @click="updateState(el.id,2)">同意</em>
+            <em class="pointer" @click="updateState(el.id,3)">拒绝</em>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div>
+      <paging :pageCount="tolPage"
+              :rangePage="pageSize"
+              :initPage="pageNow"
+              :totals="tolCount"
+              :val="jumpPage"
+              @pageEvent="pageEvent">
+      </paging>
+    </div>
+
+    <!-- 添加好友 -->
+    <div class="mask friend">
+      <div class="mask-info" style="width:700px;max-height:705px;margin-left:-350px;">
+        <div class="mask-header row w">
+          <div class="col v-m"><h2>添加好友</h2></div>
+          <div class="col v-m t-r"><a href="javascript:void(0);" @click="friendCloseMask" class="mask-close"><img src="../../assets/img/close.png" alt=""></a></div>
+        </div>
+        <div style="padding:20px 50px 0 50px;">
+          <div class="form">
+            <p class="form-label"><em>*</em>用户名：</p>
+            <input type="text" v-model="friendName" @blur="friendCheck" maxlength="30" placeholder="请输入用户名">
+          </div>
+          <span class="form-error" style="padding-left: 20px;font-size: 14px;" id="friendTips"></span>
+        </div>
+        <div class="form t-c">
+          <a href="javascript:void(0);" class="button" @click="onSubmit">提交</a>
+        </div>
+      </div>
+    </div>
+
+  </li>
+</template>
+
+<script>
+  const paging =()=>import('@/components/page/paginationRed.vue');//分页
+
+  export default {
+    components : {paging},
+    data(){
+      return {
+        routeDefine: this.$route.params.define,
+        userInfo:this.$store.getters.getUser,//账号信息
+        //basicInfo:this.$store.getters.getBasic,//志愿者信息
+        friendsList:'',//好友列表
+        myOutList:'',//我的申请列表
+        myInList:'',//别人申请我的列表
+        nowIndex:'0',
+        friendName:'',//好友用户名
+        friendFlag:false,//好友是否存在
+        tolCount:0,//总条数
+        tolPage:0,//总页数
+        pageSize:8,//每页条数
+        pageNow:1,//当前页
+        jumpPage:1
+      };
+    },
+    created() {
+      window.Vues = this;//主体vue实例挂载
+      this.getList();
+    },
+    mounted() {
+      this.setData();
+    },
+    methods:{
+      setData:function () {
+        $('.tabbar span').each(function (idx, el) {
+          $(el).click(function () {
+            Vues.nowIndex = idx;
+            $(this).addClass('active').siblings().removeClass('active');
+            $('.tabbar-down').eq(idx).show().siblings('.tabbar-down').hide();
+          })
+        });
+      },
+      pageEvent:function(e){//分页
+        this.getList();
+      },
+      getList() {
+        if (this.nowIndex == 0) {// 我的好友
+          this.utilscommit.request('nvsi_listMyFriends',{type:this.nowIndex,pageNow:this.pageNow,pageSize:this.pageSize},this.myFriendsBack)
+        } else if (this.nowIndex == 1) {// 我申请的
+          this.utilscommit.request('nvsi_listMyFriends',{type:this.nowIndex,pageNow:this.pageNow,pageSize:this.pageSize},this.myOutBack)
+        } else if (this.nowIndex == 2) {//别人申请我的
+          this.utilscommit.request('nvsi_listMyFriends',{type:this.nowIndex,pageNow:this.pageNow,pageSize:this.pageSize},this.myInBack)
+        }
+      },
+      myFriendsBack(result) {
+        if(result && result.data) {
+          this.friendsList = result.data;
+          this.common.getTolData(this,result);
+        } else {
+          this.friendsList = {};
+          this.common.getTolData(this);
+        }
+      },
+      myOutBack:function (result) {
+        if(result && result.data) {
+          this.myOutList = result.data;
+          this.common.getTolData(this,result);
+        } else {
+          this.myOutList = {};
+          this.common.getTolData(this);
+        }
+      },
+      myInBack:function (result) {
+        if(result && result.data) {
+          this.myInList = result.data;
+          this.common.getTolData(this,result);
+        } else {
+          this.myInList = {};
+          this.common.getTolData(this);
+        }
+      },
+      sendMessage:function (albp1802,albp1803) {
+        var username = albp1802 == this.userInfo.albp0052 ? albp1803 : albp1802;
+        if (!albp1802) {
+          username = albp1803;
+        } else if (!albp1803) {
+          username = albp1802;
+        }
+        if(this.userInfo) {
+          if (this.userInfo.albp0056 == 1) {
+            this.utilscommit.request('nvsi_getInfoByUserName',{username:username,type:1},this.friendBack);
+          }
+        } else {
+          this.$utilroutes.toLogin();
+        }
+
+      },
+      friendBack:function (result) {
+        if (result) {
+          if (result.data) {
+            this.common.addCookie("msg",2,0.2);
+            this.$router.push({ name:'message',params:{define:this.routeDefine,data1:result.data.albp0029,data2:result.data.id}});
+          } else {
+            this.$swal(result.message,{buttons:'确定'});
+          }
+        } else {
+          this.$swal('未获取到该好友的信息',{buttons:'确定'});
+        }
+      },
+      deleteFriend:function (id) {//删除好友
+        if (this.userInfo) {
+            this.$swal('确认删除该好友？',{buttons:['取消','确定']}).then((value)=>{
+                if(value){
+                  Vues.updateState(id,4);
+                }
+            });  
+        }
+      },
+      updateState:function (id,state) {
+        if (this.userInfo) {
+          this.utilscommit.request('nvsi_updateFriendState',{id:id,state:state},function (result) {
+            if (result) {
+              if (result.data) {
+                Vues.$swal('操作成功',{buttons:'确定'}).then(function (value) {
+                  Vues.getList();
+                })
+              } else {
+                Vues.$swal('操作失败',{buttons:'确定'});
+              }
+            } else {
+              Vues.$swal('操作失败',{buttons:'确定'});
+            }
+          })
+        }
+      },
+      toUserDetail(albp1802,albp1803) {
+        var username = albp1802 == this.userInfo.albp0052 ? albp1803 : albp1802;
+        if (!albp1802) {
+          username = albp1803;
+        } else if (!albp1803) {
+          username = albp1802;
+        }
+        this.utilscommit.request('nvsi_getInfoByUserName',{username:username,type:1},function (result) {
+          if (result) {
+            if (result.data) {
+              window.open(Vue.$router.resolve({name:'volinfo',params:{define:Vues.routeDefine,data1:result.data.albp0029,data2:result.data.albp0020}}).href);
+            } else {
+              this.$swal(result.message,{buttons:'确定'});
+            }
+          } else {
+            this.$swal('未获取到该志愿者信息',{buttons:'确定'});
+          }
+        });
+      },
+      showfriendMask:function () {
+        $('.mask.friend').addClass('active');
+        $('.form-error').html("");
+        this.friendName = '';
+      },
+      friendCloseMask:function () {
+        $('.mask.friend').removeClass('active');
+        $('.form-error').html("");
+        this.friendName = '';
+      },
+      friendCheck:function(){//好友用户名校验
+        this.friendFlag = false;
+        var tip='';
+        if(!this.friendName) {
+          tip='好友用户名不能为空';
+          this.formTip("friend",tip);
+        } else if (this.friendName == this.userInfo.albp0052) {
+          tip = '请不要填写自己的用户名';
+          this.formTip('friend',tip);
+        } else {
+          this.utilscommit.request('nvsi_getUserByUserName',{"albp0052":this.friendName},function (result) {
+            if (result && result.data) {
+              tip = '';
+              Vues.friendFlag = true;
+            } else {
+              tip = '用户不存在';
+              Vues.formTip("friend",tip);
+            }
+          });
+        }
+      },
+      onSubmit:function () {
+        if(this.userInfo){
+          if (this.friendFlag) {
+            var data = {
+              "albp1802":this.friendName
+            };
+            this.utilscommit.request("nvsi_insertFriendApply",data,this.submitBack);
+          }
+        }else{          
+          this.$utilroutes.toLogin();
+        }
+      },
+      submitBack:function (result) {
+        if (result) {
+          if (result.data) {
+            this.friendCloseMask();
+            if(this.nowIndex!=1){
+               this.nowIndex=1;
+               $('.tabbar span:eq(1)').addClass('active').siblings().removeClass('active');
+               $('.tabbar-down').eq(1).show().siblings('.tabbar-down').hide();
+            }
+            this.getList();
+            this.$swal('申请成功',{buttons:'确定'});/* .then(function () {
+              window.location.reload();
+            }); */
+          } else {
+            this.$swal(result.message,{buttons:'确定'});
+          }
+        } else {
+          this.$swal('发送申请失败',{buttons:'确定'});
+        }
+      },
+      formTip:function(el,tip) {
+        $('#' + el + 'Tips').html(tip).css("color", "red");
+      }
+    },
+    watch: {
+      nowIndex: function(newval, oldval) { //监听tab页面
+        //刷新列表
+        this.pageNow = 1;
+        this.getList();
+      }
+    }
+  }
+
+</script>
+
+<style scoped>
+  .user-table th{
+    text-align: left;
+    padding: 10px;
+  }
+</style>

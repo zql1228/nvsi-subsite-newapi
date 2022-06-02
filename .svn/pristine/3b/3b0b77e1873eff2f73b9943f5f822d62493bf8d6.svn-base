@@ -1,0 +1,185 @@
+<template>
+  <div>
+  <li class="col v-t white tab-container">
+    <div class="tabbar tabbar-tight">
+      <span>志愿者证正面：</span>
+    </div>
+    <div class="card t-c">
+      <div id="front">
+        <img src="../../assets/img/volunteerphoto.png" alt="" style="width: 500px;">
+      </div>
+      <div>
+        <a href="javascript:void(0);" class="button card_a" v-print="'#front'">打印</a>
+       	<a href="javascript:void(0);" class="button card_a" @click="downFront">下载</a>
+	   </div>
+    </div>
+    <div class="tabbar tabbar-tight">
+      <span>志愿者证背面：</span>
+    </div>
+    <div class="card t-c" >
+      <div id="reverse">
+        <img src="../../assets/img/card2.jpg" alt="" style="width: 500px;">
+      </div>
+      <div>
+        <a href="javascript:void(0);" class="button card_a" v-print="'#reverse'">打印</a>
+        <a href="javascript:void(0);" class="button card_a" @click="downReverse">下载</a>
+      </div>
+    </div>
+  </li>
+  <li class="col v-t g-8 pl-40 white tab-container pt-36">
+    <h2 class="subtitle subtitle-noline subtitle-small">志愿者证证件照片</h2>
+    <up-card :photo="photo"></up-card>
+    <div style="margin-top: -30px;font-size: 13px;text-align: center;">只支持格式为jpg、png、jpeg，大小不超过200k</div>
+    <h2 class="subtitle subtitle-noline subtitle-margin subtitle-small">志愿者二维码</h2>
+    <div class="avatar-upload" v-if="$store.getters.getArea.cnname!='江苏'">
+      <!-- <img src="../../assets/img/codezs.png" alt="" class="pt-20" style="width: 119px;height: 115px;"> --><!-- src="../../assets/img/code2.png" -->
+      <!-- <p><b>系统已推出“中国志愿”APP，请扫码安装</b> --><!-- <b>系统即将推出移动客户端APP，敬请期待！</b> --><!-- </p> -->
+      <img src="@/assets/img/erwei.jpg" alt="" style="width: 119px;height: 115px;">
+      <p><b>扫码关注在线客服公众号</b></p>
+    </div>
+    <div class="avatar-upload" v-else>
+      <img class="pt-20" style="width: 119px;height: 115px;" src="@/assets/img/js_erwei.png" alt="">
+      <p><b>扫码安装“江苏政务服务”APP</b></p>
+    </div>
+  </li>
+  </div>
+</template>
+<script>
+
+  const UpCard =()=>import('@/view/home/upvolcard.vue');//上传头像
+  import avatar from '../../assets/img/mruser.png';
+
+  export default {
+    name: 'usercard',
+    components : {UpCard },
+    data(){
+      return {
+        nav2:'usercard',
+        context:this.common.getUrl(),
+        routeDefine: this.$route.params.define,
+        areaid:this.common.areaInfo().areaid,
+        userInfo:this.$store.getters.getUser,//账户信息
+        basicInfo:this.$store.getters.getBasic,//用户信息
+        imgFile:'',
+        frontCard:'',//证正面
+        photo:avatar,
+      };
+    },
+    created() {
+      window.imgError = this.imgError;
+    },
+    mounted() {
+      this.basicInfos();
+    },
+    methods:{
+      basicInfos:function (result) {
+        if(this.basicInfo.albp0083) {//设置照片
+          let albp0083 = JSON.parse(this.basicInfo.albp0083);
+          this.photo = this.context +"/LEAP/Download/" + albp0083.nameedpath + "/" + albp0083.name;
+          //this.photo='<img style="width: 100%;height: 100%;" alt="" class="w" src="'+ photos +'" onerror="imgError(this)">';
+          /*  this.$nextTick(function () {
+            $('#photo').html('<img style="width: 100%;height: 100%;" alt="" class="w" src="'+ photo +'" onerror="imgError(this)">');
+          }); */
+        }
+        if (this.basicInfo.albp0024) {//设置志愿者证
+          var rad = (new Date()).getTime();
+          var albp0024 = JSON.parse(this.basicInfo.albp0024);
+          this.frontCard = this.context + '/LEAP/Download/' + albp0024.nameedpath + '/' + albp0024.name + '?r=' + rad;
+          $('#front').html('<img style="width: 500px;" alt="" class="w" src="'+ this.frontCard +'">');
+          /* this.$nextTick(function () {
+            
+          }); */
+        } else {
+          this.getCardPhoto();
+        }
+      },
+      getCardPhoto:function () {
+        var sex = this.basicInfo.albp0006;
+        if(sex == "1"){
+          sex = "男";
+        }else if(sex == "2"){
+          sex = "女";
+        }
+        var data = {
+            name:this.basicInfo.albp0003,
+            volid:this.basicInfo.id,
+            volnum:this.basicInfo.albp0029,
+            regarea:this.userInfo.albp0061,
+            regdate:this.userInfo.albp0062,
+            vollinknum:this.basicInfo.albp0030,
+            areaid:this.basicInfo.albp0020,
+            photo:this.basicInfo.albp0083,
+            sex:sex
+        };
+        this.utilscommit.request('nvsi_saveVolunteerServiceCard',data,this.cardBack)
+      },
+      cardBack:function (result) {
+        if(result){
+            this.utilscommit.request('nvsi_getBasicInfo',this.userInfo,this.basicInfoCheck);//获取志愿者数据
+        }else{
+          this.$swal('志愿者证生成失败',{buttons:'确定'});
+        }
+      },
+      basicInfoCheck(data){
+        if(data && data.code==0){
+          this.basicInfo = data.data;
+          this.$store.commit('saveBasic',this.basicInfo);
+          this.basicInfos();
+        }
+      },
+      imgError(el) {
+        el.src = avatar;
+      },
+      uploadImgResult:function (result) {
+        this.commit(JSON.stringify(result));
+      },
+      commit:function (serverData) {
+        var data = {
+          "id":this.userInfo.albp0055,
+          "albp0083":serverData?serverData:this.basicInfo.albp0083
+        };
+        this.utilscommit.request("nvsi_modifyVolBasicInfo",data,this.modifyBack);
+      },
+      modifyBack:function (result) {
+        if(result) {
+          if(result.code==0){
+            this.utilscommit.request('nvsi_getBasicInfo',this.userInfo,this.basicInfoCheck);//获取志愿者数据
+            this.$swal('修改成功',{buttons:'确定'});/* .then(function (value) {
+              Vue.$router.go(0);//刷新页面
+            }); */
+          } else {
+            this.$swal(result.message,{buttons:'确定'});
+          }
+        }
+      },
+      downReverse:function () {
+        window.open(window.location.protocol + '//' + window.location.host + $('#reverse').children().attr('src'));
+      },
+      downFront:function () {
+        window.open(this.frontCard);
+      },
+    },
+    watch:{
+      imgFile:function (newval,oldval) {
+        if(newval!=oldval){
+          let param = new FormData(); //创建form对象
+          //let files = new window.File([this.imgFile], this.imgFile.name, {type: this.imgFile.type});
+          //param.append('file',files);
+          param.append('file', this.imgFile, this.imgFile.name);
+          let areaid= this.areaid;
+          this.utilscommit.uploadImg(param,areaid,this.uploadImgResult);
+        }
+      }
+    }
+  }
+
+</script>
+
+<style scoped>
+  .card_a{
+    margin:20px;
+  }
+</style>
+
+
+

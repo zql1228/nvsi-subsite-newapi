@@ -1,0 +1,302 @@
+<template>
+  <div id="login">
+    <!--中间部分-->
+    <div class="main bannerimg">
+      <div class="mid">
+        <ul class="row w">
+          <li class="col">
+            <div class="router">
+              <span>当前位置：</span>
+              <a href="javascript:void(0);"><router-link tag="span" :to="{name:'home',params:{define:routeDefine}}">首页</router-link></a>
+              <span v-show="lotype==1">管理部门</span><span v-show="lotype==2">志愿者</span><span v-show="lotype==3">志愿队伍</span><span> 登录</span>
+            </div>
+          </li>
+        </ul>
+        <div class="row w login">
+          <div class="col v-t">
+            <img src="../../assets/img/login.png" style="height: 450px;width: 754px;">
+          </div>
+          <div class="col v-t white">
+            <h2>
+              <a :class="{'ml':lotype!=1}">登录</a> 
+              <!-- <a  href="javascript:void(0);" style="color: #999;font-size: 14px;margin-left: 90px;" @click="goLogin">管理部门登录</a> --><!-- :href="tositeurl+'/LEAP/site/index.html#/login/1'" -->
+              <router-link  :to="{name:'login',params:{define:routeDefine,type:1}}" style="color: #999;font-size: 14px;margin-left: 90px;" v-show="lotype!=1">管理部门登录</router-link>
+            </h2> 
+            <div class="login-wrap">
+              <div class="login-input">
+                <img src="../../assets/img/user.png">
+                <input type="text" id="username" v-model="username" @blur="usernameCheck" @keypress.enter="login" placeholder="请输入用户名或身份证号码" maxlength="30"  onchange="this.value=this.value.replace(/[^\w_.]/g,'').slice(0,30);">
+              </div>
+              <span class="login-tips" id="usernameTips"></span>
+              <div class="login-input">
+                <img src="../../assets/img/pwd.png">
+                <input type="password" id="password" v-model="password" @blur="passwordCheck" @keypress.enter="login" placeholder="请输入密码" maxlength="30">
+              </div>
+              <span class="login-tips" id="passwordTips"></span>
+              <div class="login-input" style="line-height: 2.1;">
+                <img src="../../assets/img/yzm.png" alt="">
+                <input type="text" placeholder="请输入验证码" id="code" @blur="imgCodeCheck" @keypress.enter="login" maxlength="4" onchange="value=value.replace(/[^0-9a-zA-Z]/g,'').slice(0,4);" style="display: inline-block;width: 60%;">
+                <span @click="getImgCode('imgCode')" id="imgCode" style="margin-left: 10px;cursor: pointer;border: 1px solid #dfdfdf;text-align: center;width: 35%;height: 46px;border-radius: 4px;float: right;"></span>
+              </div>
+              <span class="login-tips" id="imgCodeTips"></span>
+              <a href="javascript:void(0);" class="button" @click="login" @keypress.enter="login">登 录</a>
+              <div class="row w" v-show="lotype!=1">
+                <!-- <a href="javascript:void(0);" class="col v-m login-txt" @click="goLogin">队伍登录</a> --><!-- :href="tositeurl+'/LEAP/site/index.html#/login/'+$store.getters.getArea.areaid" -->
+                <router-link class="col v-m login-txt" tag="a" :to="{name:'login',params:{define:routeDefine,type:3}}"  v-show="lotype!=3">队伍登录</router-link>
+                <router-link class="col v-m login-txt" tag="a" :to="{name:'volreg',params:{define:routeDefine}}">立即注册</router-link>
+                <a :href="context + '/LEAP/site/index.html#/forgetpwd1'" class="col v-m t-r login-txt">忘记密码?</a>
+                <a :href="context + '/LEAP/site/index.html#/findpwd'" class="col v-m t-r login-txt">找回用户名</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</template>
+
+<script>
+
+  export default {
+    name: 'login',
+    data(){
+      return {
+        context:this.common.getUrl(),
+        routeDefine: '',
+        lotype: '',
+        areaid:'',
+        cnname:'',
+        username:'',
+        password:'',
+        imgCode:'',
+        userInfo:{},
+        tositeurl:'http://219.148.94.205:8001/NVSI',//域名：http://chinavolunteer.cn     ip:http://219.148.94.205:8001
+      };
+    },
+    created() {
+      window.Vues=this;
+      this.getAreaInfo();
+      this.getUserInfo();
+    },
+    mounted() {
+      this.getImgCode("imgCode");
+    },
+    methods:{
+      getAreaInfo:function () {
+      this.routeDefine=this.$route.params.define;
+      this.lotype=this.$route.params.type;
+        var areaInfo = this.$store.getters.getArea;
+        if(areaInfo && areaInfo.enname && areaInfo.enname==this.routeDefine){
+          this.areaid = areaInfo.areaid;
+          this.cnname=areaInfo.cnname;
+          this.utilscommit.request('nvsi_listServiceType',{'areaid':this.areaid},this.serviceTypeInfo);//服务类型
+        }
+      },
+      getUserInfo:function () {
+        this.utilscommit.request('nvsi_getUserInfo',null,this.userInfoCheck)
+      },
+      userInfoCheck:function (result) {
+        if (result.data) {
+          let loginstatus=window.sessionStorage.getItem("nvsi_loginstatus");//登录状态 1=已登录
+          if(loginstatus && loginstatus==1){
+            Vueh.getUserInfo();//打开页眉中的用户信息
+            this.$router.push({name: "home", params: {define: this.routeDefine}});
+          }
+        }
+      },
+      login:function () {
+        if (this.usernameCheck() && this.passwordCheck() && this.imgCodeCheck()) {
+          if(this.lotype==1 || this.lotype==3){//管理员登录 和 队伍登录
+                this.toLoginLeap();//登录业务系统
+          }else{
+            var type = 1;//1:用户名，2:手机号码，3:身份证号码
+            if (this.common.checkPhoneno(this.username)) {
+              type = 2;
+            } else if (this.common.checkCardNo(this.username)) {
+              type = 3;
+            }
+            var data = {
+              "areaid":this.areaid,
+              "type":type,
+              "username": this.username,
+              "password": this.password
+            };
+            this.utilscommit.request('nvsi_getLoginCheck',data,this.loginBack)
+            }
+          
+        }
+      },
+      loginBack:function(result) {
+        if(result && result.data) {
+          this.userInfo = result.data;
+          if(this.userInfo.albp0058 == 1) {
+            this.utilscommit.request('nvsi_getBasicInfo',this.userInfo,this.userBack);
+          } else {
+            this.loginOut();
+            this.$swal('无效用户!',{buttons: "确定"});
+            this.getImgCode("imgCode");
+          }
+        } else {
+          var msg = "用户名或密码错误";
+          $('#imgCodeTips').html(msg).css("color", "red");
+          this.getImgCode("imgCode");
+        }
+      },
+      userBack:function (result) {
+        if(this.userInfo.albp0056 == "1" || this.userInfo.albp0056 == "2") {//志愿者  1是非实名 2是实名
+          if (result.data.albp0090 == 1) {//是否停用
+           /*  if(this.userInfo.state == "1" && result.data) {//本站点志愿者
+              if(!result.data.albp0028 || !result.data.albp0020) {//无服务区域或居住区域
+                this.$router.push({name: "updatedata", params: {define: this.routeDefine}});
+              }else {//有服务区域和居住区域
+                this.$router.push({name: "usercenter", params: {define: this.routeDefine}});
+              }
+            }else if(this.userInfo.state == "2") {//非本站点志愿者
+              this.$router.push({name: "usercenter", params: {define: this.routeDefine}});
+            } */
+            if(result.data.albp0028 && result.data.albp0020) {//有服务区域或居住区域
+              this.$router.push({name: "usercenter", params: {define: this.routeDefine}});
+            }else {//无服务区域和居住区域
+              this.$router.push({name: "updatedata", params: {define: this.routeDefine}});
+            }
+            window.sessionStorage.setItem("nvsi_loginstatus",1);
+            this.$store.commit('saveUser',this.userInfo);
+            Vueh.getUserInfo();//打开页眉中的用户信息
+          } else {
+            this.loginOut();
+            this.$swal( '您的账号已被停用，如有问题请联系所在区域管理部门',{buttons: "确定"});
+            this.getImgCode("imgCode");
+          }
+        }else {
+          if(result.data.albe0026=='3') {//停用团体
+            this.loginOut();
+            this.$swal('您的账号已被停用，如有问题请联系所在区域管理部门',{buttons: "确定"});
+            this.getImgCode("imgCode");
+            return null;
+          } else {
+            this.$swal('非志愿者不能登录，请前往志愿队伍登录页面进行登录',{buttons:['取消','确定']}).then(function(value){
+              if (value) {
+                  //window.location.href=Vues.tositeurl+"/LEAP/site/index.html#/login/"+Vues.$store.getters.getArea.areaid;
+                  Vues.$router.push({name:'login', params: {define:Vues.routeDefine,type:3}});
+              }
+            });
+          /* var path = this.leaplogin.login(this.username,this.password);
+            if (path) {
+              this.common.addCookie("mgpath",path,0.5);
+              window.open(path,"_blank");
+              this.$router.push({name: "home", params: {define: this.routeDefine}});
+              window.sessionStorage.setItem("nvsi_loginstatus",1);
+              this.$store.commit('saveUser',this.userInfo);
+              Vueh.getUserInfo();//打开页眉中的用户信息
+            } else {
+              this.loginOut();
+              this.$swal('用户名或密码错误!',{buttons: "确定"});
+              this.getImgCode("imgCode");
+            }  */
+          }
+        }
+      },
+      /* goLogin(){//管理部门，队伍登录直接跳转到后台
+       window.open('http://219.148.94.205:8001/NVSI/LEAP/Login/00/NVSI/Login.html')
+      }, */
+      toLoginLeap(){//登录业务系统
+        var path = this.leaplogin.login(this.username,this.password);
+        if (path) {
+          this.common.addCookie("mgpath",path,0.5);
+          window.open(path,"_blank");
+          this.$router.push({name: "home", params: {define: this.routeDefine}});
+        } else {
+          this.loginOut();
+          this.$swal('用户名或密码错误!',{buttons:'确定'});
+          this.getImgCode("imgCode");
+        }
+      },
+      loginOut:function () {
+        this.utilscommit.request('nvsi_loginOut',null,this.loginOutCheck)
+      },
+      loginOutCheck:function (result) {
+        if(result && result.code==0){//退出
+          Vueh.getUserInfo();//打开页眉中的用户信息
+        }
+        //this.$router.push({name: "login",params: {define: this.routeDefine}});
+      },
+      usernameCheck:function () {
+        var tip='';
+        var flag = true;
+        if(!this.username) {
+          tip='用户名不能为空';
+          flag = false;
+        }
+        this.formTip("username",tip);
+        return flag;
+      },
+      passwordCheck:function () {
+        var tip='';
+        var flag = true;
+        if(!this.password) {
+          tip='密码不能为空';
+          flag = false;
+        }else if (!this.common.checkPW(this.password)) {
+          tip='用户名或密码错误';
+          flag = false;
+        }
+        this.formTip("password",tip);
+        return flag;
+      },
+      imgCodeCheck:function () {
+        var el = $('#code');
+        var tip='';
+        var flag = true;
+        var code = el.val();
+        if(!code) {
+          tip='验证码不能为空';
+          flag = false;
+        }else{
+          code = this.common.trimAll(code).toUpperCase();
+          if (code != this.imgCode) {
+            tip='验证码错误';
+            flag = false;
+          }
+        }
+        this.formTip("imgCode",tip);
+        return flag;
+      },
+      getImgCode:function (node) {
+        this.imgCode = this.common.changeCode(node);
+      },
+      formTip:function (el,tip) {
+        $('#' + el + 'Tips').html(tip).css("color", "red");
+      },
+    },
+    watch:{
+      '$route.params.define':function(newval,oldval){
+        if(this.routeDefine!=newval){
+          this.routeDefine=this.$route.params.define;
+          this.getAreaInfo();
+        }
+      },
+      '$route.params.type':function(){
+        this.$router.go(0);
+      },
+    }
+  }
+
+</script>
+
+
+<style scoped>
+  .login-input{
+    margin: 5px 0;
+  }
+  .login-tips{
+    display: inline-block;
+    font-size: 14px;
+  }
+  .ml{
+    margin-left: 30%;
+  }
+</style>
+
+
+

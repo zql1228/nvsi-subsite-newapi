@@ -1,0 +1,274 @@
+<template>
+  <div id="volinfo">
+    <!--中间部分-->
+    <div class="main bannerimg">
+      <div class="mid">
+        <ul class="row w">
+          <li class="col">
+            <div class="router">
+              <span>当前位置：</span>
+              <a href="javascript:void(0);"><router-link tag="span" :to="{name:'home',params:{define:routeDefine}}">首页</router-link></a>
+              <a href="javascript:void(0);">志愿者</a>
+            </div>
+          </li>
+        </ul>
+        <div class="row w avatar" style="padding-left:0;">
+          <div class="col v-t"><img :src="context + volInfo.photo" @error="imgError" alt=""></div>
+          <div class="col v-t">
+            <p class="avatar-tit mb-20">
+              <em style="color:#333">{{volInfo.albp0003}}</em>
+              <span class="button button-small" style="color:#fff;border-radius:20px;width:auto;height:24px;line-height:24px;margin-left:10px;padding:0 10px;font-size:12px;">实名志愿者</span></p>
+            <ul class="grid">
+              <li class="grid-item g-8">
+                <i>服务星级：</i>
+                <span>{{(!volInfo.sum && '暂无星级') || (volInfo.sum &lt;100 && '暂无星级') || (volInfo.sum >= 100 && volInfo.sum &lt;300 && '1星') || (volInfo.sum >= 300 && volInfo.sum &lt;600 && '2星') || (volInfo.sum >= 600 && volInfo.sum &lt;1000 && '3星') || (volInfo.sum >= 1000 && '4星')}}</span>
+              </li>
+              <li class="grid-item g-16">
+                <i>区域：</i>
+                <span>{{volInfo.albp0025}}</span>
+              </li>
+              <li class="grid-item g-8">
+                <i>服务时长：</i>
+                <span>{{volInfo.sum || '0.0'}}</span><span>小时</span>
+              </li>
+              <li class="grid-item g-8">
+                <i>注册日期：</i>
+                <span>{{volInfo.albp0062 | ellipsisNos(10)}}</span>
+              </li>
+              <li class="grid-item g-8">
+                <i>排名：</i>
+                <span>999+</span>
+              </li>
+              <li class="grid-item g-8">
+                <i>积分：</i>
+                <span>0</span>
+              </li>
+              <!--<li class="grid-item g-8">
+                <i>志愿者编号：</i>
+                <span>{{volInfo.albp0029}}</span>
+              </li>-->
+              <li class="grid-item g-16">
+                <i>服务评价：</i>
+                <span>守时程度：5.0    服务态度：5.0    专业水平：5.0</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="tabbar row w" style="margin-top:20px;">
+          <div class="col v-t">
+            <span class="active">特长和服务经历</span>
+            <span>加入的项目</span>
+            <span>加入的团体</span>
+          </div>
+          <div class="col v-m t-r">
+            <a href="javascript:void(0);" @click="sendMessage(volInfo.albp0029,volInfo.albp0031)" class="button button-normal">给他发站内信</a>
+          </div>
+        </div>
+        <!-- 特长和服务经历 -->
+        <div class="tabbar-down" style="margin: 10px;line-height: 200%;">
+          <p style="color: #008D03;"><span>特长：</span></p>
+          <span>{{volInfo.strengths || '无'}}</span>
+          <p style="color: #008D03;"><span>服务经历：</span></p>
+          <span>{{volInfo.albp0040 || '无'}}</span>
+        </div>
+        <!-- 加入的项目 -->
+        <div class="tabbar-down" style="display:none;">
+          <table class="table-list">
+            <colgroup>
+              <col width="50%">
+              <col width="25%">
+              <col width="25%">
+            </colgroup>
+            <tbody>
+            <tr>
+              <th>项目名称</th>
+              <th>立项日期</th>
+              <th>项目状态</th>
+            </tr>
+            <tr v-if="!projectList.length"><td colspan="3" style="text-align: center;border-bottom: 1px #F6F3F7;"><img src="../../assets/img/js-wujilu.png"/></td></tr>
+            <tr v-for="(el,index) in projectList" :key="index">
+              <td class="left">
+                <span @click="$utilroutes.toProjectInfo(el.id,el.albx0021)" class="c-danger pointer" v-if="el.albx0015<=7 || el.albx0015==12">{{el.albx0002 | ellipsis(25)}}</span>
+                <span v-else>{{el.albx0002 | ellipsis(25)}}</span>
+              </td>
+              <td class="left">{{el.albx0031 | ellipsisNos(10)}}</td>
+              <td class="left"><span v-show="el.albx0015==8 || el.albx0015==9 || el.albx0015==11">{{(el.albx0015==8 && '暂停') ||(el.albx0015==9 && '作废') || (el.albx0015==11 && '停用') }}</span><i v-show="el.albx0015<=7 || el.albx0015==12">{{((el.albx0015==3 || el.albx0015==4 || el.albx0015==5) && '运行中') || (el.albx0015==6 && '手工结项') || (el.albx0015==7 && '自动结项')|| (el.albx0015==12 && '补录') }}</i></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- 加入的团体 -->
+        <div class="tabbar-down" style="display:none;">
+          <table class="table-list">
+            <colgroup>
+              <col width="50%">
+              <col width="25%">
+              <col width="25%">
+            </colgroup>
+            <tbody>
+            <tr>
+              <th>团体名称</th>
+              <th>成员</th>
+              <th>成立日期</th>
+            </tr>
+            <tr v-if="!groupList.length"><td colspan="3" style="text-align: center;border-bottom: 1px #F6F3F7;"><img src="../../assets/img/js-wujilu.png"/></td></tr>
+           <tr v-for="(el,index) in groupList" :key="index">
+              <td class="left">
+                <em @click="$utilroutes.toGroupInfo(el.id,el.albe0012)" :title="el.albe0002" class="c-danger pointer">{{el.albe0002 | ellipsis(25)}}</em>
+              </td>
+              <td class="left">{{el.albe0056 || '0'}}</td>
+              <td class="left">{{el.albe0015 | ellipsisNos(10)}}</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        <div v-if="nowIndex == 1 || nowIndex == 2">
+          <paging :pageCount="tolPage"
+                  :rangePage="pageSize"
+                  :initPage="pageNow"
+                  :totals="tolCount"
+                  :val="jumpPage"
+                  @pageEvent="pageEvent">
+          </paging>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+  const paging =()=>import('@/components/page/paginationRed.vue');//分页
+  import avatar from '../../assets/img/mruser.png';
+
+
+export default {
+  name: 'volinfo',
+  components : {
+    paging//分页
+  },
+  data:function (){
+    return {
+      context:this.common.getUrl(),
+      routeDefine: this.$route.params.define,
+      userInfo:{},
+      volnum:'',//志愿者编号
+      albp0020:'',//志愿者服务区域（不一定是当前服务区域）
+      volInfo:{},//志愿者信息
+      groupList:{},//加入团体
+      projectList:{},//加入项目
+      nowIndex:'',
+      tolCount:0,//总条数
+      tolPage:0,//总页数
+      pageSize:8,//每页条数
+      pageNow:1,//当前页
+      jumpPage:1
+    };
+  },
+  created() {
+    window.Vues = this;//主体vue实例挂载
+    this.getUserInfo();
+    this.volnum = this.$route.params.data1;
+    this.albp0020 = this.$route.params.data2;
+    this.getVolInfo();
+  },
+  mounted() {
+    this.setData();
+  },
+  methods:{
+    getUserInfo:function () {
+      this.utilscommit.request('nvsi_getUserInfo',null,this.userInfoCheck)
+    },
+    userInfoCheck:function (result) {
+      if(result.data)this.userInfo = result.data;
+    },
+    setData:function () {
+      $('.tabbar span').each(function(idx, el){
+        $(el).click(function(){
+          Vues.nowIndex = idx;
+          if (idx == 1 || idx == 2){//刷新分页
+            Vues.tolPage = 0;
+            Vues.getList();
+          }
+          $(this).addClass('active').siblings().removeClass('active');
+          $('.tabbar-down').eq(idx).show().siblings('.tabbar-down').hide()
+        })
+      });
+    },
+    pageEvent:function(e){//分页
+      this.getList();
+    },
+    getList:function () {
+      if (this.nowIndex == 1) {
+        this.utilscommit.request('nvsi_listVolJoinProject',{volnum:this.volnum,pageNow:this.pageNow,pageSize:this.pageSize},this.projectBack)
+      } else if (this.nowIndex == 2) {
+        this.utilscommit.request('nvsi_listVolJoinGroup',{volnum:this.volnum,pageNow:this.pageNow,pageSize:this.pageSize},this.orgBack)
+      }
+    },
+    projectBack:function (result) {
+       if(result && result.data) {
+          this.projectList = result.data;
+          this.common.getTolData(this,result);
+        } else {
+          this.projectList = {};
+          this.common.getTolData(this);
+        }
+    },
+    orgBack:function (result) {
+        if(result && result.data) {
+          this.groupList = result.data;
+          this.common.getTolData(this,result);
+          } else {
+          this.groupList = {};
+          this.common.getTolData(this);
+        }
+    },
+    getVolInfo:function () {
+      this.utilscommit.request('nvsi_getVolInfoByNum',{'volnum':this.volnum,'albp0020':this.albp0020},this.volInfoBack);
+    },
+    volInfoBack:function (result) {
+      if (result && result.data) {
+        this.volInfo = result.data;
+      }
+    },
+    sendMessage(acceptId,userid) {//发站内信
+      if(this.userInfo) {
+        if (this.userInfo.albp0056 == '1') {
+          this.common.addCookie("msg",2,0.2);
+          this.$router.push({ name:'message',params:{define:this.routeDefine,data1:acceptId,data2:userid}});
+        } else {
+          const path = this.common.getCookie('mgpath');
+          if (path) {
+            window.open(path);
+          } else {
+            this.$swal('登录信息已过期，是否重新登录？',{buttons:['取消','确定']}).then(function (value) {
+              if (value) {
+                Vue.$router.push({name: "login",params: {define: Vue.$route.params.define,type:0}});
+              } else {
+                this.loginOut();
+                Vue.$router.go(0);//刷新页面
+              }
+            });
+          }
+        }
+      } else {
+        this.$router.push({name: "login",params: {define: this.routeDefine,type:0}});
+      }
+    },
+    imgError:function (el) {
+      el.target.src = avatar;
+    },
+  }
+
+}
+
+</script>
+
+
+<style>
+  .table-list th{
+    text-align: left;
+  }
+</style>
+
+
+

@@ -1,0 +1,614 @@
+<template>
+  <li class="col v-t white tab-container">
+    <div class="tabbar tabbar-tight mb-20">
+      <span class="active">收件箱</span>
+      <span>发件箱</span>
+      <span id="sendMessage" class="hides">发站内信</span>
+    </div>
+    <div class="tabbar-down">
+      <table class="user-table">
+        <colgroup>
+          <col width="10%" />
+          <col width="10%" />
+          <col width="30%" />
+          <col width="20%" />
+          <col width="20%" />
+          <col width="10%" />
+        </colgroup>
+        <tr>
+          <th>类型</th>
+          <th>状态</th>
+          <th>标题</th>
+          <th>发件人</th>
+          <th>发信时间</th>
+          <th>操作</th>
+        </tr>
+        <tr v-if="!inMessageList">
+          <td
+            colspan="6"
+            style="text-align: center;border-bottom: 1px #F6F3F7;"
+          >
+            <img src="../../assets/img/js-wujilu.png" />
+          </td>
+        </tr>
+        <tr v-for="(el, index) in inMessageList" :key="index">
+          <td class="left">
+            {{
+              (el.albx0153 == 1 && "用户信件") ||
+                (el.albx0153 == 2 && "团体信件") ||
+                (el.albx0153 == 3 && "系统信件")
+            }}
+          </td>
+          <td class="left">
+            {{ (el.albx0154 == 1 && "已读") || (el.albx0154 == 0 && "未读") }}
+          </td>
+          <td class="left">
+            <em
+              class="pointer"
+              @click="showContent($event, el.id, el.albx0154)"
+              title="点击阅读详情"
+              style="word-wrap: break-word;"
+              >{{ el.albx0152 }}</em
+            >
+            <div
+              style="word-wrap: break-word;display: none;border-top: 1px dotted #ccc;"
+            >
+              {{ el.albx0155 }}
+            </div>
+          </td>
+          <td class="left">
+            <em
+              @click="toUserDetail(el.albx0153, el.albx0156, el.albx0160)"
+              class="pointer"
+              :class="{ name_color: el.albx0153 == 1 }"
+              >{{ el.albx0161 }}</em
+            >
+          </td>
+          <td class="left">{{ el.albx0158 | ellipsisNos(10) }}</td>
+          <td class="left">
+            <em
+              class="pointer"
+              @click="
+                replay(
+                  $event,
+                  el.albx0156,
+                  el.albx0160,
+                  el.albx0152,
+                  el.albx0153
+                )
+              "
+              >回复</em
+            >
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div class="tabbar-down" style="display:none;">
+      <!-- 发件箱 -->
+      <table class="user-table">
+        <colgroup>
+          <col width="10%" />
+          <col width="10%" />
+          <col width="30%" />
+          <col width="20%" />
+          <col width="20%" />
+          <col width="10%" />
+        </colgroup>
+        <tr>
+          <th>类型</th>
+          <th>状态</th>
+          <th>标题</th>
+          <th>收件人</th>
+          <th>发信时间</th>
+          <th>操作</th>
+        </tr>
+        <tr v-if="!outMessageList">
+          <td
+            colspan="6"
+            style="text-align: center;border-bottom: 1px #F6F3F7;"
+          >
+            <img src="../../assets/img/js-wujilu.png" />
+          </td>
+        </tr>
+        <tr v-for="(el, index) in outMessageList" :key="index">
+          <td class="left">
+            {{
+              (el.albx0153 == 1 && "用户信件") ||
+                (el.albx0153 == 2 && "团体信件") ||
+                (el.albx0153 == 3 && "系统信件")
+            }}
+          </td>
+          <td class="left">
+            {{ (el.albx0154 == 1 && "已读") || (el.albx0154 == 0 && "未读") }}
+          </td>
+          <td class="left">
+            <em
+              class="pointer"
+              @click="showContent($event, el.id)"
+              title="点击阅读详情"
+              style="word-wrap: break-word;"
+              >{{ el.albx0152 }}</em
+            >
+            <div
+              style="word-wrap: break-word;display: none;border-top: 1px dotted #ccc;"
+            >
+              {{ el.albx0155 }}
+            </div>
+          </td>
+          <td class="left">
+            <em
+              @click="toUserDetail(el.albx0159, el.albx0157, el.albx0164)"
+              class="pointer"
+              :class="{ name_color: el.albx0159 == 1 }"
+              >{{ el.albx0165 }}</em
+            >
+          </td>
+          <td class="left">{{ el.albx0158 | ellipsisNos(10) }}</td>
+          <td class="left">
+            <em @click="deleteOut(el.id)" class="pointer">删除</em>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div v-if="nowIndex == 1 || nowIndex == 0">
+      <paging
+        :pageCount="tolPage"
+        :rangePage="pageSize"
+        :initPage="pageNow"
+        :totals="tolCount"
+        :val="jumpPage"
+        @pageEvent="pageEvent"
+      >
+      </paging>
+    </div>
+    <div class="tabbar-down" style="display:none;">
+      <!-- 发站内信 -->
+      <form id="form">
+        <div class="grid g-14 auto">
+          <div class="form">
+            <p class="form-label"><em>*</em>标题：</p>
+            <input
+              type="text"
+              id="title"
+              v-model="title"
+              @blur="titleCheck"
+              maxlength="50"
+              placeholder="请输入标题"
+            />
+          </div>
+          <span
+            class="form-error"
+            style="font-size: 14px;padding-left: 20px;"
+            id="titleTips"
+          ></span>
+          <div class="form">
+            <p class="form-label"><em>*</em>收件人：</p>
+            <input
+              type="text"
+              id="addressee"
+              v-model="addresseeName"
+              @blur="addresseeCheck"
+              maxlength="25"
+              oninput="this.value=this.value.replace(/[^\w\_\.'']/g,'');"
+              readonly
+            />
+          </div>
+          <span
+            class="form-error"
+            style="font-size: 14px;padding-left: 20px;"
+            id="addresseeTips"
+          ></span>
+          <div class="form">
+            <p class="form-label"><em>*</em>内容：</p>
+            <textarea
+              id="content"
+              cols="30"
+              rows="5"
+              v-model="content"
+              @blur="contentCheck"
+              class="textarea"
+              maxlength="200"
+              placeholder="请输入内容"
+            ></textarea>
+          </div>
+          <span
+            class="form-error"
+            style="font-size: 14px;padding-left: 20px;"
+            id="contentTips"
+          ></span>
+          <div class="pt-30 pb-40 t-c">
+            <a
+              href="javascript:void(0);"
+              @click="send"
+              class="button"
+              style="width:200px;"
+              >发站内信</a
+            >
+          </div>
+        </div>
+      </form>
+    </div>
+  </li>
+</template>
+
+<script>
+const paging = () => import("@/components/page/paginationRed.vue"); //分页
+
+export default {
+  components: { paging },
+  data() {
+    return {
+      routeDefine: this.$route.params.define,
+      userInfo: this.$store.getters.getUser, //账号信息
+      basicInfo: this.$store.getters.getBasic, //志愿者信息
+      inMessageList: {}, //收件列表
+      outMessageList: null, //发件列表
+      nowIndex: "", //当前tab页
+      nowA: "", //当前标签
+      addressee: "", //收件人用户名
+      addresseeName: "", //收件人姓名
+      addresseeType: "", //收件人类型
+      addresseeId: "", //收件人id（团体id或志愿者编号）
+      addresseeNc: "", //收件人昵称
+      addresseeImg: "", //收件人头像
+      addresseeArea: "", //收件人区域
+      title: "", //标题
+      content: "", //内容
+      addresseeFlag: false, //收件人是否存在
+      tolCount: 0, //总条数
+      tolPage: 0, //总页数
+      pageSize: 8, //每页条数
+      pageNow: 1, //当前页
+      jumpPage: 1
+    };
+  },
+  created() {
+    window.Vues = this; //主体vue实例挂载
+    this.nowIndex = this.common.getCookie("msg");
+    this.common.deleteCookie("msg");
+    if (this.nowIndex == 2) {
+      this.getShowMessage();
+      var acceptId = this.$route.params.data1; //收件人id
+      var userid = this.$route.params.data2; //当前用户id
+      if (acceptId && userid) {
+        this.utilscommit.request(
+          "nvsi_getUserById",
+          { id: userid },
+          this.userByIdBack
+        );
+        this.addresseeId = acceptId;
+      }
+    }
+    this.getList();
+  },
+  mounted() {
+    this.setData();
+  },
+  methods: {
+    userByIdBack: function(result) {
+      if (result && result.data) {
+        this.addressee = result.data.albp0052;
+        this.addresseeType = result.data.type;
+        this.addresseeCheck();
+      }
+    },
+    setData: function() {
+      $(".tabbar span").each(function(idx, el) {
+        if (Vues.nowIndex) {
+          $(el).removeClass("active");
+          if (idx == Vues.nowIndex) {
+            $(el).addClass("active");
+          }
+          $(".tabbar-down")
+            .eq(Vues.nowIndex)
+            .show()
+            .siblings(".tabbar-down")
+            .hide();
+        }
+        $(el).click(function() {
+          Vues.nowIndex = idx;
+          Vues.common.addCookie("msg", idx, 0.2);
+          if (idx == 0 || idx == 1) {
+            //刷新收件箱
+            Vues.pageNow = 1;
+            Vues.getList();
+          } else if (idx == 2) {
+            //刷新发站内信
+            Vues.addressee = "";
+            Vues.addresseeId = "";
+            Vues.title = "";
+            Vues.content = "";
+          }
+          $(this)
+            .addClass("active")
+            .siblings()
+            .removeClass("active");
+          $(".tabbar-down")
+            .eq(idx)
+            .show()
+            .siblings(".tabbar-down")
+            .hide();
+        });
+      });
+    },
+    pageEvent: function(e) {
+      //分页
+      this.getList();
+    },
+    getList() {
+      if (this.nowIndex == 0) {
+        this.utilscommit.request(
+          "nvsi_listInBox",
+          { pageNow: this.pageNow, pageSize: this.pageSize },
+          this.inBack
+        );
+      } else if (this.nowIndex == 1) {
+        this.utilscommit.request(
+          "nvsi_listOutBox",
+          { pageNow: this.pageNow, pageSize: this.pageSize },
+          this.outBack
+        );
+      }
+    },
+    inBack(result) {
+      if (result) {
+        this.inMessageList = result.data;
+        this.common.getTolData(this, result);
+      } else {
+        this.inMessageList = {};
+        this.common.getTolData(this);
+      }
+    },
+    outBack: function(result) {
+      if (result) {
+        this.outMessageList = result.data;
+        this.common.getTolData(this, result);
+      } else {
+        this.outMessageList = null;
+        this.common.getTolData(this);
+      }
+    },
+    showContent: function(e, msId, albx0154) {
+      //查看内容
+      this.nowA = e.target;
+      if (this.nowA.nextSibling.nextSibling.style.display == "") {
+        this.nowA.nextSibling.nextSibling.style.display = "none";
+      } else if (this.nowA.nextSibling.nextSibling.style.display == "none") {
+        // console.log("打开收件箱详情 albx0154："+albx0154)
+        this.nowA.nextSibling.nextSibling.style.display = "";
+        if (this.nowIndex == 0 && albx0154 == "0") {
+          // console.log("开始将未读变成已读")
+          this.utilscommit.request(
+            "nvsi_getInStandLetter",
+            { id: msId },
+            this.instandStateBack
+          );
+        }
+      }
+    },
+    instandStateBack: function(result) {
+      if (result && result.data) {
+        this.getList();
+      }
+    },
+    replay: function(e, albx0156, areaid, title, type) {
+      //回复收件
+      if (title && title.length > 3 && title.substring(0, 3) == "回复：") {
+        title = title.substring(3, title.length);
+      }
+      this.utilscommit.request(
+        "nvsi_getUserByIdAndArea",
+        { albx0156: albx0156, albx0160: areaid, albx0153: type },
+        function(result) {
+          if (result && result.data) {
+            Vues.addressee = result.data.albp0052;
+            Vues.addresseeType = type;
+            Vues.addresseeId = albx0156;
+            Vues.title = "回复：" + title;
+            Vues.nowIndex = 2;
+            Vues.common.addCookie("msg", 2, 0.2);
+            $(".tabbar-down")
+              .eq(2)
+              .show()
+              .siblings(".tabbar-down")
+              .hide();
+            $(".tabbar span").each(function(idx, el) {
+              $(el).removeClass("active");
+              if (idx == 2) {
+                $(el).addClass("active");
+              }
+            });
+            Vues.addresseeCheck();
+          } else {
+            Vues.$swal("未获取到要回复的用户信息！", { buttons: "确定" });
+          }
+        }
+      );
+    },
+    deleteOut: function(messageId) {
+      //删除发件
+      if (this.userInfo) {
+        this.$swal("确认删除发件？", { buttons: ["取消", "确定"] }).then(
+          value => {
+            if (value) {
+              Vues.utilscommit.request(
+                "nvsi_deleteOutLetter",
+                { id: messageId },
+                Vues.deleteBack
+              );
+            }
+          }
+        );
+      } else {
+        Vueh.loginOut(); //触发页眉的退出事件
+      }
+    },
+    deleteBack: function(result) {
+      if (result && result.data) {
+        this.$router.go(0); //刷新页面
+      } else {
+        this.$swal("删除失败！", { buttons: "确定" });
+      }
+    },
+    toUserDetail(type, id, areaid) {
+      if (type == 1) {
+        this.$utilroutes.toUserInfo(id, areaid);
+      } else if (type == 2) {
+        this.$utilroutes.toGroupInfo(id, areaid);
+      }
+    },
+    addresseeCheck: function() {
+      //收件人用户名校验
+      this.addresseeFlag = false;
+      var tip = "";
+      if (!this.addressee) {
+        tip = "收件人不能为空";
+        this.formTip("addressee", tip);
+      } else {
+        this.utilscommit.request(
+          "nvsi_getInfoByUserName",
+          { username: this.addressee, type: this.addresseeType },
+          this.addressIdBack
+        );
+      }
+    },
+    addressIdBack: function(result) {
+      if (result) {
+        if (result.data) {
+          this.addresseeFlag = true;
+          if (this.addresseeType == 1) {
+            this.addresseeArea = result.data.albp0020; //区域
+            this.addresseeId = result.data.albp0029; //编号
+            this.addresseeImg = result.data.albp0027; //头像
+            this.addresseeNc = result.data.albp0084; //昵称
+            this.addresseeName = result.data.albp0003; //姓名
+          } else if (this.addresseeType == 2) {
+            this.addresseeArea = result.data.albe0012; //区域
+            this.addresseeId = result.data.albp0055; //id
+            this.addresseeImg = result.data.albe0025; //头像
+            this.addresseeNc = result.data.albe0002; //昵称
+            this.addresseeName = result.data.albe0002; //姓名
+          }
+        } else {
+          this.formTip("addressee", result.message);
+        }
+      } else {
+        this.formTip("addressee", "收件人不存在");
+      }
+    },
+    titleCheck: function() {
+      //标题校验
+      var tip = "";
+      var flag = true;
+      if (!this.title) {
+        tip = "标题不能为空";
+        flag = false;
+      }
+      this.formTip("title", tip);
+      return flag;
+    },
+    contentCheck: function() {
+      //内容校验
+      var tip = "";
+      var flag = true;
+      if (!this.content) {
+        tip = "内容不能为空";
+        flag = false;
+      }
+      this.formTip("content", tip);
+      return flag;
+    },
+    send: function() {
+      if (this.userInfo) {
+        if (this.addresseeFlag && this.titleCheck() && this.contentCheck()) {
+          var messageType = "";
+          if (this.userInfo.albp0087 == "1") {
+            //用户信件
+            messageType = "1";
+          } else {
+            //团体信件
+            messageType = "2";
+          }
+          var data2 = {
+            albx0152: this.title, //标题
+            albx0153: messageType, //类型
+            albx0154: "0", //状态
+            albx0155: this.content, //内容
+            albx0160: this.basicInfo.albp0020, //发件人区域
+            albx0161: this.basicInfo.albp0003, //发件人姓名
+            albx0162: this.basicInfo.albp0027, //发件人头像
+            albx0163: this.basicInfo.albp0084, //发件人昵称
+            albx0157: this.addresseeId, //收件人
+            albx0159: this.addresseeType, //收件人类型
+            albx0164: this.addresseeArea, //收件人区域
+            albx0165: this.addresseeName, //收件人姓名
+            albx0166: this.addresseeImg, //收件人头像
+            albx0167: this.addresseeNc //收件人昵称
+          };
+          this.utilscommit.request(
+            "nvsi_insertStandLetter",
+            data2,
+            this.sendBack
+          );
+        }
+      } else {
+        this.$utilroutes.toLogin();
+        //this.$router.push({name: "login",params: {define: this.routeDefine}});
+      }
+    },
+    sendBack: function(result) {
+      if (result.data) {
+        this.$swal("发送成功！", { buttons: "确定" });
+        this.addressee = this.addresseeName = this.addresseeType = this.addresseeId = this.addresseeNc = this.addresseeImg = this.addresseeArea = this.title = this.content = this.sendName =
+          "";
+        //打开发件箱
+        this.nowIndex = 1;
+        this.getList();
+        $(".tabbar-down")
+          .eq(1)
+          .show()
+          .siblings(".tabbar-down")
+          .hide();
+        $(".tabbar-tight span")
+          .eq(1)
+          .addClass("active");
+      } else {
+        this.$swal("发送失败！", { buttons: "确定" });
+      }
+    },
+    formTip: function(el, tip) {
+      $("#" + el + "Tips")
+        .html(tip)
+        .css("color", "red");
+    },
+    getShowMessage: function() {
+      //关闭发站内信页面
+      $("#sendMessage").removeClass("hides");
+    },
+    getCloseMessage: function() {
+      //打开发站内信页面
+      $("#sendMessage").addClass("hides");
+    }
+  },
+  watch: {
+    nowIndex: function(to, from) {
+      //监听发站内信是否有收件人
+      if (this.nowIndex == 2 && this.addresseeId) {
+        this.getShowMessage(); //关闭发站内信页面
+      } else {
+        this.getCloseMessage();
+      }
+    }
+  }
+};
+</script>
+
+<style scoped>
+.user-table th {
+  text-align: left;
+  padding: 10px;
+}
+.hides {
+  display: none !important;
+}
+</style>

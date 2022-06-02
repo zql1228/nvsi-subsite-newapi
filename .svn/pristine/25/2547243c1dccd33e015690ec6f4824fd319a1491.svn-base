@@ -1,0 +1,711 @@
+<template>
+  <li class="col v-t white tab-container">
+    <div class="tabbar tabbar-tight mb-20 row w">
+      <span class="col v-m">我的项目</span>
+      <div class="col v-m t-r">
+        <a class="button button-normal" href="javascript:void(0);" @click="getPro">项目同步</a>
+        <router-link tag="a" class="button button-normal" href="javascript:void(0);" :to="{name:'project',params:{define:routeDefine}}">参加更多项目</router-link>
+      </div>
+    </div>
+    <table class="user-table">
+      <colgroup>
+        <col width="25%">
+        <col width="18%">
+        <col width="10%">
+        <col width="15%">
+        <col width="10%">
+        <col width="8%">
+        <col width="14%">
+      </colgroup>
+      <tr>
+        <th>项目名称</th>
+        <th>联系方式</th>
+        <th>加入时间</th>
+        <th>岗位</th>
+        <th>服务时长</th>
+        <th>状态</th>
+        <th>操作</th>
+      </tr>
+      <tr v-if="!myProjectList.length"><td colspan="7" style="text-align: center;border-bottom: 1px #F6F3F7;"><img src="../../assets/img/js-wujilu.png"/></td></tr>
+      <tr v-for="(el,index) in myProjectList" :key="index">
+        <td class="left">
+          <em @click="$utilroutes.toProjectInfo(el.id,el.albx0021)" :title="el.albx0002" class="pointer">{{el.albx0002 | ellipsis(18)}}</em>
+          <p>{{el.albe0002 | ellipsis(18)}}</p>
+        </td>
+        <td class="left">
+          <p>
+            <span v-text="el.albx0025"></span>
+            <span style="margin: 0 6px">{{(el.albx0027 == '1' && (el.albx0026)) || (el.albx0029 == '1' && (el.albx0028)) || ''}}</span>
+          </p>
+          <span><button @click="sendMessage(el.albx0011)" class="button button-line button-line-mini pointer">给他发站内信</button></span>
+        </td>
+        <td class="left">{{el.albx0055 | ellipsisNos(10,'--')}}</td><!-- {{(el.albx0055 || el.albx0056) | ellipsisNos(10)}} -->
+        <td class="left">{{el.albx0072}}</td>
+        <td class="left"><em @click="toServiceTimeList" class="pointer">{{el.servicetimesum | addZero}}小时</em></td>
+        <td class="left">
+          <span style="color: #cc0000" v-if="el.albx0054 == 4">邀请中</span>
+          <span style="color: #cc0000" v-if="el.albx0054 == 1">申请中</span>
+          <span style="color: #cc0000" v-if="el.albx0054 == 7">已拒绝</span>
+          <i v-if="el.albx0054 == 2 || el.albx0054 == 3 || el.albx0054 == 5 || el.albx0054 == 6">已加入</i>
+        </td>
+        <td class="left">
+          <em v-if="el.albx0054==7" class="pointer" style="margin-right: 6px;" @click="applyProAgain(el.lbx02id,el.projectid,el.jobid)">再次申请</em>
+          <em v-if="el.albx0054==4" class="pointer" style="margin-right: 6px;" @click="agreeOrgInvite(el.lbx02id,el.jobid,el.projectid)">同意</em>
+          <em v-if="el.albx0054==4" class="pointer" style="margin-right: 6px;" @click="refuseOrgInvite(el.lbx02id,el.jobid)">拒绝</em>
+          <em v-if="(el.servicetimesum=='0'&&(el.albx0054==2||el.albx0054==3||el.albx0054==5||el.albx0054==6) && (el.albx0015==3 || el.albx0015==4))" class="pointer" style="margin-right: 6px;" @click="outProject(el.albx0011,el.id,el.albx0021,el.jobid,el.lbx02id)">脱离</em>
+          <em v-if="(el.servicetimesum=='0'&&(el.albx0054==2||el.albx0054==3||el.albx0054==5||el.albx0054==6))" class="pointer" style="margin-right: 6px;" @click="applyTime(el.id,el.albx0011,el.albx0002)">申请时长</em>
+          <em v-if="el.albx0054==1 || el.albx0054==7" class="pointer" style="margin-right: 6px;" @click="deleteApplyOrg(el.lbx02id,el.projectid,el.jobid)">删除</em><!-- 删除 等同于 取消申请 -->
+          <em v-if="el.albx0054==1" class="pointer" style="margin-right: 6px;" @click="changeJob(el.id,el.jobid,el.albx0021,el.lbx02id)">更换岗位</em>
+          <em v-if="(el.servicetimesum>0&&!el.pjid)&&(el.albx0054==2||el.albx0054==3||el.albx0054==5||el.albx0054==6)&&(el.albx0015==6 || el.albx0015==7)" class="pointer" style="margin-right: 6px;" @click="evaluate(el.id,el.albx0011,el.albx0021)">评价</em>
+          <em v-if="(el.servicetimesum>0&&!el.pjid)&&(el.albx0054==2||el.albx0054==3||el.albx0054==5||el.albx0054==6)" class="pointer" style="margin-right: 6px;" @click="applyTime(el.id,el.albx0011,el.albx0002)">申请时长</em>
+          <em v-if="(el.servicetimesum>0&&el.pjid)&&(el.albx0054==2||el.albx0054==3||el.albx0054==5||el.albx0054==6)" class="pointer" style="margin-right: 6px;" @click="showEvaluate(el.id,el.albx0011,el.albx0021)">查看</em>
+          <em v-if="(el.servicetimesum>0&&el.pjid)&&(el.albx0054==2||el.albx0054==3||el.albx0054==5||el.albx0054==6)" class="pointer" style="margin-right: 6px;" @click="applyTime(el.id,el.albx0011,el.albx0002)">申请时长</em>
+        </td>
+      </tr>
+    </table>
+    <paging :pageCount="tolPage"
+            :rangePage="pageSize"
+            :initPage="pageNow"
+            :totals="tolCount"
+            :val="jumpPage"
+            @pageEvent="pageEvent">
+    </paging>
+
+     <!-- 申请时长 -->
+    <div class="mask time">
+      <form id="form">
+        <div class="mask-info" style="width:700px;max-height:705px;margin-left:-350px;">
+          <div class="mask-header row w">
+            <div class="col v-m"><h2>申请时长</h2></div>
+            <div class="col v-m t-r"><a href="javascript:void(0);" @click="timeCloseMask" class="mask-close"><img src="../../assets/img/close.png" alt=""></a></div>
+          </div>
+          <div style="padding:20px 50px 0 50px;">
+            <div class="form">
+              <p class="form-label" v-text="'项目名称：' + projectName"></p>
+            </div>
+            <div class="form">
+              <p class="form-label" v-text="'已申请时长：' + appliedTime + '小时（审核中）'"></p>
+            </div>
+            <div class="form">
+              <p class="form-label"><em>*</em>活动开始时长：</p>
+              <date-picker :lang="lang" type="datetime" valueType="format" default-value="Date" v-model="startTime" @close="getApplyTime()" style="width: 50%" placeholder="请输入活动开始时长" :disabled-date="common.notAfterToday"></date-picker>
+              <!-- <input type="text" v-model="time" @blur="applyTimeCheck" maxlength="5">
+              <span class="form-label" style="position:absolute;right:10px;top: 40px;">小时</span> -->
+            </div>
+            <span class="form-error" style="padding-left: 20px;font-size: 14px;" id="startTimeTips"></span>
+            <div class="form">
+              <p class="form-label"><em>*</em>活动结束时长：</p>
+              <date-picker :lang="lang" type="datetime" valueType="format" default-value="Date" v-model="endTime" @close="getApplyTime()" style="width: 50%"  placeholder="请输入活动结束时长" :disabled-date="common.notAfterToday"></date-picker>
+            </div>
+            <span class="form-error" style="padding-left: 20px;font-size: 14px;" id="endTimeTips"></span>
+            <div class="form">
+              <p class="form-label"><em>*</em>时长：</p>
+              <input type="text" v-model="applyInfo.applyTime" maxlength="5"  placeholder="请输入时长" readonly>
+              <span class="form-label" style="position:absolute;right:10px;top: 40px;">小时</span>
+            </div>
+            <span class="form-error" style="padding-left: 20px;font-size: 14px;" id="applyTimeTips"></span>
+            <div class="form">
+              <p class="form-label"><em>*</em>备注：（如：2018-8-8上午8:00-9:00慰问养老院）</p>
+              <input type="text" v-model="applyInfo.remarks" @blur="remarksCheck" maxlength="50" placeholder="请输入备注">
+            </div>
+            <span class="form-error" style="padding-left: 20px;font-size: 14px;" id="remarksTips"></span>
+          </div>
+          <div class="form t-c">
+            <a href="javascript:void(0);" class="button" @click="onSubmitApply">提交</a>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- 更换岗位 -->
+    <div class="mask job">
+      <div class="mask-info" style="width:700px;max-height:705px;margin-left:-350px;">
+        <div class="mask-header row w">
+          <div class="col v-m"><h2>更换岗位</h2></div>
+          <div class="col v-m t-r"><a href="javascript:void(0);" @click="jobCloseMask" class="mask-close"><img src="../../assets/img/close.png" alt=""></a></div>
+        </div>
+        <div style="padding:20px 50px 0 50px;">
+          <div class="form">
+            <p class="form-label"><em>*</em>岗位：</p>
+            <div class="select">
+              <select v-model="job" id="changeJob">
+                <option v-for="(el,index) in jobList" :key="index" :value="el.id">{{el.albx0072}}</option>
+              </select>
+            </div>
+          </div>
+          <span class="form-error" style="padding-left: 20px;font-size: 14px;" id="jobTips"></span>
+        </div>
+        <div class="form t-c">
+          <a href="javascript:void(0);" class="button" @click="onChange">提交</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 评价 -->
+    <div class="mask evaluate">
+      <div class="mask-info" style="width:550px;margin-left:-275px;">
+        <div class="mask-header row w">
+          <div class="col v-m"><h2>评价</h2></div>
+          <div class="col v-m t-r"><a href="javascript:void(0);" @click="evaluateCloseMask" class="mask-close"><img src="../../assets/img/close.png" alt=""></a></div>
+        </div>
+        <div class="satisfy"><em style="color: #f00;">*</em><span>对项目开展培训的满意度：</span>
+          <star :row="1" :starOn="starOn" :starOff="starOff"></star>
+        </div>
+        <div class="satisfy"><em style="color: #f00;">*</em><span>与志愿团体合作的满意度：</span>
+          <star :row="2" :starOn="starOn" :starOff="starOff"></star>
+        </div>
+        <div class="satisfy"><em style="color: #f00;">*</em><span>项目执行与计划的满意度：</span>
+          <star :row="3" :starOn="starOn" :starOff="starOff"></star>
+        </div>
+        <div class="form" style="padding-left:0;">
+          <p class="form-label"><em style="color: #f00;">*</em>评价内容：</p>
+          <textarea class="textarea" rows="4" v-model="content" maxlength="200"></textarea>
+        </div>
+        <div class="pt-10 t-c"><a href="javascript:void(0);" class="button" style="width:200px;" @click="onEvaluateSubmit">保存评价</a></div>
+      </div>
+    </div>
+
+    <!-- 查看评价 -->
+    <div class="mask showEvaluate">
+      <div class="mask-info" style="width:550px;margin-left:-275px;">
+        <div class="mask-header row w">
+          <div class="col v-m"><h2>查看评价</h2></div>
+          <div class="col v-m t-r"><a href="javascript:void(0);" @click="hideEvaCloseMask" class="mask-close"><img src="../../assets/img/close.png" alt=""></a></div>
+        </div>
+        <div>
+          <p><span>我对志愿团体的评价</span></p>
+          <p class="satisfy"><span>对项目开展培训的满意度：</span><star ref="showNum1" :starOn="starOn" :starOff="starOff"></star><!-- <em class="c-danger">{{(volEvaluateInfo && volEvaluateInfo.albx0503 + '颗星') || ''}}</em> --></p>
+          <p class="satisfy"><span>与志愿团体合作的满意度：</span><star ref="showNum2" :starOn="starOn" :starOff="starOff"></star><!-- <em class="c-danger">{{(volEvaluateInfo && volEvaluateInfo.albx0504 + '颗星') || ''}}</em> --></p>
+          <p class="satisfy"><span>项目执行与计划的满意度：</span><star ref="showNum3" :starOn="starOn" :starOff="starOff"></star><!-- <em class="c-danger">{{(volEvaluateInfo && volEvaluateInfo.albx0505 + '颗星') || ''}}</em> --></p>
+          <p class="satisfy"><span>评价内容：</span><em class="c-danger">{{volEvaluateInfo && volEvaluateInfo.albx0508}}</em></p>
+        </div>
+        <div>
+          <p><span>志愿团体对我的评价</span></p>
+          <p class="satisfy"><span>守时程度：</span><star ref="showNum4" :starOn="starOn" :starOff="starOff"></star><!-- <em class="c-danger">{{(orgEvaluateInfo && orgEvaluateInfo.albx0463 + '颗星') || ''}}</em> --></p>
+          <p class="satisfy"><span>服务态度：</span><star ref="showNum5" :starOn="starOn" :starOff="starOff"></star><!-- <em class="c-danger">{{(orgEvaluateInfo && orgEvaluateInfo.albx0464 + '颗星') || ''}}</em> --></p>
+          <p class="satisfy"><span>专业水平：</span><star ref="showNum6" :starOn="starOn" :starOff="starOff"></star><!-- <em class="c-danger">{{(orgEvaluateInfo && orgEvaluateInfo.albx0465 + '颗星') || ''}}</em> --></p>
+          <p class="satisfy"><span>评价内容：</span><em class="c-danger">{{orgEvaluateInfo && orgEvaluateInfo.albx0468}}</em></p>
+        </div>
+      </div>
+    </div>
+  </li>
+
+</template>
+
+<script>
+  const paging =()=>import('@/components/page/paginationRed.vue');//分页
+  const star =()=>import('@/view/home/star.vue');//星星
+
+  export default {
+    name: 'myproject',
+    components : {
+      paging,
+      star,//星星插件
+    },
+    data(){
+      return {
+        routeDefine: this.$route.params.define,
+        userInfo:this.$store.getters.getUser,//账号信息
+        basicInfo:this.$store.getters.getBasic,//志愿者信息
+        myProjectList:{},//我的团体
+        appliedTime:'',//申请中的时长
+        applyInfo:{},//申请的信息
+        projectName:'',//申请的项目名
+        lineProjectId:'',
+        lineAreaid:'',
+        lineGroupId:'',
+        lineJobId:'',
+        jobList:{},//岗位列表
+        job:'',
+        projectId:'',
+        evaluateInfo:{},//评价信息
+        row1:'0',
+        row2:'0',
+        row3:'0',
+        content:"",//评价内容
+        volEvaluateInfo:'',//志愿者对团体评价
+        orgEvaluateInfo:'',//团体对志愿者评价
+        tolCount:0,//总条数
+        tolPage:0,//总页数
+        pageSize:8,//每页条数
+        pageNow:1,//当前页
+        jumpPage:1,
+        starOn:require('../../assets/img/star.png'),
+        starOff:require('../../assets/img/star1.png'),
+        lang :{//配置日期语音环境
+        formatLocale :{
+          firstDayOfWeek :1,
+        },
+        monthBeforeYear :false,
+      },
+        startTime:'',//活动开始时间
+        endTime:'',//活动结束时间
+        timeDifference:0.00,//时间差
+        lbx02id:'',//
+        jobid:'',//
+      };
+    },
+    created() {
+      window.Vues = this;//主体vue实例挂载
+      this.getProjectList();
+    },
+    methods:{
+      pageEvent:function(e){//分页
+        this.getProjectList();
+      },
+      getProjectList() {//我的项目列表
+        this.utilscommit.request('nvsi_listVolMyProject',{pageNow:this.pageNow,pageSize:this.pageSize},this.projectListBack)
+      },
+      projectListBack(result) {//我的项目列表--结果
+        if(result && result.data) {
+         /*  var myProjectList=result.data;
+           myProjectList.forEach(element => {
+            if(element && element.albx0026){
+               element.albx0026=this.common.ecryptPhone(element.albx0026);
+            }
+             if(element && element.albx0028)element.albx0028=this.common.ecryptPhone(element.albx0028);
+          });
+          console.log(myProjectList) 
+          this.myProjectList = myProjectList;*/
+          this.myProjectList=result.data;
+          this.common.getTolData(this,result);
+        } else {
+          this.myProjectList = {};
+          this.common.getTolData(this);
+        }
+      },
+      toServiceTimeList() {
+        this.$router.push({ name:'myservicetime',params:{define:this.routeDefine}});
+      },
+      sendMessage(acceptId) {//发站内信
+        if(this.userInfo) {
+          this.utilscommit.request("nvsi_selectCountInfo",{groupid:acceptId}, this.sendMessageBack);
+        } else {
+          this.$utilroutes.toLogin();
+        }
+      },
+      sendMessageBack(data){
+        if(data && data.data && data.data.id){
+          this.common.addCookie("msg",2,0.2);
+          this.$router.push({ name:'message',params:{define:this.routeDefine,data1:data.data.albp0055,data2:data.data.id}});
+        }
+      },
+      applyProAgain(lbx02id,projectid,jobid){//再次申请
+          this.utilscommit.request("nvsi_operateVolMyProjectForWeb",{type:2,lbx02id:lbx02id,projectid:projectid,jobid:jobid}, this.applyProAgainBack);
+      },
+      applyProAgainBack(data){//再次申请响应
+        if(data && data.data){
+          this.getProjectList();
+          this.$swal('申请成功',{buttons:'确定'});
+        }else{
+          this.$swal('申请失败',{buttons:'确定'});
+        }
+      },
+      agreeOrgInvite(lbx02id,jobid,projectid) {//同意邀请
+        if(this.userInfo) {
+          this.$swal('确认同意邀请？',{buttons:['取消','确定']}).then(function(value){
+            if (value) {
+              Vues.utilscommit.request("nvsi_updateVolAgreeToJob",{lbx02id:lbx02id,jobid:jobid,projectid:projectid}, Vues.agreeBack);
+            }
+          });
+        } else {
+          this.$utilroutes.toLogin();
+        }
+      },
+      agreeBack(result) {
+        if(result) {
+          if (result.data) {
+            this.$router.go(0);//刷新页面
+          } else {
+            this.$swal(result.message,{buttons:'确定'});
+          }
+        }else{
+          this.$swal('同意邀请失败',{buttons:'确定'});
+        }
+      },
+      refuseOrgInvite(lbx02id,jobid) {//拒绝邀请
+        if(this.userInfo) {
+          this.$swal('确认拒绝邀请？',{buttons:['取消','确定']}).then(function(value){
+            if (value) {
+              Vues.utilscommit.request("nvsi_updateVolNotToJob",{lbx02id:lbx02id,jobid:jobid}, Vues.refuseBack);
+            }
+          });
+        } else {
+          this.$utilroutes.toLogin();
+        }
+      },
+      refuseBack(result) {
+        if(result) {
+          if (result.data) {
+            this.$router.go(0);//刷新页面
+          } else {
+            this.$swal(result.message,{buttons:'确定'});
+          }
+        }else{
+          this.$swal('拒绝邀请失败',{buttons:'确定'});
+        }
+      },
+      outProject(groupId,projectId,areaid,jobid,lbx02id) {//脱离项目
+        if(this.userInfo) {
+          this.lineProjectId = projectId;
+          this.lineAreaid = areaid;
+          this.lbx02id=lbx02id;
+          this.jobid=jobid;
+          var data = {
+            "albx0522":groupId,
+            "albx0523":projectId
+          };
+          this.utilscommit.request("nvsi_countHasSchedule",data, this.countScheduleBack);
+        } else {
+         this.$utilroutes.toLogin();
+        }
+      },
+      countScheduleBack(result) {
+        if (result && result.data) {
+          this.$swal('您还有未完成的排班，请联系项目负责人删除排班后再脱离',{buttons:'确定'});
+          return;
+        }
+        this.$swal('确认脱离项目？',{buttons:['取消','确定']}).then(function(value){
+          if (value) {
+            var data2 = {
+              "projectid":Vues.lineProjectId,
+              "areaid":Vues.lineAreaid,
+              "lbx02id":Vues.lbx02id,
+              "jobid":Vues.jobid
+            };
+            Vues.utilscommit.request('nvsi_chostVolOutProject',data2,Vues.outOfProjectBack)
+          }
+        });
+      },
+      outOfProjectBack:function (result) {
+        if (result) {
+          if (result.data) {
+            this.$router.go(0);//刷新页面
+          } else {
+            this.$swal(result.message,{buttons:'确定'});
+          }
+        }
+      },
+      applyTime:function (projectId,groupId,projectName) {//申请时长
+        if(this.userInfo) {
+          var data = {
+              "projectid":projectId
+          };
+          this.utilscommit.request("nvsi_countVolApplyTime",data, this.countApplyTimeBack);
+          this.projectName = projectName;
+          this.applyInfo.projectId = projectId;
+          this.applyInfo.groupId = groupId;
+          $('.mask.time').addClass('active');
+        } else {
+          this.$utilroutes.toLogin();
+        }
+      },
+      countApplyTimeBack:function (result) {
+        //console.log("时长   ",result)
+        this.appliedTime = result?result.data:'0.00';
+      },
+      timeCloseMask:function () {
+        this.applyInfo = {};
+        this.projectName = '';
+        this.appliedTime = '';
+        document.getElementById("form").reset();
+        $('.mask.time').removeClass('active');
+        $('.form-error').html("");
+      },
+      getApplyTime(){
+       if(!this.startTime){
+          this.formTip("startTime","活动开始时间不能为空");
+          return false;
+       }else if(!this.endTime){
+          this.formTip("endTime","活动结束时间不能为空");
+          return false;
+       }
+       this.formTip("startTime","");
+       this.formTip("endTime","");
+       this.getTimeNum();
+       return true;
+      },
+      getTimeNum(){//判断时长
+        let startTime=new Date(this.startTime.replace(/\-/g, "\/"));
+        let endTime=new Date(this.endTime.replace(/\-/g, "\/"));
+        let TodayLastTime = new Date(this.startTime.substring(0,10)+" 23:59:59.999");//当天最后时长
+        if(endTime<startTime){
+          this.endTime='';
+          return this.$swal("活动结束时间不能早于活动开始时间", {buttons:'确定'});
+        }else if(endTime>TodayLastTime){
+          this.endTime='';
+          return this.$swal("活动结束时间必须在当天内",{buttons:'确定'}); 
+        }
+        let timeDifference=endTime-startTime;//时长差
+        if(timeDifference < 60000){
+          this.endTime='';
+          return this.$swal("时长不能小于1分钟", {buttons:'确定'}); 
+        }else if(timeDifference > 86400000){
+          this.endTime='';
+          return this.$swal("活动时间间隔不能大于24小时",{buttons:'确定'}); 
+        }
+        this.timeDifference=timeDifference;
+        let data={albx0175 : this.basicInfo.albp0029,albx0181 : this.startTime,albx0182 : this.endTime}
+        this.utilscommit.request("nvsi_isGetServicetime",data, this.getApplyTimeBack);//验证时长重复性
+      },
+      getApplyTimeBack(data){
+        if(data){
+          if(data.data){
+            this.$swal("录入时长与已生效的时长存在重复，请核实后重试！",{buttons:'确定'}); 
+            this.timeDifference=0.00;
+          }else{
+            this.timeDifference=this.timeDifference/(1000*3600);
+            //console.log(this.timeDifference.toFixed(2) +"");
+            this.$set(this.applyInfo, 'applyTime', this.timeDifference.toFixed(2) +"");
+            //this.applyInfo.applyTime=this.timeDifference.toFixed(2) +"";
+            //console.log(this.applyInfo.applyTime);
+          } 
+        }
+      },
+      applyTimeCheck() {
+        var applyTime = this.applyInfo.applyTime;
+        var tip='';
+        var flag = true;
+        if(!applyTime) {
+          tip='申请时长不能为空';
+          flag = false;
+        }/* else if(applyTime <= 0 || applyTime > 10 || !this.common.checkApplyTime(applyTime)) {
+          tip='申请时长必须是0.01-10的数字,小数点后保留两位';
+          flag = false;
+        } */
+        this.formTip("applyTime",tip);
+        return flag;
+      },
+      remarksCheck() {
+        var remarks = this.applyInfo.remarks;
+        var tip='';
+        var flag = true;
+        if(!remarks) {
+          tip='备注不能为空';
+          flag = false;
+        }
+        this.formTip("remarks",tip);
+        return flag;
+      },
+      onSubmitApply() {
+        if(this.userInfo) {
+          if(this.getApplyTime && this.applyTimeCheck() && this.remarksCheck()) {
+            var data = {
+                "albx0181":this.startTime,//活动开始时间
+                "albx0182":this.endTime,//活动结束时间
+                "albx0172":this.applyInfo.applyTime,//申请时长
+                "albx0173":"2",//添加方式
+                "albx0174":"1",//时长状态
+                "albx0176":this.applyInfo.projectId,//项目id
+                "albx0177":this.applyInfo.groupId,//团体id
+                "albx0179":this.applyInfo.remarks,//备注
+            };
+            this.utilscommit.request("nvsi_insertVolApplyTimeCode",data, this.applyTimeBack);
+          }
+        }else{
+          this.$utilroutes.toLogin();
+        }
+      },
+      applyTimeBack:function (result) {
+        if(result) {
+          if(result.data) {
+            this.$swal('申请成功',{buttons:'确定'}).then(function(value) {
+              Vues.$router.go(0);//刷新页面
+              });
+          } else {
+            this.$swal(result.message,{buttons:'确定'});
+          }
+        }
+      },
+      deleteApplyOrg:function (lbx02id,projectId,jobid) {//删除申请
+        if(this.userInfo) {
+          this.$swal('确认删除申请？',{buttons:['取消','确定']}).then(function(value){
+            if (value) {
+              /* var data = {
+                  "areaid":areaid,
+                  "albx0052":postId,
+                  "albx0057":projectId
+              };
+              Vues.utilscommit.request("nvsi_deleteVolApplyProject",data, Vues.deleteApplyBack); */
+              var data = {
+                  "type":1,
+                  "lbx02id":lbx02id,
+                  "projectid":projectId,
+                  "jobid":jobid
+              };
+              Vues.utilscommit.request("nvsi_operateVolMyProjectForWeb",data, Vues.deleteApplyBack); 
+            }
+          });
+        } else {
+          this.$utilroutes.toLogin();
+        }
+      },
+      deleteApplyBack:function (result) {
+        if(result && result.data) {
+          this.getProjectList();
+          this.$swal('申请成功',{buttons:'确定'});
+        }else {
+          this.$swal('删除失败！',{buttons:'确定'});
+        }
+      },
+      changeJob:function (projectId,jobId,areaid,lbx02id) {//更换岗位
+        if(this.userInfo) {
+          this.lineAreaid = areaid;
+          this.lineProjectId = projectId;
+          this.lineJobId = jobId;
+          this.lbx02id = lbx02id;
+          var data = {
+              "areaid":areaid,
+              "projectid":projectId
+          };
+          this.utilscommit.request("nvsi_listProjectJobs",data, this.listJobsBack);
+          $('.mask.job').addClass('active');
+        } else {
+          this.$utilroutes.toLogin();
+        }
+      },
+      listJobsBack:function (result) {
+        if(result) {
+          this.jobList = result.data;
+          this.job = this.lineJobId;
+          this.projectId = this.lineProjectId;
+        }
+      },
+      onChange:function () {
+        if(this.userInfo) {
+          if(this.jobCheck()) {
+            var data = {
+                "albx0052":this.job,
+                "albx0057":this.projectId,
+                lbx02id:this.lbx02id,
+                jobid:this.lineJobId
+            };
+            this.utilscommit.request("nvsi_updateVolJob",data, this.updateJobBack);
+          }
+        }
+      },
+      updateJobBack:function (result) {
+        if(result && result.data) {
+          this.$swal('更换岗位成功',{buttons:'确定'}).then(function (value) {
+            Vue.$router.go(0);//刷新页面
+          });
+        }else{
+          this.$swal('更换岗位失败',{buttons:'确定'});
+        }
+      },
+      jobCloseMask:function () {
+        $('.mask.job').removeClass('active');
+        $('.form-error').html("");
+      },
+      jobCheck:function () {
+        var job = this.job;
+        var tip='';
+        var flag = true;
+        if(!job) {
+          tip='更换的岗位不能为空';
+          flag = false;
+        }
+        this.formTip("job",tip);
+        return flag;
+      },
+      evaluate:function (projectId,orgId) {//评价
+        if(this.userInfo) {
+          this.evaluateInfo.orgId = orgId;
+          this.evaluateInfo.projectId = projectId;
+          $('.mask.evaluate').addClass('active');
+        } else {
+          this.$utilroutes.toLogin();
+        }
+      },
+      evaluateCloseMask:function () {
+        $('.mask.evaluate').removeClass('active');
+        $('.form-error').html("");
+      },
+      onEvaluateSubmit:function () {
+        if(this.row1 && this.row2 && this.row3 && this.content) {
+          var data = {
+              "albx0502":this.evaluateInfo.orgId,
+              "albx0503":this.row1,
+              "albx0504":this.row2,
+              "albx0505":this.row3,
+              "albx0508":this.content,
+              "albx0509":this.evaluateInfo.projectId
+          };
+          this.utilscommit.request("nvsi_insertVolEvaluateProject",data, this.evaluateBack);
+        }else {
+          this.$swal('请评价',{buttons:'确定'});
+        }
+      },
+      evaluateBack:function (result) {
+        if(result && result.data) {
+          this.$swal('评价成功',{buttons:'确定'}).then(function (value) {
+            Vue.$router.go(0);//刷新页面
+          });
+        }else {
+          this.$swal('评价失败',{buttons:'确定'});
+        }
+      },
+      showEvaluate:function (projectId,orgId) {//查看评价
+        if(this.userInfo) {
+          var data = {
+              "orgid":orgId,
+              "projectid":projectId,
+          };
+          this.utilscommit.request("nvsi_getVolEvaluate",data, this.volEvaluateBack);
+        } else {
+          this.$utilroutes.toLogin();
+        }
+      },
+      volEvaluateBack:function (result) {
+        if(result && result.result) {
+          this.volEvaluateInfo = result.result.volevaluate;
+          //对项目开展培训的满意度
+          if(this.volEvaluateInfo && this.volEvaluateInfo.albx0503)this.$refs.showNum1.getShowRating(this.volEvaluateInfo.albx0503);
+          //与志愿团体合作的满意度
+          if(this.volEvaluateInfo && this.volEvaluateInfo.albx0504)this.$refs.showNum2.getShowRating(this.volEvaluateInfo.albx0504);
+          //项目执行与计划的满意度
+          if(this.volEvaluateInfo && this.volEvaluateInfo.albx0505)this.$refs.showNum3.getShowRating(this.volEvaluateInfo.albx0505);
+          this.orgEvaluateInfo = result.result.orgevaluate;
+          //守时程度
+          if(this.orgEvaluateInfo && this.orgEvaluateInfo.albx0463)this.$refs.showNum4.getShowRating(this.orgEvaluateInfo.albx0463);
+          //服务态度
+          if(this.orgEvaluateInfo && this.orgEvaluateInfo.albx0464)this.$refs.showNum5.getShowRating(this.orgEvaluateInfo.albx0464);
+          //专业水平
+          if(this.orgEvaluateInfo && this.orgEvaluateInfo.albx0465)this.$refs.showNum6.getShowRating(this.orgEvaluateInfo.albx0465);
+
+          $('.mask.showEvaluate').addClass('active');
+        } else {
+          this.$swal('获取评价信息失败',{buttons:'确定'});
+        }
+      },
+      hideEvaCloseMask:function () {
+        $('.mask.showEvaluate').removeClass('active');
+        $('.form-error').html("");
+      },
+      formTip:function(el,tip) {
+        $('#' + el + 'Tips').html(tip).css("color", "red");
+      },
+      getPro(){//同步项目
+        if(this.basicInfo){
+            let id=this.basicInfo.id; 
+            this.utilscommit.request('nvsi_findOldTeam',{'albx0053':id},this.getProConfirmBack)
+        }
+      },
+      getProConfirmBack(res){
+          if(res.data){
+              this.$swal('同步成功',{buttons:'确定'})
+          }else{
+              this.$swal(res.message,{buttons:'确定'})
+          }
+      },
+    }
+  }
+
+</script>
+
+<style scoped>
+  .user-table th{
+    text-align: left;
+    padding: 10px;
+  }
+</style>

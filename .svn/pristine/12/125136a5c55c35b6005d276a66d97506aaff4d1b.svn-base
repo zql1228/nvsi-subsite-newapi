@@ -1,0 +1,149 @@
+import Vue from 'vue'
+import App from './App'//入口
+import router from './router'//路由
+import store from './store';
+import VueAxios from 'vue-axios'//请求
+axios.defaults.withCredentials = true;//允许axios请求携带cookie等凭证
+import qs from 'qs'//qs库
+//import VueSwiper from 'vue-awesome-swiper'//轮播图插件
+// import '!vue-style-loader!css-loader!../node_modules/swiper/dist/css/swiper.css';
+import utilscommit from './assets/js/utils.js'//请求路径
+import common from './assets/js/common.js'//基础包
+import getMaps from './assets/js/getMap.js'//获取地图信息
+import leaplogin from './assets/js/login.js'//leap登录
+import utilroutes from './router/routes.js'//基础包
+import Print from 'vue-print-nb';//打印
+import DatePicker from 'vue2-datepicker';//日期
+import 'vue2-datepicker/locale/zh-cn';//中文-时间插件
+require('!vue-style-loader!css-loader!../node_modules/vue2-datepicker/index.css');
+require('!vue-style-loader!css-loader!./assets/css/base.css');
+require('!vue-style-loader!css-loader!./assets/css/main.css');
+require('!vue-style-loader!css-loader!./assets/fonts/UniveConBol.css');
+require('!vue-style-loader!css-loader!./assets/css/cropper.min.css');
+
+
+//去除部分警告
+Vue.config.productionTip = false
+//工具类
+Vue.prototype.utilscommit = utilscommit;
+Vue.prototype.common = common;
+Vue.prototype.$utilroutes = utilroutes;
+Vue.prototype.getMaps = getMaps;
+Vue.prototype.$qs = qs;
+Vue.prototype.leaplogin = leaplogin;
+Vue.prototype.$cryptoJS = CryptoJS;//加密
+
+Vue.use(VueAxios,axios);//全局使用
+Vue.prototype.$swal = swal;
+Vue.use(Print);//打印
+Vue.use(DatePicker);//时间弹出层
+Vue.use(VueLazyload);//懒加载
+//Vue.use(VueSwiper)
+Vue.config.productionTip = false
+
+
+Vue.filter('ellipsis', function (value,num) {//文本过滤，多余部分加省略号
+  if (!value) return '';
+  if (value.length > num) {
+    return value.slice(0,num) + '...'
+  }
+  return value;
+});
+
+//文本过滤，多余部分加省略号
+Vue.prototype.ellipsis = function(value,num){
+  if (!value) return '';
+  if (value.length > num) {
+    return value.slice(0,num) + '...'
+  }
+  return value;
+}
+
+Vue.filter('ellipsisNos', function (value,num,text) {//文本过滤
+  if (!value && !text) return '';
+  if (!value && text) return text;
+  if (value.length > num) {
+    return value.slice(0,num)
+  }
+  return value;
+});
+
+Vue.filter('truncate', function (value,num,text) {//文本过滤
+  if (!value) return '';
+  if (value.length > num) {
+    return value.slice(0,num) + text;
+  }
+  return value;
+});
+
+
+Vue.filter('addZero', (value = '') => {//数字补两个零
+    if(!value) return '0.00';
+    if (!['[object Number]', '[object String]'].includes(Object.prototype.toString.call(value))) {
+      return value;
+    }
+    let num = value.toString().replace(/^(\d+)(\.\d+)?$/g, (big, ...args) => {
+      let [a, b] = args;
+      if (!b) b = '.';
+      while (b.length <= 2) {
+        b += '0';
+      }
+      return a + b;
+    })
+    return num;
+});
+// 数字补两个零
+Vue.prototype.addZero = function(value){
+  if(!value) return '0.00';
+  if (!['[object Number]', '[object String]'].includes(Object.prototype.toString.call(value))) {
+    return value;
+  }
+  let num = value.toString().replace(/^(\d+)(\.\d+)?$/g, (big, ...args) => {
+    let [a, b] = args;
+    if (!b) b = '.';
+    while (b.length <= 2) {
+      b += '0';
+    }
+    return a + b;
+  })
+  return num;
+}
+Vue.prototype.truncate  = function(value,num,text){//处理字符串
+  if (!value) return '';
+  if (value.length > num) {
+    return value.slice(0,num) + text;
+  }
+  return value;
+}
+/* Vue.prototype.ecryptIDCard = function(value){//解密身份证，并修改成格式为XXXXXX****XXXX/^(?<=\d{6})\d+(?=[\dX]{4})?$/g
+  if(value && value.length>8 && value.indexOf("*")==-1){//身份证
+    if(value.length>11)value=this.utilscommit.getDecrypt(value);
+    value=value.replace(/^(\d{6})(\d*)(\d{4})$/, function(a, b, c, d) {
+      return b + c.replace(/\d/g, "*") + d;
+    });
+  }
+  return value;
+}
+
+Vue.prototype.ecryptPhone = function(value){//解密手机号码，并修改成格式为XXX****XXXX
+  if(value && value.length>8 && value.indexOf("*")==-1){//手机号码
+    if(value.length>11)value=this.utilscommit.getDecrypt(value);//解密手机号码
+    value=value.replace(/^(\d{3})(\d*)(\d{4})$/, function(a, b, c, d) {
+      return b + c.replace(/\d/g, "*") + d;
+    });
+  }
+  return value;
+} */
+
+
+/* eslint-disable no-new */
+new Vue({
+  el: '#app',
+  router,
+  store,
+  components: { App },
+  template: '<App/>'
+});
+
+
+

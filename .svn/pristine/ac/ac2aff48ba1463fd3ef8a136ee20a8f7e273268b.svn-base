@@ -1,0 +1,178 @@
+<template>
+    <li class="col v-t white">
+            <!-- <div class="tabbar tabbar-tight">
+              <span>我的首页</span>s
+            </div> -->
+            <div class="row w avatar">
+              <div class="col v-t" >
+                <img v-if="basicInfo.photo" :src="context + basicInfo.photo" @error="imgError" alt="">
+                <img v-else src="../../assets/img/avatar1.png" alt="">
+              </div>
+              <div class="col v-t">
+                <p class="avatar-tit">欢迎回来，<em v-text="userInfo.albp0064"></em></p>
+                <p>
+                  <router-link href="javascript:void(0);" class="button button-line" tag="a" :to="{name:'updatedata',params:{define:routeDefine}}">修改资料</router-link>
+                </p>
+                <ul class="grid">
+                  <!--<li class="grid-item g-12">
+                    <i>志愿者编号：</i>
+                    <span v-text="basicInfo.albp0029"></span>
+                  </li>-->
+                  <li class="grid-item g-12">
+                    <i>注册日期：</i>
+                    <span v-show="userInfo.albp0062">{{userInfo.albp0062 | ellipsisNos(10)}}</span>
+                  </li>
+                  <li class="grid-item g-12">
+                    <i>最近登录时间：</i>
+                    <span v-show="userInfo.albp0054">{{userInfo.albp0054 | ellipsisNos(19)}}</span>
+                  </li>
+                  <li class="grid-item g-12">
+                    <i>登录IP：</i>
+                    <span v-text="userInfo.albp0060"></span>
+                  </li>
+                </ul>
+              </div>
+              <div class="col v-t t-c" style="width:220px;" v-if="$store.getters.getArea.cnname!='江苏'">
+                <!-- <img src="../../assets/img/codezs.png" alt="" style="width: 119px;height: 115px;">
+                <p class="pt-10">系统即将推出移动客户端APP，请扫码安装</p> -->
+                <img src="@/assets/img/erwei.jpg" alt="" style="width: 119px;height: 115px;">
+                <p>扫码关注在线客服公众号</p>
+              </div>
+              <div  class="col v-t t-c" style="width:220px;" v-else>
+                <img style="width: 119px;height: 115px;" src="@/assets/img/js_erwei.png" alt="">
+                <p class="pt-10">扫码安装“江苏政务服务”APP</p>
+              </div>
+            </div>
+            <div style="padding:20px;">
+              <ul class="stats">
+              <li style="width: 30%;"><img src="../../assets/img/user1.png" alt=""><span><a href="javascript:void(0);" @click="toServiceTime"><b><em v-text="addZero(countInfo.areatimesum)"></em>/<em v-text="addZero(countInfo.timesum)"></em></b></a><i>站点时长/总时长（小时）</i></span></li>
+              <li style="width: 24%;"><img src="../../assets/img/user2.png" alt=""><span><b v-if="!countInfo.pmcount || countInfo.pmcount>999 ||  countInfo.pmcount=='0'">999+</b><b v-else v-text="countInfo.pmcount"></b><i>当前站点排名</i></span></li>
+              <li style="width: 24%;"><img src="../../assets/img/user3.png" alt=""><span><volstar style="line-height: 17px;margin-top: 13px;" :score="countInfo.albp0026" :starOn="starOn" :starOff="starOff"></volstar><i style="margin-top: 3px;">星级志愿者</i></span></li>
+              <li style="width: 22%;"><img src="../../assets/img/user4.png" alt=""><span><b>0</b><i>积分</i></span></li>
+            </ul>
+            <ul class="stats">
+              <li style="width: 30%;"><img src="../../assets/img/user5.png" alt=""><span><a @click="toOrgList" href="javascript:void(0);"><b class="danger"><em v-text="countInfo.orgcount || 0"></em></b></a><i>加入志愿团体（个）</i></span></li>
+              <li style="width: 24%;"><img src="../../assets/img/user6.png" alt=""><span><a @click="toProjectList" href="javascript:void(0);"><b class="danger"><em v-text="countInfo.projectcount || 0"></em></b></a><i>参与志愿项目（个）</i></span></li>
+              <li style="width: 24%;"><img src="../../assets/img/user7.png" alt=""><span><b class="danger">{{countInfo.pxsum || '0.00'}}</b><i>培训时长（小时）</i></span></li>
+              <li style="width: 22%;"><img src="../../assets/img/user8.png" alt=""><span><b v-text="countInfo.bzcount || 0"></b><i>表彰（次）</i></span></li>
+            </ul>
+            <ul class="stats">
+              <li style="width: 30%;"><img src="../../assets/img/user9.png" alt=""><span><a @click="toMessageList" href="javascript:void(0);"><b class="primary"><em v-text="countInfo.messagecount || 0"></em></b></a><i>站内信（条）</i></span></li>
+              <li style="width: 24%;"><img src="../../assets/img/user10.png" alt=""><span><a @click="toFriendsList" href="javascript:void(0);"><b class="primary"><em v-text="countInfo.friendcount || 0"></em></b></a><i>好友申请（条）</i></span></li>
+              <li style="width: 24%;"><img src="../../assets/img/user11.png" alt=""><span><a @click="toCommentList" href="javascript:void(0);"><b class="primary"><em v-text="countInfo.commentcount || 0"></em></b></a><i>评论</i></span></li>
+              <li style="width: 22%;"><img src="../../assets/img/user12.png" alt=""><span><a @click="toReportList" href="javascript:void(0);"><b class="primary"><em v-text="countInfo.reportcount || 0"></em></b></a><i>举报</i></span></li>
+            </ul>
+            <ul class="stats">
+              <li style="width: 30%;"><img src="../../assets/img/user13.png" alt=""><span><b>{{countInfo.albx0463 || 5.0}}</b><i>守时程度（分）</i></span></li>
+              <li style="width: 24%;"><img src="../../assets/img/user14.png" alt=""><span><b>{{countInfo.albx0464 || 5.0}}</b><i>服务态度（分）</i></span></li>
+              <li style="width: 24%;"><img src="../../assets/img/user15.png" alt=""><span><b>{{countInfo.albx0465 || 5.0}}</b><i>专业水平（分）</i></span></li>
+              <li style="width: 22%;"><img src="../../assets/img/user16.png" alt=""><span><a @click="toEvaluateList" href="javascript:void(0);"><b class="success"><em v-text="countInfo.pjcount || 0"></em></b></a><i>评价（条）</i></span></li>
+            </ul>
+            </div>
+          </li>
+</template>
+
+<script>
+
+  const CompleteTip =()=>import('@/view/usercenter/completetip.vue');//弹出层
+ /*  const Usermenu =()=>import('./usermenu');//左侧菜单栏 */
+  const volstar =()=>import('@/view/home/volstar.vue');//星星
+  import avatar from '../../assets/img/avatar1.png';
+
+  export default {
+    name: 'usercenter',
+    components : {
+      /* Usermenu, */
+      CompleteTip,
+      volstar
+    },
+    data(){
+      return {
+        /* nav2:'usercenter', */
+        context:this.common.getUrl(),
+        routeDefine: this.$route.params.define,
+        areaid:this.common.areaInfo().areaid,
+        userInfo:this.$store.getters.getUser,//账户信息
+        basicInfo:this.$store.getters.getBasic,//用户信息
+        countInfo:{areatimesum:'0.00'},//统计信息
+        starOn:require('../../assets/img/star.png'),
+        starOff:require('../../assets/img/star1.png'),
+        //showtype:0,//弹出层展示类型 0=不展示  1=展示，未完善信息    2=展示，异站点信息
+      };
+    },
+    created() {
+      this.getCountdata();
+    },
+    methods:{
+      getCountdata(){
+          this.utilscommit.request('nvsi_getUserCenterInfo',{"areaid":this.areaid},this.countBack);
+      },
+     /*  getUserInfo:function () {
+        this.utilscommit.request('nvsi_getUserInfo',null,this.userInfoCheck)
+      },
+      userInfoCheck:function (result) {
+        if (!result|| !result.data || !result.data.albp0055 || result.data.albp0058 == '0') {
+          this.$router.push({name: "login",params: {define: this.routeDefine}});
+        }else {
+          this.userInfo = result.data;
+          this.utilscommit.request('nvsi_getBasicInfo',this.userInfo,this.basicInfoCheck);
+        }
+      },
+      basicInfoCheck:function (result) {
+        if (result && result.data) {
+          this.basicInfo = result.data;
+          this.showtype=this.common.getComShowtype(this.userInfo.albp0056,this.basicInfo);//获取弹窗展示
+          if(this.showtype==0) {
+            this.utilscommit.request('nvsi_getUserCenterInfo',{"areaid":this.areaid},this.countBack)
+          }
+        } else {
+          this.utilscommit.request('nvsi_loginOut',null,this.loginOutCheck);
+        }
+      },
+      loginOutCheck:function (result) {
+        this.$router.push({name: "login",params: {define: this.routeDefine}});
+      }, */
+      countBack:function (result) {
+        this.countInfo = result.data;
+      },
+      imgError(el) {
+        el.target.src = avatar;
+      },
+      toServiceTime:function () {
+        this.$router.push({name: "myservicetime",params: {define: this.routeDefine}});
+      },
+      toOrgList:function () {
+        this.$router.push({name: "myorg",params: {define: this.routeDefine}});
+      },
+      toProjectList:function () {
+        this.$router.push({name: "myproject",params: {define: this.routeDefine}});
+      },
+      toEvaluateList:function () {//我的评价
+        this.$router.push({name: "myevaluate",params: {define: this.routeDefine}});
+      },
+      toMessageList:function () {//站内信
+        this.$router.push({name: "message",params: {define: this.routeDefine}});
+      },
+      toFriendsList:function () {//好友申请
+        this.$router.push({name: "myfriends",params: {define: this.routeDefine}});
+      },
+      toCommentList:function () {//我的评论
+        this.$router.push({name: "mycomment",params: {define: this.routeDefine}});
+      },
+      toReportList:function () {//我的举报
+        this.$router.push({name: "myreport",params: {define: this.routeDefine}});
+      }
+    }
+  }
+
+</script>
+
+<style scoped>
+  .user-table td {
+    padding:0 10px;
+    line-height: 25px;
+  }
+</style>
+
+
+

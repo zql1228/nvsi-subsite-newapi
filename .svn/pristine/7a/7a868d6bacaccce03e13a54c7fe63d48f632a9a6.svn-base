@@ -1,0 +1,417 @@
+<template>
+    <div id="findpwd">
+        <!--中间部分-->
+        <div class="main bannerimg">
+            <div class="mid">
+                <ul class="row w">
+                <li class="col">
+                    <div class="router">
+                    <span>当前位置：</span>
+                    <router-link tag="a" :to="{name:'home',params:{define:routeDefine}}">首页</router-link>
+                    <router-link tag="a" :to="{name:'attestation',params:{define:routeDefine,id:userInfo.id}}">实名认证</router-link>
+                    </div>
+                </li>
+                </ul>
+                <!-- 主体 -->
+                <div class="J-main J-auto">
+                    <div class="J-find-page">
+                        <h1 class="J-find-page_h1">实名认证</h1>
+                        <!-- 姓名输入框 -->
+                        <div>
+                            <p class="J-find-page_p"><span class="J-find-page_span">* </span>真实姓名</p>
+                            <div class="J-find-page__inputgap"><img class="J-check-img_img" src="../../assets/img/forgetpwd/J-personal.png" alt="">
+                                <input  type="text" class="J-check_input" placeholder="请输入真实姓名" id="realName" v-model="name" @blur="getRealName" maxlength="20">
+                                <span class="J-smb span-i" id="realNameTip"></span>
+                            </div>
+                        </div>
+                        <!-- 手机输入框 -->
+                        <div class="J-mt-23">
+                            <p class="J-find-page_p"><span class="J-find-page_span">* </span>手机号码</p>
+                            <div class="J-find-page__inputgap"><img class="J-check-img_img" src="../../assets/img/forgetpwd/J-phone.png" alt="">
+                                <input type="text" class="J-check_input" placeholder="请输入手机号码"  id="phone" v-model="phone" @blur="getPhone" maxlength="11" oninput="value=value.replace(/[^0-9]/g,'');">
+                                <span class="J-smb span-i" id="phoneTip"></span>
+                            </div>
+                        </div>
+                        <!-- 证件类型选择框 -->
+                        <div class="J-mt-23">
+                            <p class="J-find-page_p"><span class="J-find-page_span">* </span>证件类型</p>
+                            <div class="J-find-page__inputgap"> 
+                                <select v-model="cardtype" id="idType" class="J-check_input" style="padding-left: 10px;font-size: 14px;font-weight: 400;">
+                                    <option value="0" disabled selected>请选择证件类型</option>
+                                    <option :value="el.codeid" v-for="(el,index) in idTypeList" :key="index">{{el.codevalue}}</option>
+                                </select>
+                                <span class="J-smb span-i" id="idcareTypeTip"></span>
+                            </div>
+                        </div>
+                        <!-- 证件号码输入框 -->
+                        <div>
+                            <p class="J-find-page_p J-mt-23"><span class="J-find-page_span">* </span>证件号码</p>
+                            <div class="J-find-page__inputgap"><img class="J-check-img_img" src="../../assets/img/forgetpwd/J-check1.png" alt="">
+                                <input type="text" class="J-check_input" placeholder="请输入证件号码" id="idcare" v-model="cardno" @blur="getIDcard" maxlength="18">
+                                <span class="J-smb span-i" id="idcareTip"></span>
+                            </div>
+                        </div>
+                        <!-- 性别选择框 -->
+                        <div style="display:flex;margin-top:10px" v-if="cardtype!='01'">
+                            <p class="J-find-page_p" style="line-height:43px"><span class="J-find-page_span">* </span>性别</p>
+                            <div>
+                                <div style="margin-left:100px">
+                                    <label for="man" class="radio">
+                                        <input type="radio" id="man" name="radio" value="1" v-model="gender">
+                                        <span></span>
+                                        <i>男</i>
+                                    </label>
+                                    <label for="woman" class="radio">
+                                        <input type="radio" id="woman" name="radio" value="2" v-model="gender">
+                                        <span></span>
+                                        <i>女</i>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                         <!-- 出生年月选择框 -->
+                        <div class="J-mt-23" v-if="cardtype!='01'">
+                            <p class="J-find-page_p"><span class="J-find-page_span">* </span>出生日期</p>
+                            <div class="J-find-page__inputgap J-birth_input"> 
+                                <date-picker style="width: 100%;" :lang="lang" v-model="birthday" valueType="format" placeholder="请输入出生日期" @blur="checkbirthDay"></date-picker>
+                                <span class="J-smb span-i" id="birthdayTip"></span>
+                            </div>
+                        </div>
+                        <!-- 图文验证码输入框 -->
+                        <div>
+                            <p class="J-find-page_p J-mt-23"><span class="J-find-page_span">* </span>图文验证码</p>
+                        </div>
+                        <div class="J-find-page__inputgap" >
+                            <img class="J-check-img_img" style="width:18px"  src="../../assets/img/forgetpwd/imgyz.png" alt="">
+                            <input type="text" class="J-check_input" style="width:330px;" v-model="photoCode" @blur="photoCodeCheck" id="photoCode" placeholder="请输入图文验证码" maxlength="4" oninput="value=value.replace(/[^0-9a-zA-Z]/g,'');">
+                            <div class="col v-m" style="display:inline;padding-left:15px" @click="changeImgCode">
+                                <img :src="imgsrc"  class="button button-line" style="width:100px;height:45px;padding:0 0 0 5px;">
+                            </div>
+                            <span class="J-smb span-i" id="photoCodeTip"></span>
+                        </div>
+                        <!-- 手机验证码输入框 -->
+                        <div>
+                            <p class="J-find-page_p J-mt-23"><span class="J-find-page_span">* </span>手机验证码</p>
+                        </div>
+                        <div class="J-find-page__inputgap" >
+                            <img class="J-check-img_img" style="width:20px" src="../../assets/img/forgetpwd/phoneyz.png" alt="">
+                            <input type="text" class="J-check_input" style="width:330px;"  v-model="phoneCode" @blur="phoneCodeCheck" id="phoneCode" placeholder="请输入手机验证码" maxlength="6" oninput="value=value.replace(/[^0-9a-zA-Z]/g,'')">
+                            <div class="col v-m" style="display:inline;padding-left:15px">
+                                <button class="button button-line" @click="getCode" v-text="codeButton" style="width:100px;height:45px;font-size: 14px;padding:0 10px;"></button>
+                            </div>
+                            <span class="J-smb span-i" id="phoneCodeTip"></span>
+                        </div>
+                        <!-- 证件上传 -->
+                        <p class="J-find-page_p J-mt-23" v-if="cardtype!='01'"><span class="J-find-page_span">* </span>上传证件照片（身份证人像面、身份证国徽面及手持身份证）</p>
+                        <ul class="J-find-page__ul" v-if="cardtype!='01'">
+                            <li class="J-find-page__li">
+                                <div class="J-upload J-mt-20">
+                                    <up-image photo="1" title="请上传身份证人像面" :img="img1"></up-image>
+                                </div>
+                            </li>
+                            <li class="J-find-page__li">
+                                <div class="J-upload J-mt-20">
+                                    <up-image photo="2" title="请上传身份证国徽面" :img="img2"></up-image>
+                                </div>
+                            </li>
+                            <li class="J-find-page__li">
+                                <div class="J-upload J-mt-20">
+                                    <up-image photo="3" title="请上传手持身份证" :img="img3"></up-image>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="J-button-box J-mt-54">
+                            <button class="J-next" @click="submitBtn">提交</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+  const UpImage =()=>import('@/view/home/upcardimg.vue');//上传图片
+  export default {
+    name: 'findpwd',
+    components : {
+      UpImage,
+    },
+    data:function(){
+      return {
+        routeDefine: this.$route.params.define,
+        userInfo:this.$store.getters.getUser,//用户信息
+        lang :{//配置日期语音环境
+          formatLocale :{
+            firstDayOfWeek :1,
+          },
+          monthBeforeYear :false ,
+        },
+        name:'',//姓名
+        phone:'',//电话号码
+        cardtype:'0',//证件类型
+        idTypeList:'',//证件类型列表
+        cardno:'',//证件号
+        gender:'1',//性别
+        birthday:'',//出生年月
+        photoCode:'',//图文验证码
+        phoneCode:'',//手机验证码
+        imgsrc:'',//图文验证码图片地址
+        codeButton:'获取验证码',
+        countdown:60,
+        timer:"",//定时器
+        getIDcardFlag:false,
+        photoCodeCheckFlag:false,
+        img1:require('../../assets/img/IDCard01.png'),
+        img2:require('../../assets/img/IDCard02.png'),
+        img3:require('../../assets/img/IDCard03.png'),
+        imgFile1:'',
+        imgFile2:'',
+        imgFile3:'',
+        imgkey:'',//图文验证码
+      }
+    },
+    created(){
+        this.getdata();
+        this.changeImgCode();
+        this.init();
+    },
+    methods:{
+        init(){//初始化数据
+            if(this.userInfo){
+                this.name=this.userInfo.albp0064?this.userInfo.albp0064:'';//姓名
+                this.phone=this.userInfo.albp0068d?this.userInfo.albp0068d:'';//电话
+                this.cardtype=this.userInfo.albp0065?this.userInfo.albp0065:'0';//证件类型
+                this.cardno=this.userInfo.cardno?this.userInfo.cardno:'';//证件号码
+                this.gender=this.userInfo.albp0067?this.userInfo.albp0067:'1';//性别
+                this.birthday=this.userInfo.birthdate?this.userInfo.birthdate:'';//出生日期
+            }
+        },
+        getdata(){//获取证件类型
+            this.utilscommit.request('nvsi_getCodeValues',{'codename':'nvsi_albp0065'},this.getIdTypeList);
+        },
+        getIdTypeList(result){
+            let idTypeList = this.common.orderBy(result.data,'codeid','asc');
+            let idTypeLists=[];//去除军官证、士兵证、其他有效国籍旅行证件
+            if(idTypeList){
+            for (let index = 0; index < idTypeList.length; index++) {
+                if(index==0 && idTypeList[0])this.idType=idTypeList[0].codeid;//默认给第一个赋值
+                if(index<5)idTypeLists.push(idTypeList[index]);
+            }
+            }
+            this.idTypeList=idTypeLists;
+        },
+        changeImgCode(){//获取图文验证码
+            this.photoCode='';
+            this.formTip("photoCode","");//置空图文验证码及其验证
+            if(this.timer){//清空定时器
+                clearTimeout(this.timer);
+                this.timer=null;
+            }
+            this.phoneCode="";
+            this.formTip("phoneCode","");//置空手机验证码及其验证
+            this.codeButton = "获取验证码";
+            this.countdown = 60;
+            this.utilscommit.request("nvsi_getImageCode",null,this.changeImgCodeBack);
+        },
+        changeImgCodeBack(data){//图片验证码获取结果
+            if(data && data.data){
+                this.imgsrc=data.data.img;
+                this.imgkey=data.data.imgkey;
+            }
+        },
+        getCode() {//获取手机验证码
+            var flag=true;
+            if(this.cardtype=='01'){//内地身份证
+                flag=this.getRealName() && this.getPhone() && this.getIDcardType() && this.getIDcard() && this.getIDcardFlag==true && this.photoCodeCheck() && this.photoCodeCheckFlag==true
+            }else{
+                flag=this.getRealName() && this.getPhone() && this.getIDcardType() && this.getIDcard() && this.getIDcardFlag==true && this.photoCodeCheck() && this.photoCodeCheckFlag==true  && this.checkbirthDay()
+            }
+            if (this.countdown==60 && flag) {
+                var code = this.common.trimAll(this.photoCode).toUpperCase();
+                var data = {
+                    "name":"NVSI",
+                    "phonenum":this.phone,
+                    "userflag":"NVSI",
+                    "areaid":"0",
+                    "imgCode":code,
+                    imgkey:this.imgkey
+                };
+                this.utilscommit.request("nvsi_getMobileCode",data,this.getPhoneCodeBack);
+            }
+        },
+        getPhoneCodeBack(result) {
+            if(result.code==0 && result.data) {
+                this.setTime();
+            }
+        },
+        setTime() {
+            if (this.countdown == 0) {
+                this.codeButton = "获取验证码";
+                this.countdown = 60;
+                return;
+            } else {
+                this.codeButton=this.countdown + "s";
+                this.countdown--;
+            }
+            let that=this;
+            this.timer=setTimeout(function() {
+                that.setTime();
+            },1000);
+        },
+        getRealName(){//用户姓名验证
+            if(!this.name){
+                this.formTip("realName","真实姓名不能为空")
+                return false;
+            }
+            this.formTip("realName","")
+            return true;
+        },
+        getPhone(){//手机号验证
+            if(!this.phone){
+                this.formTip("phone","手机号码不能为空")
+                return false;
+            }else if(!this.common.checkPhoneno(this.phone)){
+                this.formTip("phone","手机号码不合法")
+                return false;
+            }
+            this.formTip("phone","")
+            return true;
+        },
+        getIDcardType(){//证件类型验证
+            if(!this.cardtype || this.cardtype==0){
+                this.formTip("idcareType","请选择证件类型")
+                return false;
+            }
+            this.formTip("idcareType","")
+            return true;
+        },
+        getIDcard(){//证件号码验证
+            if(!this.cardno){
+                this.formTip("idcare","证件号码不能为空")
+                return false;
+            }else if(this.cardtype=='01' && !this.common.checkCardNo(this.cardno)){
+                this.formTip("idcare","证件号码不合法")
+                return false;
+            }else{
+                if(this.cardno!=this.userInfo.cardno || this.cardtype!=this.userInfo.albp0065){//如果填写证件或者证件类型与缓存的不相同，则需做唯一校验
+                    this.utilscommit.request('nvsi_getIDCardCheck',{"card":this.cardno,"cardtype":this.cardtype},this.getIDcardBack);
+                }else{
+                    this.getIDcardFlag=true;
+                    this.formTip("idcare","")
+                }
+                return true;                                                                                                                                                                                                                    
+            }
+        },
+        getIDcardBack(result){//证件号码验证返回结果
+            if(result && result.data){
+                this.formTip("idcare","")
+                this.getIDcardFlag=true;
+            }else{
+                this.formTip("idcare",result.message)
+                this.getIDcardFlag=false;
+            }
+        },
+        checkbirthDay(){//出生日期校验
+            if(!this.birthday){
+                this.formTip("birthday","请选择出生日期")
+                return false;
+            }
+            this.formTip("birthday","")
+            return true;
+        },
+        photoCodeCheck(){//图文验证码验证
+            if(!this.photoCode){
+                this.formTip("photoCode","图文验证码不能为空");
+                return false;
+            }else{
+                var code = this.common.trimAll(this.photoCode).toUpperCase();
+                this.utilscommit.request('nvsi_getImgCodeCheck',{"imgcode":code,imgkey:this.imgkey},this.photoCodeCallback);
+                return true;
+            }
+        },
+        photoCodeCallback(result){
+            if (result && result.data){
+                this.formTip("photoCode","");
+                this.photoCodeCheckFlag=true;
+            }else{
+                this.formTip("photoCode",result.message);
+                this.photoCodeCheckFlag=false;
+            }
+        },
+        phoneCodeCheck(){//手机验证码验证
+            if(!this.phoneCode){
+                this.formTip("phoneCode","手机验证码不能为空");
+                return false;
+            }else if (this.phoneCode.length!=6) {
+                this.formTip("phoneCode","请输入6位手机验证码");
+                return false;
+            }else{
+                this.formTip("phoneCode","");
+                return true; 
+            }
+        },
+        submitBtn(){//提交
+            var flag=true;
+            if(this.cardtype=='01'){
+                flag=this.getRealName() &&  this.getPhone() && this.getIDcard() && this.getIDcardFlag==true && this.getIDcardType() &&  this.photoCodeCheck() && this.photoCodeCheckFlag==true && this.phoneCodeCheck();
+            }else{//非内地居民身份证
+                flag=this.getRealName() &&  this.getPhone() && this.getIDcard() && this.getIDcardFlag==true && this.getIDcardType() &&  this.photoCodeCheck() && this.photoCodeCheckFlag==true && this.phoneCodeCheck() && this.checkbirthDay();
+            }
+            if(flag){
+                if(this.cardtype!='01' && !this.imgFile1) {
+                    this.$swal("请上传身份证人像面",{buttons: "确定"});
+                }else if(this.cardtype!='01' && !this.imgFile2) {
+                    this.$swal("请上传身份证国徽面",{buttons: "确定"});
+                } else if(this.cardtype!='01' && !this.imgFile3) {
+                    this.$swal("请上传手持身份证",{buttons: "确定"});
+                }else if(this.cardtype!='01'){//非内地居民身份证
+                    let param=new FormData()
+                    param.append('cardphoto1',this.imgFile1,this.imgFile1.name)
+                    param.append('cardphoto2',this.imgFile2,this.imgFile2.name)
+                    param.append('cardphoto3',this.imgFile3,this.imgFile3.name)
+                    this.utilscommit.uploadImgs(param,this.$store.getters.getArea.areaid,this.uploadImgResult)
+                }else{
+                    this.commit();
+                }
+            }
+        },
+        uploadImgResult:function (result) {
+            if(result){
+                this.commit(JSON.stringify(result));
+            }else{
+                this.commit();
+            }
+        },
+        commit(serverData){
+            var a=serverData?JSON.parse(serverData):{};
+            var data = {
+                "realName":this.name,
+                "cardNo":this.cardno,
+                "phoneNo":this.phone,
+                "verificationcode":this.phoneCode,
+                "cardType":this.cardtype,
+                "sex":this.gender,
+                "birthday":this.birthday,
+                "cardPhotoFront":a.cardphoto1?a.cardphoto1:'',
+                "cardPhotObverse ":a.cardphoto2?a.cardphoto2:'',
+                "cardPhotoHold":a.cardphoto3?a.cardphoto3:'',
+            }
+            this.utilscommit.request("nvsi_modifyVolImpInfo", data,this.commitback);
+        },
+        commitback(result){
+            if (result.code==0 && result.data) {
+                this.$swal("提交实名认证成功，请等待审核",{buttons: "确定"}).then( () =>{
+                    this.$router.push({name: "updateiden", params: {define: this.routeDefine}});
+                });
+                this.$store.commit('saveUser',result.data);
+            } else {
+                this.$swal(result.message,{buttons: "确定"});
+            }
+        },
+        formTip(el,tip){//错误提示
+            $('#'+el+'Tip').html(tip);
+        },
+    }
+  }
+</script>

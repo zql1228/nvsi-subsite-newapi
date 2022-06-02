@@ -1,0 +1,175 @@
+<template>
+  <div id="usercenter">
+    <!--中间部分-->
+    <div class="main bannerimg">
+      <div class="mid">
+        <ul class="row w">
+          <li class="col">
+            <div class="router">
+              <span>当前位置：</span>
+              <a href="javascript:void(0);"><router-link tag="span" :to="{name:'home',params:{define:routeDefine}}">首页</router-link></a>
+              <a href="javascript:void(0);" v-if="routename!='userinfo'"><router-link tag="span" :to="{name:'usercenter',params:{define:routeDefine}}">用户中心</router-link></a>
+              <span v-text="metaTitle"></span>
+            </div>
+          </li>
+        </ul>
+        <ul class="row w">
+          <li class="col v-t" style="width:130px!important;">
+             <ul class="navbar" id="usermenu" style="background: #ffffff">
+                <li>
+                  <em>用户中心<i>></i></em>
+                  <div>
+                    <router-link href="javascript:void(0);" :class="{active:routename=='userinfo'}" tag="a" :to="{name:'usercenter',params:{define:routeDefine}}">我的首页</router-link>
+                    <router-link href="javascript:void(0);" :class="{active:routename=='updatedata' || routename=='updateiden' || routename=='updateother' || routename=='updatetamasha' || routename=='updatepassword' || routename=='updatestar'}" tag="a" :to="{name:'updatedata',params:{define:routeDefine}}">修改资料</router-link>
+                    <router-link href="javascript:void(0);" v-if="userinfo.albp0063=='1'" :class="{active:routename=='usercard'}" tag="a" :to="{name:'usercard',params:{define:routeDefine}}">志愿者证</router-link>
+                    <router-link href="javascript:void(0);" :class="{active:routename=='mycredit'}" tag="a" :to="{name:'mycredit',params:{define:routeDefine}}">我的信用</router-link>
+                    <router-link href="javascript:void(0);" :class="{active:routename=='message'}" tag="a" :to="{name:'message',params:{define:routeDefine}}">站内信</router-link>
+                    <router-link href="javascript:void(0);" :class="{active:routename=='myfriends'}" tag="a" :to="{name:'myfriends',params:{define:routeDefine}}">我的好友</router-link>
+                    <!-- <router-link href="javascript:void(0);" :class="{active:routename=='myproving'}" tag="a" :to="{name:'myproving',params:{define:routeDefine}}">我的求证</router-link> -->
+                    <router-link href="javascript:void(0);" :class="{active:routename=='mycomment'}" tag="a" :to="{name:'mycomment',params:{define:routeDefine}}">动态评论</router-link>
+                    <router-link href="javascript:void(0);" :class="{active:routename=='myevaluate'}" tag="a" :to="{name:'myevaluate',params:{define:routeDefine}}">我的评价</router-link>
+                    <router-link href="javascript:void(0);" :class="{active:routename=='myreport'}" tag="a" :to="{name:'myreport',params:{define:routeDefine}}">投诉举报</router-link>
+                    <router-link href="javascript:void(0);" :class="{active:routename=='mystudy'}" tag="a" :to="{name:'mystudy',params:{define:routeDefine}}">我的学习</router-link>
+                    <router-link href="javascript:void(0);" :class="{active:routename=='mycommend'}" tag="a" :to="{name:'mycommend',params:{define:routeDefine}}">我的表彰</router-link>
+                    <router-link href="javascript:void(0);" :class="{active:routename=='myexchange'}" tag="a" :to="{name:'myexchange',params:{define:routeDefine}}">我的兑换</router-link>
+                    <router-link href="javascript:void(0);" :class="{active:routename=='servicelog'}" tag="a" :to="{name:'servicelog',params:{define:routeDefine}}">下载证明</router-link>
+                    <router-link href="javascript:void(0);" :class="{active:routename=='mytransfer'}" tag="a" :to="{name:'mytransfer',params:{define:routeDefine}}">记录转移</router-link>
+                  <!--  <router-link href="javascript:void(0);" :class="{active:routename=='starapply'}" tag="a" :to="{name:'starapply',params:{define:routeDefine}}">星级申请</router-link> -->
+                  </div>
+                </li>
+                <li>
+                  <em>志愿项目<i>></i></em>
+                  <div>
+                    <router-link href="javascript:void(0);" :class="{active:routename=='myproject'}" tag="a" :to="{name:'myproject',params:{define:routeDefine}}">我的项目</router-link>
+                    <router-link href="javascript:void(0);" :class="{active:routename=='myschedule'}" tag="a" :to="{name:'myschedule',params:{define:routeDefine}}">我的排班</router-link>
+                    <router-link href="javascript:void(0);" :class="{active:routename=='myservicetime'}" tag="a" :to="{name:'myservicetime',params:{define:routeDefine}}">服务时长</router-link>
+                  </div>
+                </li>
+                <li>
+                  <em>志愿队伍<i>></i></em>
+                  <div>
+                    <router-link href="javascript:void(0);" :class="{active:routename=='myorg'}" tag="a" :to="{name:'myorg',params:{define:routeDefine}}">我的队伍</router-link>
+                    <!-- <a id="myhistoryorg" href="myhistoryorg.html">历史队伍</a> -->
+                  </div>
+                </li>
+                <li>
+                  <em>志愿家庭<i>></i></em>
+                  <div>
+                    <router-link href="javascript:void(0);" :class="{active:routename=='myfamily'}" tag="a" :to="{name:'myfamily',params:{define:routeDefine}}">我的家庭</router-link>
+                  </div>
+                </li>
+              </ul>
+          </li>
+          <router-view/>
+        </ul>
+      </div>
+    </div>
+    <!-- 完善信息 -->
+    <complete-tip :basicInfo="basicInfo" :showtype="showtype"></complete-tip>
+    
+  </div>
+</template>
+
+<script>
+
+  const CompleteTip =()=>import('@/view/usercenter/completetip.vue');//弹出层
+
+  export default {
+    name: 'usercenter',
+    components : {
+      CompleteTip,
+    },
+    data(){
+      return {
+        context:this.common.getUrl(),
+        routeDefine: this.$route.params.define,
+        routename: this.$route.name,
+        metaTitle: this.$route.meta.titlename,
+        userinfo:this.$store.getters.getUser,
+        basicInfo:{},
+        showtype:'',
+      };
+    },
+    created(){
+      window.Vuec=this;
+      this.checkUser();
+    },
+    mounted() {
+      this.emClick();
+    },
+    methods:{
+      checkUser(){
+        if (!this.userinfo|| !this.userinfo.albp0055 || this.userinfo.albp0058 == '0') {//albp0056  1-未实名  2-实名
+          if(this.routename!='userdata' || (this.routename=='userdata' && (this.userinfo.albp0056!='1' || this.userinfo.albp0056!='2')))
+          this.$utilroutes.toLogin();
+        }else {
+          this.utilscommit.request('nvsi_getBasicInfo',this.userinfo,this.basicInfoCheck);
+        }
+      },
+      basicInfoCheck:function (result) {
+        if (result && result.data) {
+          this.basicInfo = result.data;
+          this.$store.commit('saveBasic',this.basicInfo);
+          this.showTip();//是否完善资料
+        } else {
+          Vueh.loginOut();//触发页眉的退出事件
+        }
+      },
+      emClick:function () {
+        $(".navbar li em").click(function () {
+          $(this).parent().toggleClass('active').siblings().removeClass('active');
+        });
+        $('.navbar div a.active').parent().parent().toggleClass('active').siblings().removeClass('active');
+      },
+      showTip(){//是否完善资料
+        let showtype=this.common.getComShowtype(this.userinfo.albp0056,this.basicInfo,this.userinfo.albp0063);//获取弹窗展示
+        if(this.$route.name=="updatedata"){//修改资料
+            if(showtype<3){
+              this.showtype=0;
+              if(window.Vues){
+                this.$nextTick(function () {
+                  window.Vues.getBasicInfo();
+                });
+              }
+            }else{
+              this.showtype=showtype;
+            }
+          }else if(this.$route.name=="updateiden" && this.userinfo.albp0063=="0"){//身份信息
+            this.showtype=0;
+          }else{
+            this.showtype=showtype;
+          }
+      },
+      getUser(){//更新用户信息
+        this.utilscommit.request('nvsi_getUserInfo',null,this.getUserBack);
+      },
+      getUserBack:function (data) {//用户信息返回
+         if(data && data.data){
+           this.userInfo = data.data;
+           this.$store.commit('saveUser',this.userInfo);
+           this.checkUser();
+         }else{
+           this.$utilroutes.toLogin();
+         }
+      },
+    },
+    watch:{
+      '$route': function(to, from) { //监听路由是否变化
+        this.routename=to.name;
+        this.metaTitle=to.meta.titlename;
+        this.showTip();//是否完善资料
+      }
+    }
+  }
+
+</script>
+
+<style scoped>
+  .user-table td {
+    padding:0 10px;
+    line-height: 25px;
+  }
+</style>
+
+
+

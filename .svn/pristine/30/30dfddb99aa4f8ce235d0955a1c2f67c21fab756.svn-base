@@ -1,0 +1,101 @@
+<template>
+  <div class="js-nav" id="navigationBar">
+    <ul class="mid" v-if="!$store.getters.getArea.industrycode">
+      <li v-for="(el,index) in columnsList" :key="index">
+        <a href="javascript:void(0)" @click="getJump(el)" :class="{active:el.albx6009==routename || el.id==id}" v-text="truncate(el.albx6002,5,'')"></a>
+      </li>
+    </ul>
+    <ul class="mid" v-else>
+      <li v-for="(el,index) in columnsList" :key="index" style="width: 12%;">
+        <a href="javascript:void(0)" @click="getJump(el)" :class="{active:el.albx6009==routename || (el.albx6009.substring(0,5)==routename && el.albx6009.substring(5,6)==routetype)}" v-text="truncate(el.albx6002,6,'')"></a>
+      </li>
+    </ul>
+  </div>
+</template>
+
+<script>
+    export default {
+        name: "navigationBar",
+        props:{
+          nav:{type:String}
+        },
+        data:function(){
+            return{
+              routeDefine:this.$route.params.define,
+              id:this.$route.params.id,
+              routename: this.$route.name,
+              routetype: this.$route.params.type,
+              context:this.common.getUrl(),
+              columnsList:[],//菜单列表
+            }
+        },
+        beforeCreate(){
+          window.VueB=this;
+        },
+        created(){
+          this.getMenus();
+          //console.log(this.$route,this.routetype)
+          if(Vue.getRealDefind(this.$route.params.define))Vue.getDefind();
+        },
+        methods:{
+          getMenus(){//获取栏目列表
+            let area=this.$store.getters.getArea;
+            if(area && area.enname && area.enname==this.routeDefine){
+              let areaid=area.industrycode?parseInt(area.industrycode):area.areaid;//若是特殊站点
+              let projectParam={"pageNow":1,"pageSize":10,"menutype":1,areaid:areaid,isshow:1};
+              this.utilscommit.request("nvsi_listWebColumns",projectParam,this.datasback);
+            }
+          },
+          datasback(data){//栏目列表返回结果
+            if(data && data.data){
+              this.columnsList=data.data;
+            }
+          },
+          getJump(el){//跳转
+            if(el.types && el.quotemenu){//引用总站非默认
+              let quotemenu=el.quotemenu;
+              if(quotemenu.albx6006==5){//外链接
+                window.open(quotemenu.albx6009);
+              }else if(quotemenu.albx6006==1){//单个新闻
+                window.open(this.context+"/LEAP/site/index.html#/newsinfo/2/"+quotemenu.id);
+              }else if(quotemenu.albx6006==4 || quotemenu.albx6006==2){//多个子栏目的新闻 || 视频
+                 let type=quotemenu.albx6006==4?2:(quotemenu.albx6003==1?3:4);//2=新闻，3=一级视频，4=二级视频
+                window.open(this.context+"/LEAP/site/index.html#/news/"+type+"/"+quotemenu.id);
+              }
+            }else if(el.albx6006==5){//跳转外部链接
+              window.open(el.albx6009);
+            }else if(el.albx6006==4 || el.albx6006==2){//多个子栏目的新闻 || 视频
+              let type=el.albx6006==4?2:3;
+              this.$utilroutes.toNews(type,el.id,"noopen");
+            }else if(el.albx6006==1){//单个新闻
+              this.$utilroutes.toNewsInfo(2,el.id,"noopen");
+            }else if(el.albx6009){//北京子站-->默认栏目
+              if(el.albx6009=="login1"){
+               this.$utilroutes.toLogin(1);
+              }else if(el.albx6009=="login2"){
+                this.$utilroutes.toLogin(2);
+              }else{
+                this.$router.push({name: el.albx6009, params: {define:this.routeDefine}});
+              }
+            }
+          },
+        },
+         watch: {
+          $route: function(to, from) { //监听路由是否变化
+            this.id=this.$route.params.id;
+            this.routename= this.$route.name;
+            this.routetype= this.$route.params.type;
+          //console.log(this.$route,this.routetype)
+            if(to.params.define!=this.routeDefine){
+                this.routeDefine=to.params.define;
+                this.getMenus();
+            }
+          },
+        } 
+
+    }
+</script>
+
+<style scoped>
+
+</style>

@@ -1,0 +1,90 @@
+<template>
+  <div id="completetip">
+    <div class="mask" :class="{active:complete}">
+      <div class="mask-info" style="width:700px;max-height:705px;margin-left:-350px;">
+        <div class="mask-header row w">
+          <div class="col v-m"><h2>提示</h2></div>
+        </div>
+        <div style="padding:20px 50px 0 50px;">
+          <div class="form" :class="{'hiddens':showtype==2 || showtype==3}">
+            <p class="form-label" style="text-align: center;font-size: 18px;"><em>请先完善基本信息</em></p>
+            <p class="form-label" style="text-align: center;font-size: 14px;">完善基本信息，将拥有参加团体和项目等功能的权限</p>
+          </div>
+          <div class="form" :class="{'hiddens':showtype==1}">
+            <p class="form-label" style="text-align: center;font-size: 18px;"><em v-text="showtitle"></em></p>
+            <p class="form-label" style="text-align: center;font-size: 14px;" v-show="showname" v-text="showname"></p>
+          </div>
+          <div>
+            <a href="javascript:void(0);" class="button" @click="completeInfo">完善信息</a>
+            <a href="javascript:void(0);" class="button" @click="loginOut" style="float: right;">退出登录</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+  export default {
+    name: 'completetip',
+    props:['showtype','basicInfo'],//showtype-->弹出层展示类型 0=不展示  1=展示，未完善信息    2=展示，异站点信息
+    data(){
+      return {
+        context:this.common.getUrl(),
+        routeDefine: this.$route.params.define,
+        showtitle:'',
+        showname:''
+      };
+    },
+    methods:{
+      completeInfo:function () {//判断是否完善信息
+        if(this.showtype==3){//跳转身份信息
+          this.$router.push({name: "updateiden",params: {define: this.routeDefine}});
+        }else{//修改资料
+          var nowareaid=Vue.$store.getters.getArea.areaid;
+          if (!this.basicInfo.albp0020 || !this.basicInfo.albp0028 || this.basicInfo.albp0020.substring(0,2)!=nowareaid.substring(0,2)) {
+            this.$router.push({name: "updatedata",params: {define: this.routeDefine}});
+          }
+        }
+      },
+      loginOut:function() {
+        Vueh.loginOut();
+        //this.utilscommit.request('nvsi_loginOut',null,this.loginOutCheck);
+      },
+      /* loginOutCheck:function (result) {
+        this.$router.push({name: "login",params: {define: this.routeDefine}});
+      } */
+    },
+    computed:{
+      complete:function(){
+          if(this.showtype==2){//异站点登录
+            var areaname=this.basicInfo.albp0025;
+            if(areaname.indexOf(">")!=-1){
+              areaname=areaname.substring(0,areaname.indexOf(">"));
+            }
+            var nowsitename=this.$store.getters.getArea.cnname;
+            this.showtitle="是否把志愿服务记录从“"+areaname+"”转移到“"+nowsitename+"”？";
+            this.showname="在“"+nowsitename+"”中请重新设置志愿者所属服务区域、服务类别、服务领域等信息";
+          } else if(this.showtype==3){
+            this.showtitle="请进入实名认证页面进行认证";
+            this.showname="认证原因：实名认证失败或者人工审核不通过";
+          }
+          if(this.showtype){//判断页面是否展示
+            return true;
+          }else{
+            return false;
+          }
+      }
+    },
+    /* watch:{
+      showtype: function(to, from) { //监听路由是否变化
+      debugger
+        console.log("223")
+      }
+    } */
+  }
+</script>
+
+<style scoped>
+  .hiddens{display: none !important;}
+</style>

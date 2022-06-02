@@ -1,0 +1,196 @@
+<template>
+  <div id="upcardimg">
+    <div class="avatar-upload avatar-upload-small" style="margin-bottom: 0">
+      <div
+        class="avatar-upload-wrap"
+        :id="'photo' + photo"
+        style="width: 315px; height: 206px"
+      >
+        <img :src="img" alt="" class="w" />
+      </div>
+      <div class="upload">
+        <a
+          href="javascript:void(0);"
+          @click="upimg"
+          class="button button-line"
+          :id="'picker' + photo"
+          >{{ title }}</a
+        >
+      </div>
+      <div :id="'overlay' + photo"></div>
+      <div class="lightbox cropperBox" :id="'cropperBox' + photo">
+        <div class="cropperInner">
+          <img :id="'img' + photo" />
+        </div>
+        <div>
+          <button type="button" class="btnCropper" :id="'btnCropper' + photo">
+            确 定
+          </button>
+          <button type="button" class="btnCancel" :id="'btnCancel' + photo">
+            取 消
+          </button>
+          <span class="introjs-tips">鼠标滚轮可缩放图片尺寸</span>
+        </div>
+        <div class="jcrop-preview">
+          <div class="preview" :id="'preview' + photo"></div>
+        </div>
+      </div>
+      <input
+        :id="'file' + photo"
+        type="file"
+        ref="file"
+        @change="changeImg"
+        accept="image/*"
+        hidden
+        style="visibility: hidden"
+      />
+    </div>
+  </div>
+</template>
+
+<script>
+//import Cropper from 'cropperjs';
+export default {
+  props: ["photo", "title", "img"],
+  /*   {photo: {type: String},
+        title: {type: String},
+        img: {type: String},
+      }, */
+  name: "upcardimg",
+  data() {
+    return {
+      cropper: "",
+    };
+  },
+  mounted() {
+    this.aaa();
+    this.initUploader();
+  },
+  methods: {
+    initUploader() {
+      var imgs = document.getElementById("img" + this.photo);
+      this.cropper = new Cropper(imgs, {
+        aspectRatio: 1.53,
+        preview: "#preview" + this.photo,
+        dragMode: "move",
+        minCropBoxWidth: 100,
+      });
+    },
+    upimg() {
+      $("#file" + this.photo).val("");
+      $("#file" + this.photo).click();
+    },
+    changeImg(e) {
+      var file = e.target.files[0];
+      var fileName = e.target.value;
+      let fileVal = this.common.checkFile(file, 2048);
+      if (fileVal) return this.$swal(fileVal, { buttons: "确定" });
+      var bole = URL.createObjectURL(file);
+      $("#img" + this.photo).attr("src", bole);
+      $("#overlay" + this.photo).show();
+      $("#cropperBox" + this.photo).css({ display: "block" });
+      if (this.cropper) {
+        this.cropper.replace(bole);
+      }
+      $("#cropperBox" + this.photo).addClass("show");
+      $("#btnCropper" + this.photo).on("click", this.getImgFile);
+    },
+    aaa() {
+      $("#preview" + this.photo).css({ width: "315", height: "206" });
+      $("#btnCancel" + this.photo).on("click", this.hideImgFile);
+    },
+    hideImgFile() {
+      $("#cropperBox" + this.photo).removeClass("show");
+      $("#overlay" + this.photo).hide();
+      $("#file" + this.photo).val("");
+      return false;
+    },
+    getImgFile() {
+      var file = document.getElementById("file" + this.photo);
+      var fi = file.files[0];
+      var name = fi.name;
+      var fn = file.value.split(".");
+      var ext = fn[fn.length - 1];
+      var type = ext.toLowerCase() == "png" ? "image/png" : "image/jpeg";
+      $("#cropperBox" + this.photo).removeClass("show");
+      $("#overlay" + this.photo).hide();
+      var src = this.cropper
+        .getCroppedCanvas({ width: 315, height: 206 })
+        .toDataURL(type, 1);
+      //生成预览图
+      $("#photo" + this.photo).html(
+        '<img alt="" class="w" id="nowImg' +
+          this.photo +
+          '" style="width: 100%;height: 100%">'
+      );
+      $("#nowImg" + this.photo).attr("src", src);
+      //将图片转为blob
+      var imgFile = this.dataURLToFile(src, name);
+      imgFile.src = src;
+      // var imgFile = this.dataURLToBlob(src, name);
+      // imgFile.name = name;
+
+      //#region 使用回调函数上传图片
+      // this.utilscommit.uploadapi(imgFile, (res) => {
+      //   if (res.code == 0 && res.data) {
+      //     if (this.photo) {
+      //       this.$parent[`imgFile${this.photo}`] = res.data;
+      //     } else {
+      //       this.$parent.imgFile = res.data;
+      //     }
+      //   } else {
+      //     this.$swal('图片上传失败', { buttons: '确定' })
+      //   }
+      // });
+      //#endregion
+
+      //#region 使用async/await上传图片
+      // let { data } = await this.utilscommit.asyncUpload(imgFile);
+      // if (data.code == 0 && data.data) {
+      //   if (this.photo) {
+      //     this.$parent[`imgFile${this.photo}`] = res.data;
+      //   } else {
+      //     this.$parent.imgFile = res.data;
+      //   }
+      // } else {
+      //   this.$swal("图片上传失败", { buttons: "确定" });
+      // }
+      //#endregion
+      console.log(imgFile);
+      if (this.photo) {
+        this.$parent[`imgFile${this.photo}`] = imgFile;
+      } else {
+        this.$parent.imgFile = imgFile;
+      }
+    },
+    dataURLToBlob(dataurl) {
+      let arr = dataurl.split(","),
+        mime = arr[0].match(/:(.*?);/)[1],
+        bstr = atob(arr[1]),
+        n = bstr.length,
+        u8arr = new Uint8Array(n);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      return new Blob([u8arr], { type: mime });
+    },
+    dataURLToFile(dataurl, filename) {
+      var arr = dataurl.split(","),
+        mime = arr[0].match(/:(.*?);/)[1],
+        bstr = atob(arr[1]),
+        n = bstr.length,
+        u8arr = new Uint8Array(n);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      return new File([u8arr], filename, { type: mime });
+    },
+  },
+};
+</script>
+
+<style>
+/* @import "../../assets/css/base.css";
+  @import "../../assets/css/main.css";
+  @import "../../assets/css/cropper.min.css"; */
+</style> 

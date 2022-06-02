@@ -1,0 +1,430 @@
+<template>
+  <div class="js-top-bar" id="header" :class="{'js-top-back':$store.getters.getArea.enname=='fujian'}" style=" margin-bottom: 15px">
+    <!-- style="margin-top: -7px;" -->
+    <div class="mid row">
+      <div class="col t-l">
+        <!--  <h1 v-if="$route.params.define!='jiangsu'">
+            <img src="@/assets/img/js-log.png" alt="">
+            <span v-text="$store.getters.getArea.cnname"></span>
+          </h1>
+          <h1 v-else>
+            <img src="@/assets/img/js-logo2.png" alt="">
+        </h1>-->
+        <!-- 自定义顶部标题 -->
+        <h1>
+          <img src="@/assets/img/top_logo.png" alt />
+          <b class="top_title">
+            {{$store.getters.getArea.cnname}}志愿服务
+            <b class="top_title1">中国志愿服务网</b>
+            <span
+              style="bottom:-30px;right:11px"
+              v-if="$store.getters.getArea.cnname && $store.getters.getArea.cnname.length<4"
+              v-text="$store.getters.getArea.cnname"
+            ></span>
+            <span
+              style="bottom:-30px;right:11px;width: 124px; text-align: right;    background-size: 100% 100%;"
+              v-if="$store.getters.getArea.cnname && $store.getters.getArea.cnname.length==4"
+              v-text="$store.getters.getArea.cnname"
+            ></span>
+            <span
+              style="bottom:-30px;right:11px;width: 150px; text-align: right;    background-size: 100% 100%;"
+              v-if="$store.getters.getArea.cnname && $store.getters.getArea.cnname.length==5"
+              v-text="$store.getters.getArea.cnname"
+            ></span>
+          </b>
+          <br />
+        </h1>
+      </div>
+      <div class="col t-r v-m">
+        <div class="login-box" style="margin-bottom: -23px !important;">
+          <dl class="address">
+            <!--  @mouseleave="closeMaskz" -->
+            <dt class="ab" @click="showsSite">站点切换</dt>
+            <!-- @mouseenter="showsSite" -->
+            <!-- <dd class="cd" style="margin-top: -10px;">
+                <div>
+                  <a :href="common.getASite()" style="width: 250px;" target="_blank"><h3 class="headerh3">中国志愿服务网</h3></a>
+                </div>
+                <p v-if="industrylist.length>0"> 
+                  <a href="javascript:void(0);" v-for="(el,index) in industrylist" :key="index+1"  class="b">
+                    <span @click="getsubsite(el.url,el.enname)">{{el.cnname }}</span>
+                  </a>
+                </p>
+                <p> 
+                  <a href="javascript:void(0);" v-for="(el,index) in nositelist" :key="index+1"  class="b">
+                    <span @click="getsubsite(el.url,el.enname)">{{el.cnname }}</span>
+                  </a>
+                </p>
+                <p v-for="(fitem,index) in docsListFirst" :key="fitem.areaid+index">
+                  <a href="javascript:void(0);" class="b">
+                    <span @click="getsubsite(fitem.url,fitem.enname)">{{fitem.cnname }}</span>
+                  </a>
+                  <a href="javascript:void(0);"   v-for="(sitem,skey) in fitem.child" :key="skey">
+                    <span @click="getsubsite(sitem.url,sitem.enname)">{{sitem.cnname }}</span>
+                  </a>
+                </p>
+            </dd>-->
+          </dl>
+          <div style="display: inline-block;" v-html="logInfo"></div>
+          <!-- <a  v-if="!userInfo || userInfo.albp0076 == 1" @click="toLogin"> 请登录</a> -->
+          <router-link
+            v-if="!userInfo || userInfo.albp0076 == 1"
+            tag="a"
+            :to="{name:'login',params:{define:routeDefine,type:2}}"
+          >请登录</router-link>
+          <router-link
+            v-if="!userInfo || userInfo.albp0076 == 1"
+            tag="a"
+            :to="{name:'volreg',params:{define:routeDefine}}"
+          >志愿者注册</router-link>
+          <span
+            v-if="$store.getters.getArea.industrycode"
+          >&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;</span>
+          <span
+            v-if="(!userInfo || userInfo.albp0076 == 1) && !$store.getters.getArea.industrycode"
+          >|</span>
+          <router-link
+            v-if="(!userInfo || userInfo.albp0076 == 1) && !$store.getters.getArea.industrycode"
+            tag="a"
+            :to="{name:'orgreg',params:{define:routeDefine}}"
+          >志愿队伍注册</router-link>
+          <img src="@/assets/img/login-img1.png" style="margin-bottom: 13px;ma" alt />
+        </div>
+        <!-- <div class="js-search" style="margin-top: -20px;">
+            <input type="text">
+            <button></button>
+        </div>-->
+        <div class="js-search" style="margin-top: -20px;overflow: visible;">
+          <div class="js-select">
+            <b class="js-select-core" v-text="searchname"></b>
+            <ul class="js-select-options">
+              <li
+                v-for="el in searchlist"
+                :key="el.type"
+                :class="{active:searchtype==el.type}"
+                @click="searchname=el.name;searchtype=el.type"
+                v-text="el.name"
+              ></li>
+            </ul>
+          </div>
+          <input type="text" style="width: 400px;" v-model="searchtext" maxlength="30" />
+          <button style="border-radius: 0 99px 99px 0;cursor: pointer;" @click="toSearch"></button>
+        </div>
+      </div>
+    </div>
+
+    <!--站点切换弹出层-->
+    <div class="mask docs">
+      <div class="mask-info">
+        <div class="mask-header row w">
+          <div class="col v-m">
+            <h2>请选择站点</h2>
+          </div>
+          <div class="col v-m t-r">
+            <a href="javascript:void(0);" class="mask-close" @click="closeMaskz">
+              <img src="@/assets/img/close.png" alt />
+            </a>
+          </div>
+        </div>
+        <div>
+          <a
+            :href="common.getASite()"
+            style="width: 250px;"
+            class="v-m category__item"
+            target="_blank"
+          >
+            <h3>中国志愿服务网</h3>
+          </a>
+        </div>
+        <!-- <div class="category__content">
+          <a
+            href="javascript:void(0);"
+            v-for="item in docsListFirst"
+            :key="item.id"
+            class="category__item"
+          >
+            <span @click="getsubsite(item.url,item.enname)" v-cloak>
+              {{item.cnname}}
+              <img v-show="!item.mzurl  " :src="require('../assets/img/superscript.png')" alt />
+            </span>
+          </a>
+        </div> -->
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  name: "hearder",
+  data: function() {
+    return {
+      docsListFirst: [
+        /*  {
+            src:'superscript.png'
+        } */
+      ], //有子站的站点
+      nositelist: [], //无子站的站点
+      industrylist: [], //特殊站点，税务
+      routeDefine: "",
+      context: this.common.getUrls(),
+      userInfo: null,
+      logInfo: "",
+      cnname: "",
+      //全局搜索
+      searchtype: 1,
+      searchname: "新闻文章",
+      searchlist: [
+        { type: 1, name: "新闻文章" },
+        { type: 2, name: "志愿项目" },
+        { type: 3, name: "志愿队伍" }
+      ],
+      searchtext: "" //输入框
+    };
+  },
+  watch: {
+    "$route.name"(to, from) {
+      this.searchinit(to);
+    }
+  },
+  beforeMount() {
+    window.Vueh = this; //页眉vue实例挂载
+    this.routeDefine = this.$route.params.define;
+    this.searchinit(this.$route.name);
+    this.getDocsList();
+    window.loginOut = this.loginOut;
+    window.toUserCenter = this.toUserCenter;
+    this.getUserInfo();
+  },
+  /*  mounted(){
+      $('.js-select-options li').each(function(idx, el){//全局搜索下拉框
+          $(el).click(function(){
+              $(this).addClass('active').siblings().removeClass('active');
+              $('.js-select-core').text($(this).text());
+          })
+      });
+    },  */
+  methods: {
+    toLogin() {
+      window.open(
+        "http://chinavolunteer.cn/NVSI/LEAP/dist/index.html#/jiangsu/login/3"
+      );
+    },
+    searchinit(to) {
+      //初始化搜索栏
+      let idx = 0;
+      if (to == "project" || to == "projectInfo") {
+        //志愿团体
+        idx = 1;
+      } else if (to == "group" || to == "groupInfo") {
+        //志愿项目
+        idx = 2;
+      } else if (to != "news") {
+        this.searchtext = "";
+      }
+      this.searchtype = idx + 1;
+      this.searchname = this.searchlist[idx].name;
+    },
+    getDocsList() {
+     // this.utilscommit.request("nvsi_listWebDocs", null, this.callbackLevel1); //切换站点
+    },
+    callbackLevel1(data) {
+      //总站站点信息
+      if (data && data.data) {
+        let site = data.data;
+        //this.docsListFirst = site.list;//有站点栏目
+        this.docsListFirst = data.data.listremovechild; //省级站点
+        this.nositelist = site.nositelist;//无站点栏目
+        this.industrylist = site.industrylist;//特殊站点栏目
+      }
+    },
+    getsite() {
+      //跳转全国志愿服务信息系统
+      //this.centerDialogVisible=false;//关闭提示框
+      //$('.mask.docs').removeClass('active');
+      window.open(this.common.getUrls() + "LEAP/nvsi/html/index.html");
+    },
+    getUserInfo: function() {
+      this.utilscommit.request("nvsi_getUserInfo", null, this.userInfoCheck);
+    },
+    userInfoCheck: function(result) {
+      if (result.data) {
+        let userInfo = result.data;
+        let loginstatus = window.sessionStorage.getItem("nvsi_loginstatus"); //登录状态 1=已登录
+        if (userInfo.albp0076 != 1 && loginstatus && loginstatus == 1) {
+          //不为全国性组织登录
+          this.logInfo =
+            '<span style="width: 70px;">您好！</span>' +
+            '<a href="javascript:void(0);" class="icon-link" onclick="toUserCenter()">' +
+            userInfo.albp0052 +
+            "</a>" +
+            '<a href="javascript:void(0);" class="icon-link" style="width: 60px;" onclick="loginOut()">退出</a>';
+          this.userInfo = userInfo;
+          window.sessionStorage.setItem("nvsi_loginOutType", 1); //登录状态
+          this.$store.commit("saveUser", this.userInfo);
+        } else {
+          this.loginOut();
+        }
+
+        /* var nowDocsAreaid = JSON.parse(window.localStorage.getItem("subsite_areaInfo")).areaid;
+          //var nowDocsAreaid = this.areaid;
+          if (nowDocsAreaid && result.data.areaid.substring(0,2) == nowDocsAreaid.substring(0,2)) {
+            this.logInfo = '<span style="width: 70px;">您好！</span>'
+              + '<a href="javascript:void(0);" class="icon-link" onclick="toUserCenter()">' + result.data.albp0052
+              + '</a>' + '<a href="javascript:void(0);" class="icon-link" style="width: 60px;" onclick="loginOut()">退出</a>'
+          } else {
+            this.loginOut();
+          } */
+      }
+    },
+    loginOut: function() {
+      this.utilscommit.request("nvsi_loginOut", null, this.loginOutCheck);
+    },
+    loginOutCheck: function(result) {
+      if (result && result.code == 0) {
+        window.sessionStorage.removeItem("nvsi_loginstatus");
+        this.$store.commit("saveUser", null);
+        this.$store.commit("saveBasic", null);
+        if (window.sessionStorage.getItem("nvsi_loginOutType")) {
+          //点击退出按钮
+          this.$router.push({
+            name: "login",
+            params: { define: this.routeDefine, type: 2 }
+          });
+          window.sessionStorage.removeItem("nvsi_loginOutType");
+        }
+        this.logInfo = "";
+        this.userInfo = null;
+      }
+    },
+    toUserCenter: function() {
+      if (this.userInfo) {
+        if (this.userInfo.albp0056 == "1") {
+          this.$router.push({
+            name: "usercenter",
+            params: { define: this.routeDefine }
+          });
+        } else {
+          const path = this.common.getCookie("mgpath");
+          if (path) {
+            window.open(path);
+          } else {
+            this.loginOut();
+          }
+        }
+      } else {
+        this.$swal("登录信息已过期，是否重新登录？", {
+          buttons: ["取消", "确定"]
+        }).then(function(value) {
+          if (value) {
+            Vue.$router.push({
+              name: "login",
+              params: { define: Vue.$route.params.define, type: 2 }
+            });
+          } else {
+            Vue.$router.go(0); //刷新页面
+          }
+        });
+      }
+    },
+    showsSite() {
+      //打开切换站点
+      $(".docs").addClass("active");
+    },
+    closeMaskz() {
+      //关闭切换站点
+      $(".docs").removeClass("active");
+    },
+    getsubsite(url, enname) {
+      //切换站点
+      if (url) {
+        //外部子站
+        window.open(url);
+      } else {
+        //北京子站
+        window.open(
+          this.$router.resolve({ name: "home", params: { define: enname } })
+            .href
+        );
+      }
+    },
+    toSearch() {
+      //全局搜索
+      if (this.searchtext) {
+        let routename = this.$route.name;
+        if (this.searchtype == 2) {
+          //项目
+          if (routename == "project") {
+            //当前页面
+            Vues.projectName = this.searchtext; //全局搜索
+            Vues.getProjectList();
+          } else {
+            this.$router.push({
+              name: "project",
+              params: { define: this.routeDefine }
+            });
+          }
+        } else if (this.searchtype == 3) {
+          //队伍
+          if (routename == "group") {
+            //当前页面
+            Vues.groupName = this.searchtext; //全局搜索
+            Vues.getOrgList();
+          } else {
+            this.$router.push({
+              name: "group",
+              params: { define: this.routeDefine }
+            });
+          }
+        } else {
+          //新闻文章
+          this.$router.push({
+            name: "news",
+            params: { define: this.routeDefine, type: 5, id: this.searchtext }
+          });
+        }
+      } else {
+        this.$swal("请输入搜索关键字", { buttons: "确定" });
+      }
+    }
+  }
+};
+</script>
+
+<style>
+/* @import "../../assets/css/base.css";
+  @import "../../assets/css/main.css"; 
+  @import "../../assets/fonts/UniveConBol.css";*/
+.top_title {
+  /* 顶部logo标题样式 */
+  font-size: 41px;
+  font-weight: bold;
+  letter-spacing: 7px;
+  position: absolute;
+  width: max-content;
+  left: 85px;
+  top: -8px;
+}
+.top_title1 {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.4em;
+  position: absolute;
+  width: max-content;
+  bottom: -30px;
+  left: 0px;
+  width: 65%;
+}
+/*   .category__item{
+    display: flex;
+    flex-direction: row;
+    align-items: top
+  } */
+
+.category__item img {
+  width: 22px;
+  height: 14px;
+  margin-top: -15px;
+}
+
+</style>

@@ -1,0 +1,125 @@
+<template>
+  <li class="col v-t white tab-container">
+    <updatemenu></updatemenu>
+    <div class="tabbar-down">
+      <!-- 其他信息 -->
+      <div class="grid g-20 auto">
+        <!--<div class="grid-item g-14 form">
+          <p class="form-label">职称</p>
+          <div class="select">
+            <select name="">
+              <option value="">请选择</option>
+            </select>
+          </div>
+        </div>-->
+        <div class="grid-item g-14 form">
+          <p class="form-label">工作单位：</p>
+          <input type="text" v-model="basicInfo.albp0044" maxlength="50" placeholder="请输入工作单位">
+        </div>
+        <div class="grid-item g-14 form">
+          <p class="form-label">职务：</p>
+          <input type="text" v-model="basicInfo.albp01_100" maxlength="20" placeholder="请输入职务">
+        </div>
+        <div class="grid-item g-24 form">
+          <p class="form-label">血型：</p>
+          <div class="checkbox-fixed">
+            <label class="radio" v-for="(el,index) in bloodTypeList" :key="index" :for="el.id">
+              <input type="radio" name="blood" :id="el.id" :value="el.codeid" v-model="bloodType">
+              <span></span>
+              <i v-text="el.codevalue"></i>
+            </label>
+          </div>
+        </div>
+        <div class="grid-item g-24 form">
+          <p class="form-label">制服型号：</p>
+          <div class="checkbox-fixed">
+            <label class="radio" v-for="(el,index) in sizeTypeList" :key="index" :for="el.id">
+              <input type="radio" name="size" :id="el.id" :value="el.codeid" v-model="sizeType">
+              <span></span>
+              <i v-text="el.codevalue"></i>
+            </label>
+          </div>
+        </div>
+        <div class="grid-item g-22 form">
+          <p class="form-label">志愿服务经历：</p>
+          <textarea class="textarea" rows="5" v-model="basicInfo.albp0040" maxlength="300" placeholder="请输入志愿服务经历"></textarea>
+        </div>
+        <div class="pt-30 t-c"><a href="javascript:void(0);" class="button" style="width:200px;" @click="onSubmit">保存修改</a></div>
+      </div>
+    </div>
+  </li>
+</template>
+
+<script>
+  const updatemenu =()=>import('@/components/usercenter/updatemenu.vue');//横向菜单栏
+
+  export default {
+    components:{updatemenu},
+    data(){
+      return {
+        userInfo:this.$store.getters.getUser,//账号信息
+        basicInfo:this.$store.getters.getBasic,//志愿者信息
+        titleLever:'',//职称
+        bloodTypeList:{},//血型
+        bloodType:'',
+        sizeTypeList:{},//制服型号
+        sizeType:'',
+      };
+    },
+    created() {
+      this.getUserInfo();
+      this.utilscommit.request('nvsi_getCodeValues',{'codename':'nvsi_albp0048'},this.callback1);
+      this.utilscommit.request('nvsi_getCodeValues',{'codename':'nvsi_albp0049'},this.callback2);
+    },
+    methods:{
+      onSubmit:function(){
+        if (this.userInfo){
+          if(this.userInfo.state == '2') {
+            this.$router.push({name: "updatedata",params: {define: this.routeDefine}});
+          }else {
+            var data = {
+              "id":this.userInfo.albp0055,
+              //"albp0041":this.titleLever,//职称
+              // "albp0042":this.basicInfo.albp0042,//职务
+              "albp01_100":this.basicInfo.albp01_100,//职务
+              "albp0044":this.basicInfo.albp0044,//工作单位
+              "albp0048":this.bloodType,//血型
+              "albp0049":this.sizeType,//制服型号
+              "albp0040":this.basicInfo.albp0040//服务经历
+            };
+            this.utilscommit.request("nvsi_modifyVolBasicInfo",data,this.modifyBack);
+          }
+        } else {
+          this.$utilroutes.toLogin();
+        }
+      },
+      modifyBack:function (result) {
+        if(result) {
+          if(result.code==0){
+            this.$swal('修改成功',{buttons:'确定'}).then(function (value) {
+              Vuec.getUser();
+            });
+          } else {
+            this.$swal(result.message,{buttons:'确定'});
+          }
+        }
+      },
+      getUserInfo:function () {
+         this.bloodType = this.basicInfo.albp0048?this.basicInfo.albp0048:'';
+        this.sizeType = this.basicInfo.albp0049?this.basicInfo.albp0049:'';
+      },
+      callback1:function (result) {
+        this.bloodTypeList = this.common.orderBy(result.data,'orderid','asc');
+      },
+      callback2:function (result) {
+        this.sizeTypeList = this.common.orderBy(result.data,'orderid','asc');
+      }
+    }
+  }
+</script>
+
+<style scoped>
+  .form{
+    margin: 10px 0 0 20px;
+  }
+</style>

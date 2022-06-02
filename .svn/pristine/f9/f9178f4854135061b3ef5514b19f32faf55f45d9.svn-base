@@ -1,0 +1,140 @@
+<template>
+  <div id="app">
+    <!--页眉-->
+    <header-body v-show="!(name==='proShare') && !(name==='groupShare')"></header-body>
+    <!--导航栏-->
+    <navigation-bar v-show="!(name==='proShare') && !(name==='groupShare')"></navigation-bar>
+    <!-- 主体内容 -->
+    <router-view/>
+    <!-- 页脚 -->
+    <footer-body v-show="!(name==='proShare') && !(name==='groupShare')"></footer-body>
+  </div>
+</template>
+
+<script>
+const HeaderBody =()=>import('@/components/header.vue');//页眉
+//const navigationBar =()=>import('@/components/navigationBar.vue');//导航栏
+//const FooterBody =()=>import('@/components/footer.vue');//页脚
+
+import navigationBar from '@/components/navigationBar.vue';
+import FooterBody from '@/components/footer.vue';
+
+export default {
+  name: 'App',
+  components : {
+    HeaderBody,//页眉
+    navigationBar,//导航栏
+    FooterBody,//页脚
+  },
+  data:function(){
+    return{
+      routeDefine:this.$route.params.define,
+      isRouterAlive: true,
+      name:'',
+    }
+  },
+  provide () {
+    return {
+      reload: this.reload
+    }
+  },
+  beforeCreate(){
+    window.Vue = this;
+  },
+  created(){
+    this.clearCookies();//清缓存
+    this.getDefind();
+  },
+ /*  beforeMount() {
+    this.name=this.$route.name;
+    //加载页面初始化数据(页面元素属性绑定之前执行)
+  }, */
+  watch: {
+    '$route.params.define'(to,from){//路由参数变化
+        if(to!=this.routeDefine){
+          if(this.getRealDefind(to)){
+            this.routeDefine=to;
+            this.getDefind();
+          }
+        }
+    },
+    $route(to,from){
+      this.name=to.name;
+    }
+  } ,
+  methods: {
+    getRealDefind(define){
+      let route_name=this.$route.name;
+      if(route_name){
+        let setparams=this.$route.params;
+        if(window.location.host=="js.chinavolunteer.cn" && define!="jiangsu"){
+          setparams.define="jiangsu";
+          this.$router.push({name:route_name,params:setparams});
+          return false;
+        }/* else if(window.location.host=="192.168.6.131:8081" && define!="jiangsu"){//上海
+          setparams.define="jiangsu";
+          this.$router.push({name:route_name,params:setparams});
+          return false;
+        } */ else if(window.location.host=="192.168.6.168:8003" && define!="jiangsu"){//天津
+          setparams.define="jiangsu";
+          this.$router.push({name:route_name,params:setparams});
+          return false;
+        }  else if(window.location.host=="192.168.6.134:8003" && define!="jiangsu"){//天津
+          setparams.define="jiangsu";
+          this.$router.push({name:route_name,params:setparams});
+          return false;
+        } 
+      }
+      return true;
+    },
+    getDefind(){//获取当前区域信息
+      var areaInfo = this.$store.getters.getArea;//this.common.areaInfo();
+      if (!areaInfo.enname || areaInfo.enname!=this.routeDefine){
+        this.utilscommit.request("nvsi_listWebDocsInfo", {"enname":this.routeDefine}, this.areasBack)
+      };//头部信息
+    },
+    areasBack(result){
+      if(result && result.data && result.data.enname && this.routeDefine==result.data.enname){
+        let area=result.data;
+        if(area.industrycode)area.areaid='0';//特殊站点查询总站
+        this.$store.commit('saveArea',area);
+        window.localStorage.setItem("subsite_areaInfo",JSON.stringify(area));
+        VueB.getMenus();//横向菜单栏
+        Vuef.getdatafooter();//底部菜单栏
+        let routename=this.$route.name;
+        if(routename=="home" || routename=="group" || routename=="project" || routename=="orgreg" || routename=="login")Vues.getAreaInfo();//首页
+      }
+    },
+    updateAreaData(){
+
+    },
+    reload () {//刷新页面
+      this.isRouterAlive = false;//先关闭
+      this.$nextTick(function () {
+        this.isRouterAlive = true;  //再打开
+      })
+    },
+    initConfig() {
+      window.Vue = this;
+    },
+    clearCookies(){//清cookies
+      if(!this.common.getCookie("clear_c")){
+        this.utilscommit.requestOther('SystemCheck?clearAll='+new Date().getTime(),function(res){
+          Vue.common.addCookie("clear_c",new Date().getTime(),1);
+        });
+      }
+    }
+  },
+  
+}
+</script>
+
+<style>
+/*去掉百度地图水印的css*/
+.BMap_cpyCtrl {
+    display: none !important;
+}
+.anchorBL {
+    display: none !important;
+}
+</style>

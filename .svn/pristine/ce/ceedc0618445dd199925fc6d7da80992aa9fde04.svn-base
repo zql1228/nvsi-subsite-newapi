@@ -1,0 +1,1498 @@
+<template>
+  <div id="newsbody">
+    <!--中间部分-->
+    <div class="main bannerimg">
+      <div class="mid">
+        <ul class="row w">
+          <li class="col">
+            <div class="router">
+              <span>当前位置：</span>
+              <a href="javascript:void(0);"><router-link tag="a" :to="{name:'home',params:{define:routeDefine}}">首页</router-link></a>
+              <a href="javascript:void(0);"><router-link tag="a" :to="{name:'project',params:{define:routeDefine}}">志愿项目</router-link></a>
+              <a href="javascript:void(0);">志愿项目详情</a>
+            </div>
+          </li>
+        </ul>
+        <div class="section">
+          <div class="row w">
+            <div class="col v-t" style="padding-right:50px;">
+              <div class="row w">
+                <div class="col v-t" style="width:38%;">
+                  <img :src="context + projectInfo.prophoto" @error="imgError" style="width: 260px;height: 170px;" alt="">
+                </div>
+                <div class="col v-t">
+                  <h2 class="h2">{{projectInfo.albx0002}}
+                    <span style="width:88px;padding:0;" v-text="(projectInfo.albx0015==2 && '招募待启动') || (projectInfo.albx0015==3 && '招募中') ||
+                     ((projectInfo.albx0015==5||projectInfo.albx0015==4) && '招募已结束') || ((projectInfo.albx0015==7||projectInfo.albx0015==6) && '已结项') || ''"
+                           v-bind:class="(projectInfo.albx0015==2 && 'button button-small warning round') || (projectInfo.albx0015==3 && 'button button-small success round') ||
+                           ((projectInfo.albx0015==5||projectInfo.albx0015==4) && 'button button-small round') ||
+                            ((projectInfo.albx0015==7||projectInfo.albx0015==6) && 'button button-small info round')"></span>
+                  </h2>
+                  <table class="table-info">
+                    <colgroup>
+                      <col width="21%">
+                      <col width="79%">
+                    </colgroup>
+                    <tr>
+                      <th>项目编号：</th>
+                      <td>
+                        <em v-text="projectInfo.albx0013"></em>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>服务类别：</th>
+                      <td>
+                        <span v-for="item in projectInfo.types" class="button outline" :key="item.id">{{item}}</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>项目分享到：</th>
+                      <td>
+                        <a href="javascript:void(0);" @click="toWB">
+                          <img src="../../assets/img/weibo-2.png" alt="">
+                        </a>
+                        <a href="javascript:void(0);" @click="showtype=1">
+                          <img src="../../assets/img/weixin.png" alt="">
+                        </a>
+                        <a href="javascript:void(0);" @click="showtype=2">
+                          <img src="../../assets/img/qq.png" alt="">
+                        </a>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+              <div class="arrow-box">
+                <table class="table-info">
+                  <colgroup>
+                    <col width="13%">
+                    <col width="37%">
+                    <col width="15%">
+                    <col width="35%">
+                  </colgroup>
+                  <tr>
+                    <th>项目地点：</th>
+                    <td>{{projectInfo.albx0003}}</td>
+                    <th>发布日期：</th>
+                    <td>{{projectInfo.albx0031 |ellipsisNos(10)}}</td>
+                  </tr>
+                  <tr>
+                    <th>服务时间：</th>
+                    <td colspan="3">{{projectInfo.albx0010}}</td>
+                  </tr>
+                  <tr>
+                    <th>招募日期：</th>
+                    <td>{{projectInfo.albx0006 |ellipsisNos(10)}} 至 {{projectInfo.albx0007 |ellipsisNos(10)}}</td>
+                    <th>服务对象：</th>
+                    <td>{{projectInfo.serviceobj}}</td>
+                  </tr>
+                  <tr>
+                    <th>项目日期：</th>
+                    <td>{{projectInfo.albx0004 |ellipsisNos(10)}} 至 {{projectInfo.albx0005 |ellipsisNos(10)}}</td>
+                    <th>志愿者保障：</th>
+                    <td>{{projectInfo.zyzbz}}</td>
+                  </tr>
+                </table>
+              </div>
+              <table class="table-list grid" v-for="(item,index) in jobList" :key="index">
+                <thead>
+                  <tr>
+                    <th colspan="2" align="left">
+                      <span class="item" >岗位{{index+1}}：<i>{{item.albx0072}}</i></span>
+                      <span class="item">计划招募：<i>{{item.albx0077}}</i></span>
+                      <span class="item">已招募：<i>{{item.count}}</i></span>
+                    </th>
+                    <th align="right">
+                      <a v-if="applyButton2==true" href="javascript:void(0);" class="button" id="intoProject" style="background: #FF9400;" @click="applyPro($event,item.id,item.albx0072)">我要报名</a>
+                      <a v-if="applyButton3==true" href="javascript:void(0);" class="button" style="cursor:default;">已申请</a>
+                      <a v-if="applyButton4==true"  href="javascript:void(0);" class="button"  style="cursor:default;">已加入</a>
+                      <a v-if="applyButton5==true" href="javascript:void(0);" class="button" style="cursor:default;">已被邀请</a>
+                      <a v-if="applyButton6==true"  href="javascript:void(0);" class="button" style="cursor:default;">已拒绝</a>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                <tr>
+                  <th>岗位ID</th>
+                  <th>岗位描述</th>
+                  <th>岗位条件</th>
+                </tr>
+                <tr>
+                  <td class="left" v-text="item.albx0073"></td>
+                  <td class="left" v-text="item.albx0074"></td> 
+                  <td class="left"  style="word-break : break-all;overflow:hidden" v-text="item.albx0075"></td>
+                </tr>
+                </tbody>
+              </table>
+              <div class="tabbar" style="margin-top:20px;">
+                <span class="active">项目详情</span>
+                <span>报名信息</span>
+                <span>讨论区</span>
+                <span>项目动态</span>
+                <span>时长公示</span>
+              </div>
+              <!-- 项目信息 -->
+              <div class="tabbar-down">
+                  <p v-if="!projectInfo.albx0018" style="width: 100%;text-align: center;"><img src="../../assets/img/js-wujilu.png"/></p>
+                  <p v-if="projectInfo.albx0018" v-html="ecellipsiSpace(projectInfo.albx0018)" style="padding: 18px;word-break: break-all;"></p>
+              </div>
+              <!-- 最新报名 -->
+              <div class="tabbar-down" style="display:none;">
+                <table class="table-list">
+                  <colgroup>
+                    <col width="15%">
+                    <col width="30%">
+                    <col width="20%">
+                    <col width="20%">
+                    <col width="15%">
+                  </colgroup>
+                  <tbody>
+                  <tr>
+                    <th>姓名</th>
+                    <th>岗位</th>
+                    <th>服务时长</th>
+                    <th>报名时间</th>
+                    <th>操作</th>
+                  </tr>
+                  <tr v-if="!applyList.length"><td colspan="5" style="text-align: center;border-bottom: 1px #F6F3F7;"><img src="../../assets/img/js-wujilu.png"/></td></tr>
+                  <tr v-for="el in applyList" :key="el.id">
+                    <td class="left">
+                      <i class="c-danger pointer" :title="el.albp0003" @click="$utilroutes.toUserInfo(el.albp0029,el.albp0020)">{{el.albp0003}}</i>
+                    </td>
+                    <td class="left">{{el.albx0082}}</td>
+                    <td class="left">{{el.servicetimesum | addZero}}小时</td>
+                    <td class="left">{{el.albx0056 | ellipsisNos(10)}}</td>
+                    <td class="left"><a href="javascript:void(0);" class="c-danger" @click="showComplain(el.albp0029,el.albp0003)">我要投诉</a></td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+              <!-- 讨论区 -->
+              <div class="tabbar-down" style="display:none;">
+                <div class="load">
+                  <textarea class="textarea" rows="4" placeholder="在这里畅所欲言吧～" v-model="leaveContent" maxlength="200" style="height: 146px;"></textarea>
+                  <a href="javascript:void(0);" style="margin-top: 15px;" class="button" @click="publish(1)">发布评论</a>
+                  <h2 class="subtitle subtitle-plain">最新评论</h2>
+                  <p v-if="!mainMessageList.length" style="width: 100%;text-align: center;"><img src="../../assets/img/js-wujilu.png"/></p>
+                  <ul class="activity">
+                    <li class="row w" v-for="el in mainMessageList" :key="el.id">
+                      <div class="col v-t"><img :src="context + el.photo" @error="imgError3" alt=""></div>
+                      <div class="col v-t">
+                        <h3 class="activity-tit">
+                          <a href="javascript:void(0);" @click="toDetailInfo(el.albp0029,el.albp0020,el.orgid,el.albe0012)"><em>{{el.showname}}</em></a>
+                          <span>{{el.albx4006 | ellipsisNos(19)}}</span>
+                          <a href="javascript:void(0);" @click="showReply(el.id,el.albp0029 || el.orgid,el)"><em>回复</em></a>
+                        </h3>
+                        <div class="activity-info">{{el.albx4003}}</div>
+                        <div class="message-child">
+                          <div class="row w line-message" v-for="el2 in el.sublist" :key="el2.id">
+                            <h3 class="activity-tit" style="margin-top: 10px;">
+                              <a href="javascript:void(0);" @click="toDetailInfo(el2.volnum1,el2.area1,el2.orgid1,el2.area3)"><em>{{el2.name1 || el2.name3}}</em></a>
+                              <span>回复</span>
+                              <a href="javascript:void(0);" @click="toDetailInfo(el2.volnum2,el2.area2,el2.orgid2,el2.area4)"><em>{{el2.name2 || el2.name4}}</em></a>
+                              <span>{{el2.albx4006 | ellipsisNos(19)}}</span>
+                              <a href="javascript:void(0);" @click="showReply(el.id,el2.volnum1 || el2.orgid1,el2)"><em>回复</em></a>
+                            </h3>
+                            <div class="activity-info">{{el2.albx4003}}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <!-- 项目动态 -->
+              <div class="tabbar-down" style="display:none;">
+                <div class="load">
+                  <textarea class="textarea" rows="4" style="height:auto" v-model="dynamicContent" placeholder="项目参与人或项目发起人，快来发布项目动态吧～"></textarea>
+                  <input type="file" ref="photofile" @change="photoChanged" accept="image/*" hidden>
+                  <ul class="load-list" id="list" >
+                     <li v-for="(el,index) in photoShowHtml.filter(obj=>obj)" :key="index">
+                      <span class="load-wrap">
+                        <img :src="el.imgsrc" width="80px" height="80px" alt="">
+                        <!-- <img src="../../assets/img/img.png" width="80px" height="80px" alt=""> -->
+                      </span>
+                      <a href="javascript:void(0);" class="load-del" @click="delNowImg(el.id)" ><img src="../../assets/img/del.png" alt=""></a>
+                    </li> 
+                    <li class="load-add" id="picker" @click="photoClicked" ></li>
+                  </ul>
+                  <a href="javascript:void(0);" style="margin-top: 15px;" class="button" @click="submitDynamic">发布动态</a>
+                  <h2 class="subtitle subtitle-plain">最新动态</h2>
+                  <p v-if="!dynamicList.length" style="width: 100%;text-align: center;"><img src="../../assets/img/js-wujilu.png"/></p>
+                  <ul class="activity" v-if="dynamicList.length>0">
+                    <li class="row w" v-for="(el,key) in dynamicList" :key="key" >
+                      <div class="col v-t">
+                        <img v-if="!el.imgpath" src="../../assets/img/avatar.png" alt=""> 
+                        <img v-if="el.imgpath" :src="context + el.imgpath" width="64px" height="64px" alt="">
+                      </div>
+                      <div class="col v-t">
+                        <h3 class="activity-tit">{{el.albx0417}}<span>{{el.createtime  |ellipsisNos(19)}}</span></h3>
+                        <div class="activity-info" v-text="el.albx0404"></div>
+                        <ul class="activity-img" v-if="el.photolist">
+                          <li v-for="(els,keys) in el.photolist" :key="keys"><img v-if="els.imgpath" :src="context + els.imgpath" width="80px" height="80px" alt=""></li>
+                        </ul>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <!-- 时长公示 -->
+              <div class="tabbar-down" style="display:none;">
+                <table class="table-list">
+                  <colgroup>
+                    <col width="15%">
+                    <col width="15%">
+                    <col width="65%">
+                    <col width="15%">
+                  </colgroup>
+                  <tbody>
+                  <tr>
+                    <th>姓名</th>
+                    <th>服务时长</th>
+                    <th>备注</th>
+                    <th>操作</th>
+                  </tr>
+                  <tr v-if="!timePublicList.length"><td colspan="4" style="text-align: center;border-bottom: 1px #F6F3F7;"><img src="../../assets/img/js-wujilu.png"/></td></tr>
+                  <tr v-for="el in timePublicList" :key="el.id">
+                    <td class="left">
+                      <i class="pointer c-danger" :title="el.albp0003" @click="$utilroutes.toUserInfo(el.albp0029,el.albp0020)">{{el.albp0003}}</i>
+                    </td>
+                    <td class="left">{{el.albx0172 | addZero}}小时</td>
+                    <td class="left">{{el.albx0179}}</td>
+                    <td class="left"><a href="javascript:void(0);" class="c-danger" @click="inform(el.id,el.albp0029,el.albx0172)">举报</a> (<span>{{el.count || 0}}</span>)</td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div v-if="nowIndex == 1 || nowIndex == 2 || nowIndex == 3 || nowIndex == 4">
+                <paging :pageCount="tolPage"
+                        :rangePage="pageSize"
+                        :initPage="pageNow"
+                        :totals="tolCount"
+                        :val="jumpPage"
+                        @pageEvent="pageEvent">
+                </paging>
+              </div>
+            </div>
+            <div class="col v-t" style="width:30%;">
+              <h2 class="subtitle subtitle-noline" style="margin-top:-10px;">项目发起人</h2>
+              <div class="row w handup" style="margin:20px 0 40px 0;">
+                <div class="col v-m">
+                  <img :src="context + groupInfo.orgphoto" @error="imgError2" style="width: 93px;height: 93px;" alt="">
+                </div>
+                <div class="col v-m">
+                  <h2>
+                    <a href="javascript:void(0);" style="color: #2C5ABD;" @click="$utilroutes.toGroupInfo(groupInfo.id,groupInfo.albe0012)">{{groupInfo.albe0002}}</a>
+                  </h2>
+                  <p v-if="groupInfo.albe0013">地址：{{groupInfo.albe0013}}</p>
+                </div>
+              </div>
+              <!--<h2 class="subtitle subtitle-noline subtitle-margin">项目二维码</h2>
+              <div class="qrcode">
+                <img style="width:168px;" src="../../assets/img/qrcode.png" alt="">
+                <p>APP扫描二维码加入项目</p>
+              </div>
+              <div class="qrcode">
+                <img style="width:168px;" src="../../assets/img/qrcode.png" alt="">
+                <p>微信扫一扫打开项目分享</p>
+              </div>-->
+              <h2 class="subtitle subtitle-noline subtitle-margin">项目联系人</h2>
+              <div class="link-info">
+                <h2 v-if="projectInfo.albx0025">{{projectInfo.albx0025}}</h2>
+                <p v-if="projectInfo.albx0027==1 && projectInfo.albx0026">手机：{{projectInfo.albx0026}}</p>
+                <p v-if="projectInfo.albx0039==1 && projectInfo.albx0028">电话：{{projectInfo.albx0028}}</p>
+                <p v-if="projectInfo.albx0030==1">邮箱：{{projectInfo.albx0030}}</p>
+                <p class="row w">
+                <span class="col v-m" style="padding-right:10px;">
+                  <a href="javascript:void(0);" class="button outline" @click="sendMessage(groupInfo.id,groupInfo.albe0037)">给他发站内信</a>
+                </span>
+                  <span class="col v-m" style="padding-left:10px;">
+                  <a href="javascript:void(0);" class="button outline" @click="showComplain(projectid,projectInfo.albx0002)">我要投诉</a>
+                </span>
+                </p>
+              </div>
+              <h2 class="subtitle subtitle-noline subtitle-margin">项目地址</h2>
+              <div class="link-info">
+                <p :if="projectInfo.albx0003" >{{projectInfo.albx0003}}</p>
+                <p class="row w">
+                <span class="col v-m" style="padding-right:10px;">
+                  <a href="javascript:void(0);" class="button outline" @click="showMapp">查看地图</a>
+                </span>
+                  <span class="col v-m" style="padding-left:10px;">
+                </span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!--地图-->
+    <div class="mask map">
+      <div class="mask-info" style="max-height:600px;">
+        <div class="mask-header row w">
+          <div class="col v-m"><h2>地图</h2></div>
+          <div class="col v-m t-r">
+            <a href="javascript:void(0);" class="mask-close" @click="closeMapp"><img src="../../assets/img/close.png" alt=""></a>
+          </div>
+        </div>
+        <div>
+          <div id="map" style="height:450px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 微信分享 -->
+    <!-- <div class="mask vxp">
+      <div class="mask-info" style="overflow: unset;width:350px;max-height:450px;margin-left:0;transform: translate(-50%,-50%);">
+        <div class="mask-header row w">
+          <div class="col v-m"><h2>微信分享</h2></div>
+          <div class="col v-m t-r"><a href="javascript:void(0);" class="mask-close" @click="closeVX"><img src="../../assets/img/close.png" alt=""></a></div>
+        </div>
+        <div class="VX_code" style="margin-top: 10px;">
+          <div class="qrcode" ref="qrcodeproject"></div>
+          <p style="text-align: center;margin-top: 10px;">打开微信扫一扫分享</p>
+        </div>
+      </div>
+    </div> -->
+
+    <!-- 免审密码 -->
+    <div class="mask password">
+      <div class="mask-info" style="width:700px;max-height:705px;margin-left:-350px;">
+        <div class="mask-header row w">
+          <div class="col v-m"><h2>免审密码</h2></div>
+          <div class="col v-m t-r"><a href="javascript:void(0);" class="mask-close"  @click="closePassword"><img src="../../assets/img/close.png" alt=""></a></div>
+        </div>
+        <div style="padding:20px 50px 0 50px;">
+          <div class="form">
+            <p class="form-label"><em>*</em>请输入免审密码：</p>
+            <input type="text" @blur="passwordCheck" v-model="password" maxlength="20" placeholder="请输入面审密码">
+          </div>
+          <span class="form-error" style="padding-left: 20px;" id="passwordTips"></span>
+        </div>
+        <div class="form t-c">
+          <a href="javascript:void(0);" class="button" @click="submitPassword" >提交</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 举报 -->
+    <div class="mask inform">
+      <div class="mask-info" style="width:700px;max-height:705px;margin-left:-350px;">
+        <div class="mask-header row w">
+          <div class="col v-m"><h2>服务时长举报</h2></div>
+          <div class="col v-m t-r"><a href="javascript:void(0);" class="mask-close" @click="closeInform"><img src="../../assets/img/close.png" alt=""></a></div>
+        </div>
+        <div style="padding:20px 50px 0 50px;">
+          <div class="form">
+            <p class="form-label"><em>*</em>举报理由：</p>
+            <textarea rows="2" v-model="reason" @blur="reasonCheck" maxlength="100" style="height: 70px;"></textarea>
+          </div>
+          <span class="form-error" style="padding-left: 20px;" id="reasonTips"></span>
+        </div>
+        <div class="form t-c">
+          <a href="javascript:void(0);" class="button" @click="informSubmit">确定</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 我要投诉 -->
+    <div class="mask complain">
+      <div class="mask-info" style="width:700px;max-height:705px;margin-left:-350px;top: 50%;">
+        <div class="mask-header row w">
+          <div class="col v-m"><h2>我要投诉</h2></div>
+          <div class="col v-m t-r"><a href="javascript:void(0);" @click="closeComplain" class="mask-close"><img src="../../assets/img/close.png" alt=""></a></div>
+        </div>
+        <ul class="grid" style="margin-top: 10px;">
+          <li class="grid-item g-12">
+            <div class="form">
+              <p class="form-label"><em>*</em>被投诉对象：</p>
+              <input :value="objname" readonly />
+            </div>
+            <span class="form-error" style="padding: 5px 0 0 20px;" id="objTips" placeholder="请输入被投诉对象"></span>
+          </li>
+          <li class="grid-item g-12">
+            <div class="form">
+              <p class="form-label"><em>*</em>投诉人姓名：</p>
+              <input type="text" v-model="name" @blur="nameCheck" maxlength="20" placeholder="请输入投诉人姓名">
+            </div>
+            <span class="form-error" style="padding: 5px 0 0 20px;height: 17px;color: red;" id="nameTips"></span>
+          </li>
+          <li class="grid-item g-24">
+            <div class="form">
+              <p class="form-label"><em>*</em>投诉内容：</p>
+              <textarea rows="2" v-model="content" @blur="contentCheck" maxlength="100" class="form_textarea" placeholder="请输入投诉内容"></textarea>
+            </div>
+            <span class="form-error" style="padding: 5px 0 0 20px;height: 17px;color: red;" id="contentTips"></span>
+          </li>
+          <li class="grid-item g-12">
+            <div class="form">
+              <p class="form-label"><em>*</em>投诉人身份证号码：</p>
+              <input type="text" v-model="card" @blur="cardCheck" maxlength="18" placeholder="请输入投诉人身份证号码">
+            </div>
+            <span class="form-error" style="padding: 5px 0 0 20px;height: 17px;color: red;" id="cardTips"></span>
+          </li>
+          <li class="grid-item g-12">
+            <div class="form">
+              <p class="form-label"><em>*</em>投诉人手机号码：</p>
+              <input type="text" v-model="phone" @blur="phoneCheck" maxlength="11" placeholder="请输入投诉人手机号码">
+            </div>
+            <span class="form-error" style="padding: 5px 0 0 20px;height: 17px;color: red;" id="phoneTips"></span>
+          </li>
+          <li class="grid-item g-12">
+            <div class="form">
+              <p class="form-label"><em>*</em>图文验证码：</p>
+              <div class="row w" style="display: inline-table;">
+                <div class="col v-m">
+                  <input type="text" id="inputImgCode" v-model="imgcode" maxlength="4" @blur="imgCodeCheck" placeholder="请输入图文验证码">
+                </div>
+                <div class="col v-m pl-10" style="width:130px;" @click="changeImgCode">
+                  <img id="reg_image" class="button button-line" style="width: 100%;padding: 1px 1px 2px 5px;">
+                </div>
+              </div>
+            </div>
+            <span class="form-error" style="padding: 5px 0 0 20px;height: 17px;color: red;" id="imgCodeTips"></span>
+          </li>
+          <li class="grid-item g-12">
+            <div class="form">
+              <p class="form-label"><em>*</em>验证码：</p>
+              <div class="row w" style="display: inline-table;">
+                <div class="col v-m">
+                  <input type="text" id="code" v-model="code" @blur="codeCheck" oninput="value=value.replace(/[^\d]/g,'')" maxlength="6" placeholder="请输入验证码">
+                </div>
+                <div class="col v-m pl-10" style="width:130px;"><button class="button button-line" id="codebutton" @click="getCode" v-text="codeButton" style="font-size: 14px;width: 100%;"></button></div>
+              </div>
+            </div>
+            <span class="form-error" style="padding: 5px 0 0 20px;height: 17px;color: red;" id="codeTips"></span>
+          </li>
+        </ul>
+        <div class="form t-c">
+          <a href="javascript:void(0);" class="button" style="margin-top: 5px;" @click="onSubmit">提交</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 讨论区 -->
+    <div class="mask reply">
+      <div class="mask-info" style="width:700px;max-height:705px;margin-left:-350px;">
+        <div class="mask-header row w">
+          <div class="col v-m"><h2>回复</h2></div>
+          <div class="col v-m t-r"><a href="javascript:void(0);" class="mask-close" @click="closeReply"><img src="../../assets/img/close.png" alt=""></a></div>
+        </div>
+        <textarea class="textarea" rows="4" placeholder="在这里畅所欲言吧～" v-model="leaveContent" maxlength="200" style="height: 146px;"></textarea>
+        <a href="javascript:void(0);" style="margin-top: 15px;" class="button" @click="publish(0)">发布评论</a>
+      </div>
+    </div>
+      <!-- 微信分享 -->
+    <share :showtype="showtype" type='pro'></share>
+  </div>
+</template>
+
+<script>
+
+  const paging =()=>import('@/components/page/paginationRed.vue');//分页
+  const share =()=>import('@/components/share.vue');//分享
+  import i3 from '../../assets/img/i3.png';
+  import i1 from '../../assets/img/i1.png';
+  import avatar from '../../assets/img/avatar.png';
+
+export default {
+  name: 'newsbody',
+  components : {
+    paging,share
+  },
+  inject:['reload'],
+  data(){
+    return {
+      context:this.common.getUrl(),
+      routeDefine: this.$route.params.define,
+      areaid:this.$route.params.data2,
+      projectid:this.$route.params.data1,
+      projectInfo:{},//项目信息
+      userInfo:{},//用户信息
+      basicInfo:{},//团体信息
+      password:'',//免审密码
+      applyButton2:false,//招募中，我要报名
+      applyButton3:false,//招募中，已申请
+      applyButton4:false,//招募中，已加入
+      applyButton5:false,//招募中，已被邀请
+      applyButton6:false,//招募中，已拒绝
+      groupInfo:{},//团体信息
+      jobList:[],//岗位信息
+      applyJobId:'',//岗位id
+      applyJobName:'',//加入的岗位名称
+      applyList:{},//最新报名列表
+      timePublicList:{},//时长公示列表
+      nowIndex:0,
+      reason:'',//举报理由
+      timeId:'',//举报时长id
+      albx0347:'',//被举报志愿者编号
+      albx0340:'',//被举报的时长
+      objname:'',//被投诉对象名称
+      obj:'',//被投诉对象id
+      content:'',//投诉内容
+      name:'',//投诉人姓名
+      card:'',//投诉人身份证
+      phone:'',//投诉人手机
+      imgcode:'',//图文验证码
+      code:'',//手机验证码
+      codeButton:"获取验证码",
+      countdown:60,
+      imgCodeFlag:false,
+      //讨论区
+      leaveContent:'',//评论内容
+      mainMessageList:[],//主评论列表
+      mainid:'',//回复的主评论id
+      bemsgid:'',//回复的评论人id
+      messageinfo:'',//被留言者信息
+      //动态区
+      dynamicContent:'',//动态内容
+      photoNum:0,//图片个数
+      photoSumNum:0,//图片个数
+      photoShowHtml:[],//需要展示的图片
+      dynamicPhoto:[],//动态图片(共九张)
+      dynamicPhotoFile:[],//动态图片文件
+      dynamicList:[],//动态列表
+      //分页参数
+      tolCount:0,//总条数
+      tolPage:0,//总页数
+      pageSize:8,//每页条数
+      pageNow:1,//当前页
+      jumpPage:1,
+      //分享参数
+      showtype:0,
+      imgkey:'',//图文验证码的key
+      //点击加入按钮效果
+      isClick:true,//加入方式  true=可以加入，false=不可加入
+    };
+  },
+  computed: {
+    currentTabComponent: function () {
+      return 'pro_' + this.currentTab.name.toLowerCase();//对字母转换成小写
+    }
+  },
+  created() {
+    window.Vues = this;//主体vue实例挂载
+    this.getdate();
+  },
+  mounted() {
+    this.setData();
+    this.changeImgCode();
+    window.applyPro=this.applyPro
+  },
+  methods:{
+    loginOut:function () {
+      this.utilscommit.request('nvsi_loginOut',null,this.loginOutCheck);
+    },
+    loginOutCheck:function () {
+      this.$router.push({name: "login",params: {define: this.routeDefine,type:0}});
+    },
+    setData:function () {
+      $('.tabbar span').each(function (idx, el) {
+        if(Vues.nowIndex) {
+          $(el).removeClass('active');
+          if(idx == Vues.nowIndex){
+            $(el).addClass('active');
+          }
+          $('.tabbar-down').eq(Vues.nowIndex).show().siblings('.tabbar-down').hide();
+        }
+        $(el).click(function () {
+          Vues.nowIndex = idx;
+          $(this).addClass('active').siblings().removeClass('active');
+          $('.tabbar-down').eq(idx).show().siblings('.tabbar-down').hide();
+        })
+      });
+    },
+    getdate() {
+      //获取区域编号
+      this.utilscommit.request("nvsi_getWebProjectInfo",{"areaid":this.areaid,"projectid":this.projectid}, this.callback_projectinfo);//项目详情
+      this.utilscommit.request("nvsi_getUserInfo",null , this.callback_projectinfoUser);//用户信息
+    },
+    callback_projectinfo(result){//项目详情
+      if (result && result.data) {
+        // console.log("项目信息     ",result)
+        this.projectInfo = result.data;
+        //this.projectInfo.albx0010="先打个比方不办公广泛广泛大概多个地方获得广泛广泛大概双方股东股东股份说个大概豆腐干地方是根深蒂固的";
+        //this.projectInfo.serviceobj="贫困家庭,残障人士,妇女,优抚对象,老年人,病患者,农村居民,城镇居民,社会公众,其他,儿童,特殊群体";
+        //this.projectInfo.zyzbz="	志愿者保险,集中乘车,交通补贴,志愿服务工具,免费体检,志愿服务证书,志愿者服装,专项培训,提供住宿,提供饮水,餐饮或食物";
+        this.utilscommit.request("nvsi_getVolAndProRelation", {"areaid":this.areaid,"projectid":this.projectid}, this.callback_projectdlyh);//判断登录用户与项目的关系
+        this.utilscommit.request("nvsi_getProjectGroupInfo",{"areaid":this.areaid,"projectid":this.projectid}, this.callback_projectgInfo);//获取发布项目团体信息
+        this.utilscommit.request("nvsi_listProjectJobs", {"areaid":this.areaid,"projectid":this.projectid}, this.callback_projectgw);//查询项目下岗位信息
+      }
+    },
+    callback_projectinfoUser(result){//当前登录者用户信息
+      if(result.data){
+        this.userInfo=result.data;
+        this.utilscommit.request("nvsi_getBasicInfo",this.userInfo , this.callback_projectinfoBus);//获取用户基本信息
+      }else{
+        this.userInfo=null;
+      }
+    },
+    callback_projectinfoBus(result){//获取用户基本信息
+      if (result.code!=0) {
+        this.loginOut();
+      }
+      this.basicInfo = result.data;
+    },
+    callback_projectdlyh(result){//判断登录用户与项目的关系
+      var relation=result.data;
+      var proState = this.projectInfo.albx0015;//项目状态
+      if(this.projectInfo.albx0024!=4){//招募状态不为公开招募
+        //设置加入按钮
+        if(proState == "3"){//招募中
+            this.applyButton2=false;
+            this.applyButton3=false;
+            this.applyButton4=false;
+            this.applyButton5=false;
+            this.applyButton6=false;
+          if(!relation){//无关系
+            this.applyButton2=true;
+          }else if(relation == 2 || relation == "3" || relation == 5 || relation == 6) {//正式成员
+            this.applyButton4=true;
+          } else if(relation == 1) {//申请中
+            this.applyButton3=true;
+          } else if(relation == 4) {//已被邀请
+            this.applyButton5=true;
+          } else if(relation == 7) {//已拒绝
+            this.applyButton6=true;
+          } else {//其他
+            this.applyButton2=true;
+          }
+        }
+      }
+    },
+    callback_projectgInfo(result){//获取发布项目团体信息
+    //console.log("团体信息 ",result)
+      if(result && result.data){
+        this.groupInfo=result.data;
+      }
+    },
+    callback_projectgw(result){//查询项目下岗位信息
+      if(result && result.data){
+        this.jobList=result.data;
+      }
+    },
+    toWB(){
+      var e = encodeURIComponent(window.location.href);
+      var t = encodeURIComponent(document.title);
+      var s = "http://service.weibo.com/share/share.php?title=" + t + " &url=" + e + "l &source=bookmark &appkey=2992571369 &pic=0 &ralateUid=#_loginLayer_1520419214343";
+      window.open(s)
+    },
+    showMapp:function () {
+      var map = new BMap.Map("map");
+      var point=new BMap.Point(116.404,39.915);
+      if(this.projectInfo.albx0035 && this.projectInfo.albx0036 && this.projectInfo.albx0035!=0 && this.projectInfo.albx0036!=0)
+      point=new BMap.Point(this.projectInfo.albx0035,this.projectInfo.albx0036);
+      map.centerAndZoom(point, 15);// 初始化地图,设置中心点坐标和地图级别
+      map.addControl(new BMap.NavigationControl());// 添加平移缩放控件
+      map.addControl(new BMap.ScaleControl());// 添加比例尺控件
+      map.addControl(new BMap.OverviewMapControl());//添加缩略地图控件
+      map.enableScrollWheelZoom();//启用滚轮放大缩小
+      // 选择地图类型 (默认是地图,卫星,三维),这里只引用了地图和卫星两种
+      map.addControl(new BMap.MapTypeControl({mapTypes: [BMAP_NORMAL_MAP,BMAP_SATELLITE_MAP ]})); 
+      map.setCurrentCity("北京市");// 设置地图显示的城市 此项是必须设置的
+      var mkr = new BMap.Marker(point);
+      map.addOverlay(mkr);
+      $('.mask.map').addClass('active');
+    },
+    sendMessage(acceptId,userid) {//发站内信
+      if(this.userInfo) {
+        if (this.userInfo.albp0056 == "1") {
+          this.common.addCookie("msg",2,0.2);
+          this.$router.push({ name:'message',params:{define:this.routeDefine,data1:acceptId,data2:userid}});
+        } else {
+          const path = this.common.getCookie('mgpath');
+          if (path) {
+            window.open(path);
+          } else {
+            this.loginOut();
+          }
+        }
+      } else {
+        this.$router.push({name: "login",params: {define: this.routeDefine,type:0}});
+      }
+    },
+    applyPro(event,id,applyJobName){
+      this.applyJobId = id;
+      this.applyJobName=applyJobName;
+      if (this.userInfo && this.isClick) {//用户是否登录
+        if(this.userInfo.albp0058 == 1){//是否有效
+          if((this.userInfo.albp0056 == "1" || this.userInfo.albp0056 == "2") && this.userInfo.albp0063 == "1" && this.basicInfo) {//是否志愿者
+            if(this.basicInfo.albp0020 && this.basicInfo.albp0028) {//是否完善信息
+              /* var nowA = this.basicInfo.albp0020.substring(0,2);
+              var oldA = this.areaid.substring(0,2);
+              if (nowA == oldA) {//区域是否匹配
+                //判断可报名团体ID、不可同时报名项目ID、服务时长要求、
+                var par={"volnum":this.basicInfo.albp0029,"projectid":this.projectid,"areaid":this.areaid };
+                this.utilscommit.request("nvsi_getJoinProjectPower",par , this.callback_projectinfoJR);//验证志愿者能否加入项目
+              } else {
+                this.$swal('您当前服务区域与项目区域不匹配，无法加入！',{buttons: "确定"});
+                return false;
+              } */
+                var par={"volnum":this.basicInfo.albp0029,"projectid":this.projectid,"areaid":this.areaid };
+                this.updateClickState(false);//按钮置灰,不可点击
+                this.utilscommit.request("nvsi_getJoinProjectPower",par , this.callback_projectinfoJR);//验证志愿者能否加入项目
+            }else {//志愿者未填写服务区域或居住区域
+              this.$swal('未完善基本信息不能报名，是否前去完善？',{buttons:['取消','确定']}).then(function(value){
+                if(value) {
+                    Vue.$router.push({ name:'updatedata',params:{define: Vue.$route.params.define}});
+                }
+              });
+            }
+          }else {
+            this.$swal('只有志愿者才可以申请加入项目',{buttons: "确定"});
+          }
+        }else{
+          this.$swal('无效用户',{buttons: "确定"});
+        }
+      } else {
+        this.$swal('未登录不能报名，是否前去登录？',{buttons:['取消','确定']}).then(function(value){
+          if(value) {
+                Vue.$utilroutes.toLogin();
+          }
+        });
+      }
+    },
+    callback_projectinfoJR(result){//验证志愿者能否加入项目
+      if (result) {
+        if (result.data) {
+          debugger
+          var recruitType = this.projectInfo.albx0024;//招募范围
+          if(recruitType == 1 || recruitType == 6) {//公开招募  仅招募实名志愿者
+            if (recruitType == 6 && this.userInfo.albp0063 != 1) {
+              this.$swal('仅招募实名志愿者',{buttons: "确定"});
+              return false;
+            }
+            var data={
+              "areaid":this.areaid,
+              "albx0052":this.applyJobId,//岗位id
+              albx0082:this.applyJobName,//岗位名称
+              "albx0057":this.projectid,//项目id
+              "albx0054":'1'//招募状态
+            };
+            this.utilscommit.request("nvsi_chostVolToProject",data , this.callback_projectinfoSQ);//志愿者申请或加入项目
+          } else if(recruitType == 2) {//指定团体招募
+            this.updateClickState(true);//按钮还原
+            this.$swal('仅招募指定团体的志愿者',{buttons: "确定"});
+          } else if(recruitType == 3) {//免审密码
+            this.updateClickState(true);//按钮还原
+            $('.mask.password').addClass('active');
+          }
+        } else {
+          this.$swal(result.message,{buttons: "确定"});
+          this.updateClickState(true);//按钮还原
+        }
+      }
+    },
+    callback_projectinfoSQ(result){//志愿者申请或加入项目
+      if(result) {
+        if(result.data) {
+          this.$router.go(0);//刷新页面
+        }else{
+          this.updateClickState(true);//按钮还原
+          this.$swal(result.message,{buttons: "确定"});
+        }
+      }
+    },
+    updateClickState(isClick){//设置按钮状态
+      this.isClick=isClick;
+      if(isClick){//还原，可以加入
+        $("#intoProject").css({"background":"#e60012","cursor": "pointer","opacity":"0.8"})//修改注册按钮状态
+      }else{//置灰，不可点击
+        $("#intoProject").css({"background":"gray","cursor": "default","opacity":"1"})//修改注册按钮状态
+      }
+    },
+    passwordCheck(){
+      var tip='';
+      var flag = true;
+      if(!this.password){
+        tip="请输入密码！";
+        flag = false;
+      }
+      this.formTip("password",tip);
+      return flag;
+    },
+    submitPassword(){
+      if(this.passwordCheck()){
+        //验证信息加入
+        var data={
+          "password":this.password,
+          "areaid":this.areaid,
+          "albx0052":this.applyJobId,//岗位id
+          albx0082:this.applyJobName,//岗位名称
+          "albx0057":this.projectid,//项目id
+          "albx0054":'5'//招募状态
+        };
+        this.utilscommit.request("nvsi_chostVolToProject", data, this.callback_projectinfoSQ);
+      }
+    },
+    formTip(el,tip){
+      $('#' + el + 'Tips').html(tip).css("color", "red");
+    },
+    pageEvent:function(e){//分页
+      this.getList();
+    },
+    getList:function () {
+      if (this.nowIndex == 1) {
+        this.utilscommit.request('nvsi_listJoinProjectMembers',{areaid:this.areaid,projectid:this.projectid,pageNow:this.pageNow,pageSize:this.pageSize},this.applyListBack)
+      } else if (this.nowIndex == 2) {
+        var data = {
+          'ofid':this.projectid,
+          'type':'2',
+          'areaid':this.areaid,
+          'pageNow':this.pageNow,
+          'pageSize':this.pageSize
+        };
+        this.utilscommit.request('nvsi_listMainMessage',data,this.mainMessageBack);
+      } else if (this.nowIndex == 3) {
+        this.utilscommit.request('nvsi_dynamicList',{projectid:this.projectid,pageNow:this.pageNow,pageSize:this.pageSize},this.dynamicListBack)
+      } else if (this.nowIndex == 4) {
+        this.utilscommit.request('nvsi_listProjectTimePublic',{areaid:this.areaid,projectid:this.projectid,pageNow:this.pageNow,pageSize:this.pageSize},this.publicListBack)
+      }
+    },
+    applyListBack:function (result) {
+      if(result && result.data) {
+        this.applyList = result.data;
+        this.common.getTolData(this,result);
+      }else {
+        this.applyList = {};
+        this.common.getTolData(this);
+      }
+    },
+    mainMessageBack:function (result) {
+      if (result && result.data) {
+        this.mainMessageList = result.data;
+        this.common.getTolData(this,result);
+      } else {
+        this.mainMessageList = {};
+        this.common.getTolData(this);
+      }
+    },
+    publicListBack:function (result) {
+      if(result && result.data) {
+        this.timePublicList = result.data;
+        this.common.getTolData(this,result);
+      }else {
+        this.timePublicList = {};
+        this.common.getTolData(this);
+      }
+    },
+    dynamicListBack:function (result) {
+        //console.log("动态列表  ",result)
+      if(result && result.data) {
+        this.dynamicList = result.data;
+        this.common.getTolData(this,result);
+      }else {
+        this.timePublicList = {};
+        this.common.getTolData(this);
+      }
+    },
+    inform:function (timeid,albx0347,albx0340) {
+      if(this.userInfo) {
+        if (this.userInfo.albp0058 == 1) {//是否有效
+          if ((this.basicInfo.albp0020 && this.basicInfo.albp0028) || (this.userInfo.albp0056>=4 && this.userInfo.albp0056<=8)) {//是否完善信息
+            $('.mask.inform').addClass('active');
+            this.timeId = timeid;
+            this.albx0347 = albx0347;
+            this.albx0340=albx0340;
+          } else {
+            this.$swal('未完善基本信息不能举报，是否前去完善？',{buttons:['取消','确定']}).then(function(value){
+              if (value) {
+                Vue.$router.push({ name:'updatedata',params:{define: Vue.$route.params.define}});
+              }
+            });
+          }
+        } else {
+          this.$swal('无效用户！',{buttons: "确定"});
+        }
+      }else{
+        this.$swal('未登录不能举报，是否前去登录？',{buttons:['取消','确定']}).then(function (value) {
+          if (value) {
+            Vue.$utilroutes.toLogin();
+          }
+        });
+      }
+    },
+    reasonCheck(){//失去焦点
+      var tip='';
+      var flag = true;
+      if(!this.reason){
+        tip="请输入举报理由！";
+        flag = false;
+      }
+      this.formTip("reason",tip);
+      return flag;
+    },
+    informSubmit:function () {
+      if(this.reasonCheck()){
+        var data = {
+          "albx0338":this.areaid,
+          "albx0339":this.groupInfo.id,
+          "albx0342":this.timeId,//被投诉对象
+         // "albx0343":this.userInfo.albp0056 == '1' ? '1' : '2',
+          "albx0344":this.reason,
+          "albx0346":'1',
+          "albx0347":this.albx0347,
+          "albx0348":this.projectid,
+          "albx0340":this.albx0340,//服务时长
+          "albx0353":this.projectInfo.albx0002//项目名
+        };
+        console.log(data);
+        this.utilscommit.request("nvsi_insertReport", data, this.reportBack);//时长举报
+      }
+    },
+    reportBack:function (result) {
+      if(result) {
+        if(result.code==0) {
+          this.$swal(result.message,{buttons: "确定"}).then(function (value) {
+            window.location.reload();
+          });
+          this.closeInform();
+        }else {
+          this.$swal(result.message,{buttons: "确定"});
+        }
+      }
+    },
+    showComplain:function (id,name) {
+      this.objname = name;
+      this.obj = id;
+      $('.mask.complain').addClass('active');
+    },
+    contentCheck:function () {
+      var tip='';
+      var flag = true;
+      if(!this.content) {
+        tip='投诉内容不能为空';
+        flag = false;
+      }
+      this.formTip("content",tip);
+      return flag;
+    },
+    nameCheck:function () {
+      var tip='';
+      var flag = true;
+      if(!this.name) {
+        tip='投诉人姓名不能为空';
+        flag = false;
+      }
+      this.formTip("name",tip);
+      return flag;
+    },
+    cardCheck:function () {
+      var tip='';
+      var flag = true;
+      if(!this.card) {
+        tip='身份证号码不能为空';
+        flag = false;
+      } else if (!this.common.checkCardNo(this.card)) {
+        tip='请填写正确的身份证号码';
+        flag = false;
+      }
+      this.formTip("card",tip);
+      return flag;
+    },
+    phoneCheck:function () {
+      var tip='';
+      var flag = true;
+      if(!this.phone) {
+        tip='手机号码不能为空';
+        flag = false;
+      }else if (!this.common.checkPhoneno(this.phone)) {
+        tip='请填写正确的手机号码';
+        flag = false;
+      }
+      this.formTip("phone",tip);
+      return flag;
+    },
+    codeCheck:function () {
+      var el = $('#code');
+      var val = el.val();
+      var tip='';
+      var flag = true;
+      var type = 1;
+      if(!val) {
+        tip='验证码不能为空';
+        flag = false;
+        type = 2;
+      } else if (val.length!=6) {
+        tip='请输入6位手机验证码';
+        flag = false;
+        type = 2;
+      }
+      if(!flag&&this.status==1){
+        el.focus();
+        this.status = 0;
+      }
+      this.formTip("code",tip,type);
+      return flag;
+    },
+    changeImgCode:function () {
+      $('#inputImgCode').val('');
+      this.utilscommit.request("nvsi_getImageCode",null,this.changeImgCodeBack);
+	},
+	changeImgCodeBack(data){//图片验证码获取结果
+	  if(data && data.data){
+      $('#reg_image').attr('src',data.data.img);
+      this.imgkey=data.data.imgkey;
+	  }
+	},
+    imgCodeCheck:function () {
+      this.imgCodeFlag = false;
+      var el = $('#inputImgCode');
+      this.tip='';
+      this.type = 1;
+      var code = el.val();
+      if(!code) {
+        this.tip='图文验证码不能为空';
+        this.type = 2;
+        if(this.status==1){
+          el.focus();
+          this.status = 0;
+        }
+        this.formTip("imgCode",this.tip,this.type);
+      }else{
+        code = this.common.trimAll(code).toUpperCase();
+        this.utilscommit.request('nvsi_getImgCodeCheck',{"imgcode":code,imgkey:this.imgkey},this.callback3);
+      }
+    },
+    callback3:function (result) {
+      if (result) {
+        if (result.data) {
+          this.imgCodeFlag = true;
+        } else {
+          this.tip = result.message;
+          this.type = 2;
+        }
+      }
+      if(this.status==1){
+        $('#inputImgCode').focus();
+        this.status = 0;
+      }
+      this.formTip("imgCode",this.tip,this.type);
+    },
+    getCode:function () {
+      this.status = 1;
+      if (!this.contentCheck() || !this.nameCheck() || !this.cardCheck() || !this.phoneCheck() || !this.imgCodeFlag) {
+        return null;
+      }
+      var code = this.common.trimAll($('#inputImgCode').val()).toUpperCase();
+      var data = {
+        "name":"NVSI",
+        "phonenum":this.phone,
+        "userflag":"NVSI",
+        "areaid":"0",
+        "imgCode":code,
+        imgkey:this.imgkey
+      };
+      this.utilscommit.request("nvsi_getMobileCode",data,this.getPhoneCodeBack);
+    },
+    getPhoneCodeBack:function (result) {
+      if(result.data) {
+        this.setTime();
+      }
+    },
+    setTime:function () {
+      if (this.countdown == 0) {
+        $('#codebutton').removeAttr('disabled');
+        this.codeButton = "获取验证码";
+        this.countdown = 60;
+        return;
+      } else {
+        $('#codebutton').attr('disabled',true);
+        this.codeButton=this.countdown + "s";
+        this.countdown--;
+      }
+      setTimeout(function() {
+        Vues.setTime();
+      },1000);
+    },
+    onSubmit:function () {//提交投诉
+      if (!this.imgCodeFlag) {
+        this.imgCodeCheck();
+        $('#inputImgCode').focus();
+      }
+      if(this.contentCheck() && this.nameCheck() && this.cardCheck() && this.phoneCheck() && this.imgCodeFlag && this.codeCheck()) {
+        var data = {
+          "albx3702":"3",
+          "albx3703":this.obj,//被投诉对象
+          "albx3715":this.objname,//被投诉对象名称
+          "albx3704":this.name,//投诉者姓名
+          "albx3705":this.card,//身份证
+          "albx3706":this.phone,//手机
+          "albx3710":this.content,//内容
+          "albx3713":"1",
+          "albx3714":this.groupInfo.id,
+          "areaid":this.areaid,
+          "code":this.code
+        };
+        this.utilscommit.request("nvsi_insertComplain",data,function (result) {
+          if(result) {
+            if(result.data) {
+              Vues.closeComplain();
+              Vues.$swal('投诉提交成功',{buttons: "确定"});
+            }else {
+              Vues.$swal(result.message,{buttons: "确定"});
+            }
+          }
+        });
+      }
+    },
+    imgError(el) {
+      el.target.src = i3;
+    },
+    imgError2(el) {
+      el.target.src = i1;
+    },
+    imgError3(el) {
+      el.target.src = avatar;
+    },
+    closeMapp(){//关闭地图
+      $('.mask.map').removeClass('active');
+    },
+    closeVX:function () {//关闭微信
+      $("#qrcode").empty();
+      $('.mask.vxp').removeClass('active');
+    },
+    closePassword:function () {//关闭免审
+      this.password = '';
+      $('#passwordTips').html('');
+      $('.mask.password').removeClass('active');
+    },
+    closeInform:function () {//关闭举报
+      this.reason = '';
+      this.timeId = '';
+      this.albx0347 = '';
+      this.albx0340='';
+      $('.form-error').html('');
+      $('.mask.inform').removeClass('active');
+    },
+    closeComplain:function () {//关闭投诉
+      $('.mask.complain').removeClass('active');
+      $('.form-error').html('');
+      this.objname = this.obj = this.content = this.name = this.card = this.phone = this.imgcode = this.code = '';
+    },
+    toDetailInfo:function (volnum,albp0020,orgid,albe0012) {
+      if (volnum) {
+        this.$utilroutes.toUserInfo(volnum,albp0020);
+      } else if (orgid) {
+        this.$utilroutes.toGroupInfo(orgid,albe0012);
+      }
+    },
+    showReply:function (mainid,bemsgid,messageinfo) {
+      if(this.userInfo){
+        if(bemsgid==this.userInfo.volnum || bemsgid==this.userInfo.albp0055){
+          this.$swal('对不起，您不能回复自己的留言！',{buttons: "确定"});
+          return false;
+        }
+        this.mainid = mainid;
+        this.bemsgid = bemsgid;
+        this.messageinfo=messageinfo;
+        //console.log(messageinfo)
+        $('.mask.reply').addClass('active');
+      }else{
+        this.$swal('未登录不能发布，是否前去登录？',{buttons:['取消','确定']}).then(function (value) {
+          if(value) {
+            Vue.$utilroutes.toLogin();
+          }
+        })
+      }
+    },
+    closeReply:function () {
+      $('.mask.reply').removeClass('active');
+      this.leaveContent = this.mainid = this.bemsgid = '';
+    },
+    publish:function (type) {//发布留言mainid：主留言id，bemsgid：被回复的用户id     type-->是否主留言  1=是  0=否
+      if (!this.leaveContent) {
+        this.$swal('请填写留言内容',{buttons: "确定"});
+        return false;
+      }
+      if (this.userInfo) {//用户是否登录
+        if (this.userInfo.albp0058 == 1) { //是否有效
+          if (this.userInfo.albp0056 == "1" && (!this.basicInfo.albp0020 || !this.basicInfo.albp0028)) { //志愿者未完善信息
+            this.$swal('未完善基本信息不能发布，是否前去完善？',{buttons:['取消','确定']}).then(function(value){
+              if(value) {
+                    Vue.$router.push({name:'updatedata',params:{define:Vue.$route.params.define}})
+              }
+            });
+          } else {
+           // console.log("当前用户信息  ",this.userInfo)
+            let userid=this.userInfo.albp0055;//默认用户id
+            let usertype="2";//默认团体
+            let realname=this.userInfo.albp0064;//默认姓名
+            if(this.userInfo.albp0056=="1"){
+              if(this.userInfo.volnum)userid=this.userInfo.volnum;//若为志愿者，则用志愿者编号
+              usertype="1";
+              if(this.userInfo.albp0084)realname=this.userInfo.albp0084;
+            }
+            let brealname="";//被留言者昵称
+            let bphoto=null;//被留言者头像
+            let lastid=null;//上级id
+            if(type==1){//当前是主留言
+              this.bemsgid="";//当前被留言用户id为空
+            }else{
+              brealname=this.messageinfo.albx4014;
+              bphoto=this.messageinfo.albx4015;
+              lastid=this.messageinfo.id;
+            }
+            let data={
+                "albx4002":this.mainid,//主留言id
+                "albx4003":this.leaveContent,//内容
+                "albx4004":userid,//留言用户id(团体id/志愿者编号)
+                "albx4005":usertype,//用户类型（团体/志愿者）
+                "albx4007":this.projectid,//所属项目id
+                "albx4008":this.projectInfo.albx0011,//所属团体id
+                "albx4009":2,//留言类型（1团体留言/2项目讨论/3项目动态/4新闻评论/5在线课堂）
+                "albx4010":this.bemsgid,//被留言用户id(团体id/志愿者编号)
+                "albx4011":this.projectid,//留言来源id（动态id）
+                "albx4013":type,//是否主留言  1=是  0=否
+                "albx4018":this.projectInfo.albx0002,//title主体的标题（动态、项目、团体、新闻）
+                "albx4019":this.projectInfo.albx0020,//photo主体图片(只需要一张即可)
+                "albx4020":this.projectInfo.createtime,//time主体的创建时间，比如动态的创建时间
+                "albx4014":realname,//当前留言者昵称
+                "albx4015":this.userInfo.albp0027,//当前留言者头像
+                "albx4016":brealname,//被留言者昵称
+                "albx4017":bphoto,//被留言者头像
+                "albx4021":lastid,//上级留言id
+              };
+            //console.log("留言信息  ",data)
+            this.utilscommit.request('nvsi_insertMassageInfo',data,this.insertMessageBack);
+          }
+        } else {
+          this.$swal('无效用户！',{buttons: "确定"});
+        }
+      } else {
+        this.$swal('未登录不能发布，是否前去登录？',{buttons:['取消','确定']}).then(function (value) {
+          if(value) {
+              Vue.$utilroutes.toLogin();
+          }
+        });
+      }
+    },
+    insertMessageBack:function (result) {
+      if (result) {
+        if (result.data) {
+          this.leaveContent = '';
+          this.$swal("发布成功",{buttons: "确定"}).then(function (value) {
+            Vues.pageNow = 1;
+            Vues.getList();
+          });
+          this.closeReply();
+        } else {
+          this.$swal(result.message,{buttons: "确定"});
+        }
+      }
+    },
+    photoClicked(){//点击动态图片
+      this.$refs.photofile.click();
+      //console.log(this.$refs.photofile.files)
+    },
+    photoChanged(event){//图片上传
+      this.photoSumNum=this.photoSumNum+1;
+      if(this.photoNum>=9)return this.$swal('图片不能超过九张！',{buttons: "确定"});
+      let file = event.target.files[0];
+      this.$refs.photofile.value ="";
+      //校验图片
+      let fileVal=this.common.checkFile(file,2048);
+      if(fileVal)return this.$swal(fileVal,{buttons: "确定"});
+      let that = this;
+      //获取浏览器图片
+      let reader = new FileReader();
+      // 调用reader.readAsDataURL()方法，把图片转成base64
+      reader.readAsDataURL(file);
+      //监听reader对象的onload事件，当图片加载完成时，把base64编码賦值给预览图片
+      reader.onload = function () {
+        file.src=this.result;
+        //console.log("第"+that.photoNum+"张图片：");
+        that.photoShowHtml.push({"imgsrc":file.src,"id":that.photoSumNum});
+        Vues.getList();//渲染页面
+      }
+      this.dynamicPhotoFile.push(file);
+      this.photoNum=this.photoNum+1;
+    },
+    delNowImg:function(id){//删除图片
+   //console.log("删除第"+this.photoNum+"张图片");
+    if(this.photoNum>0){
+      for (var i = 0;i < this.photoShowHtml.length; i++){
+        if (this.photoShowHtml[i].id==id){
+          //console.log("删除图片："+this.photoShowHtml[i].imgsrc);
+          this.photoShowHtml.splice(i,1);
+          this.dynamicPhotoFile.splice(i,1);
+          break;
+        }
+      }
+    }
+    //console.log(this.$refs.photofile.files+"           "+this.$refs.photofile.value)
+    //清空文件：
+    /* let photoreffiles=this.$refs.photofile.files;
+    if(photoreffiles){
+      photoreffiles.clearFiles();
+    }
+   console.log(this.$refs.photofile.files) */
+    //this.$refs.photofile.files=this.dynamicPhotoFile;
+    this.photoNum=this.photoNum-1;
+    //console.log("删除完成，此时图片还剩"+this.photoNum+" 张******************************************************");
+    this.reload();
+    /* this.$set(vm.dynamicPhotoFile,id,); 
+    vm.$set(vm.photoShowHtml,id,);  */
+    //this.$forceUpdate();
+    //Vues.getList();
+    /* 
+    let tt=this.dynamicPhotoFile.splice(id,1);////删除下标为id  的对象
+    this.dynamicPhotoFile=JSON.parse(JSON.stringify(tt));
+    Vues.dynamicPhotoFile=tt;
+      $this.dynamicPhotoFile=tt;
+      Vues.getList();//渲染页面 */
+    },
+    submitDynamic(){//提交动态
+      if(!this.dynamicContent)return this.$swal('请输入动态内容！',{buttons: "确定"});
+      if(this.photoNum==0)return this.$swal('请上传动态图片！',{buttons: "确定"});
+      if (this.userInfo) {//用户是否登录
+        if (this.userInfo.albp0058 == 1) { //是否有效
+          if (this.userInfo.albp0056 == "1" && (!this.basicInfo.albp0020 || !this.basicInfo.albp0028)) { //志愿者未完善信息
+            this.$swal('未完善基本信息不能发布，是否前去完善？',{buttons:['取消','确定']}).then(function(value){
+              if(value) {
+                    Vue.$router.push({name:'updatedata',params:{define:Vue.$route.params.define}});
+              }
+            });
+          }else {
+              let param = new FormData(); //创建form对象
+              for (let i = 0; i < this.dynamicPhotoFile.length; i++) {
+                const photo = this.dynamicPhotoFile[i];
+                //param.append('file'+i,new window.File([photo], photo.name, {type: photo.type}));
+                param.append('file'+i, photo, photo.name);
+              }
+              this.utilscommit.uploadImgs(param,"dynamicphoto",this.uploadPhotoResult);//上传多张图片
+          }
+        } else {
+          this.$swal('无效用户！',{buttons: "确定"});
+        }
+      } else {
+        this.$swal('未登录不能发布，是否前去登录？',{buttons:['取消','确定']}).then(function (value) {
+         if(value) {
+              Vue.$utilroutes.toLogin();
+          }
+        });
+      }
+    },
+    uploadPhotoResult(result){
+      let photos=[];
+      for (let i = 0; i < this.dynamicPhotoFile.length; i++) {
+        const filename = 'file'+i;
+        photos[i]=JSON.parse(result[filename]);
+      }
+       this.dynamicPhoto=photos;//动态图片
+      let userid=this.userInfo.albp0055;//默认用户id
+      let usertype="2";//默认团体
+      let realname=this.userInfo.albp0064;//默认姓名
+      if(this.userInfo.albp0056=="1"){
+        if(this.userInfo.volnum)userid=this.userInfo.volnum;//若为志愿者，则用志愿者编号
+        usertype="1";
+        if(this.userInfo.albp0084)realname=this.userInfo.albp0084;
+      }
+      let data={
+        "creator":this.userInfo.albp0052,//用户名
+        "albx0402":this.projectid,//项目id
+        "albx0404":this.dynamicContent,//内容
+        "albx0406":userid,//发布人id（志愿者编号/团体编号）
+        "albx0407":usertype,//操作者类型
+        "file":this.dynamicPhoto,//图片(多张图片路径)
+        "albx0409":this.areaid,//发布区域id(默认全国)
+        "albx0410":this.projectInfo.albx0012,//发布区域名
+        "albx0411":"",//经度
+        "albx0412":"",//维度
+        "albx0414":this.projectInfo.albx0011,//团体id
+        "albx0415":this.groupInfo.albe0025,//团体图片
+        "albx0416":this.groupInfo.albe0002,//团体名称
+        "albx0417":realname,//发布人昵称
+        "albx0418":this.userInfo.albp0027,//发布人头像
+      }
+      this.utilscommit.request('nvsi_saveDynamic',data,this.saveDynamicBack);
+    },
+    saveDynamicBack(data){
+      if(data){
+         if(data.code==0){
+          this.photoShowHtml=[];
+          this.dynamicPhotoFile=[];
+          this.photoNum=0;
+          this.dynamicContent="";
+          this.$swal("发布成功",{buttons: "确定"});
+        }else{
+          this.$swal(data.message,{buttons: "确定"});
+        } 
+        this.getList();
+      }
+    },
+  },
+  watch:{
+    nowIndex:function(newval,oldval){//tab变化
+      if (newval == 1 || newval == 2|| newval == 3 || newval == 4){//刷新最新报名、讨论区、时长公示
+        this.pageNow = 1;
+        this.getList();
+      }
+    }
+  }
+
+}
+
+
+</script>
+
+<style scoped>
+  @import "../../assets/css/base.css";
+  @import "../../assets/css/main.css";
+  .mask.complain.active .mask-info{
+    transform: translateY(-50%) scale(1);
+  }
+  .activity-tit em{
+    font-size:16px;
+    color:#2C5ABD;
+    font-weight:normal;
+    margin:0;
+    padding-bottom:15px;
+  }
+  .activity-tit span{
+    margin: 0 15px 0 15px;
+  }
+  .line-message{
+    border-top: 1px solid #F0F0F0;
+  }
+  .table-list th{
+    text-align: left;
+  }
+  .table-list .pointer{
+    cursor: pointer;
+    color: #2C5ABD;
+  }
+  .form input, .form textarea, .input, .textarea {
+    line-height: 20px;
+    height: 33px;
+  }
+  .button-line {
+    line-height: 33px;
+  }
+  .button {
+    height: 33px;
+    line-height: 33px;
+  }
+  #picker{
+    /* background:none;
+    display: inline-block;
+    vertical-align:middle;
+    padding:0;
+    width:100%;
+    height:100%; */
+    background:url('../../assets/img/camera.png') no-repeat center center;
+  }
+ .hides{
+   display:none;
+ }
+ .form .form_textarea{
+    height: 70px;
+    font-family:Arial;
+  }
+  .form .form_textarea::-webkit-input-placeholder{
+    color: #bbb;
+    font-family:microsoft yahei;
+  }
+</style>

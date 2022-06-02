@@ -1,0 +1,185 @@
+<template>
+ <li class="col v-t white tab-container">
+    <div class=" tabbar tabbar-tight mb-20"><span class="active">下载证明</span></div>
+    <div class="tabbar-tips">
+      <p><em>友情提示：</em><br>下面为服务记录的筛选条件，如无需筛选，请直接点击下载证明按钮</p>
+    </div>
+    <div class="grid g-14 auto">
+        <div class="form">
+          <p class="form-label">服务项目：</p>
+          <div class="select" id="project_div">
+            <select id="projectSelect" v-model="projectSelect">
+              <option value="">请选择存在服务时长的服务项目</option>
+              <option v-for="(el,index) in projectList" :key="index" :value="el.albx0176">{{el.albx0002}}</option>
+            </select>
+          </div>
+        </div>
+        <div class="form">
+          <p class="form-label">服务队伍：</p>
+          <div class="select" id="org_div">
+            <select id="orgSelect" v-model="orgSelect">
+              <option value="">请选择存在服务时长的服务队伍</option>
+              <option v-for="(el,index) in orgList" :key="index" :value="el.albx0177">{{el.albe0002}}</option>
+            </select>
+          </div>
+        </div>
+        <div class="form">
+          <p class="form-label">服务类别：</p>
+          <div class="select" id="type_div">
+            <select id="serviceSelect" v-model="serviceTypeSelect">
+              <option value="">请选择</option>
+              <option v-for="(el,index) in serviceTypeList" :key="index" :value="el.albe0123">{{el.albe0122}}</option>
+            </select>
+          </div>
+        </div>
+        <div class="form">
+          <p class="form-label">服务区域：</p>
+          <div class="row w">
+            <div class="col v-m">
+              <input type="text" id="serviceArea" v-model="selectAreaName" readonly  placeholder="请选择服务区域">
+            </div>
+            <div class="col v-m pl-10" style="width:90px;">
+              <a href="javascript:void(0);" id="chooseServiceArea" @click="chooseServiceArea" class="button button-line">选择</a></div>
+          </div>
+        </div>
+        <div class="grid-item g-12">
+          <div class="form">
+            <p class="form-label">服务开始日期：</p>
+            <date-picker style="width: 100%;" :lang="lang" v-model="starttime" valueType="format" placeholder="请选择服务开始日期"></date-picker>
+          </div>
+        </div>
+        <div class="grid-item g-12">
+          <div class="form">
+            <p class="form-label">服务结束日期：</p>
+            <date-picker style="width: 100%;" :lang="lang" v-model="endtime" valueType="format" placeholder="请选择服务结束日期"></date-picker>
+          </div>
+        </div>
+        <div class="pt-30 pb-40 t-c"><a href="javascript:void(0);" class="button" style="width:200px;" @click="download">下载证明</a></div>
+    </div>
+
+    <!--区域选择弹窗-->
+    <div class="mask area">
+      <div class="mask-info">
+        <div class="mask-header row w">
+          <div class="col v-m"><h2>服务区域</h2></div>
+          <div class="col v-m t-r"><a href="javascript:void(0);" @click="closeMask" class="mask-close"><img src="../../assets/img/close.png" alt=""></a></div>
+        </div>
+        <areaDialog ref="areaDialog"></areaDialog>
+      </div>
+    </div>
+  </li>
+</template>
+
+<script>
+  const AreaDialog =()=>import('@/view/home/area.vue');//区域弹出层
+
+  export default {
+    components : {AreaDialog},
+    data(){
+      return {
+        lang :{//配置日期语音环境
+          formatLocale :{
+            firstDayOfWeek :1,
+          },
+          monthBeforeYear :false ,
+        },
+        projectList:[],
+        projectSelect:'',
+        orgList:[],
+        orgSelect:'',
+        serviceTypeList:[],
+        serviceTypeSelect:'',
+        starttime:'',
+        endtime:'',
+        selectArea:'',
+        selectAreaName:''
+      };
+    },
+    created() {
+        this.utilscommit.request('nvsi_listServiceProject',null, this.listProjectBack);//查询有时长的项目
+        this.utilscommit.request('nvsi_listServiceType',{areaid:this.areaid},this.listTypeBack)//查询所有服务区域
+        this.utilscommit.request('nvsi_listServiceGroup',null,this.listOrgBack);//查询有时长的团体
+    },
+    methods:{
+      listProjectBack:function (result) {
+        if (result && result.data)this.projectList = result.data;
+      },
+      listTypeBack:function (result) {
+        if (result && result.data)this.serviceTypeList = result.data;
+      },
+      listOrgBack:function (result) {
+        if (result && result.data)this.orgList = result.data;
+      },
+      chooseServiceArea:function () {
+        $('#preButton').css('display','none');
+        $('.category__content').css('display','none');
+        $('#first').css('display','');
+        $('.mask.area').addClass('active');
+        this.$refs.areaDialog.preAreaId = '';
+        this.$refs.areaDialog.preName = '';
+        this.$refs.areaDialog.listArea(this.areaid,0);
+      },
+      confirmArea:function (areaid) {
+        if (areaid) {
+            this.selectArea = areaid;
+            this.utilscommit.request('nvsi_getAreaFullName',{"areaid":areaid},this.areaBack);
+        }
+      },
+      areaBack:function (result) {
+        if (result) {
+          var provinceName = result.data.provincename?(result.data.provincename):'';
+          var cityName = result.data.cityname?('>' + result.data.cityname):'';
+          var countyName = result.data.countyname?('>' + result.data.countyname):'';
+          var streetName = result.data.streetname?('>' + result.data.streetname):'';
+          var communityName = result.data.communityname?('>' + result.data.communityname):'';
+          this.selectAreaName = provinceName + cityName + countyName + streetName + communityName;
+        } else {
+          this.selectAreaName = '';
+        }
+      },
+      closeMask:function () {
+        $('.mask').removeClass('active');
+        $('#first').css('display','');
+        $('.category__item').removeClass('active');
+        this.$refs.areaDialog.chooseArea = '';
+        this.$refs.areaDialog.preAreaId = '';
+        this.$refs.areaDialog.preName = '';
+      },
+      download:function () {
+        let typeName = "";
+        if (this.serviceTypeSelect) {
+          typeName = $("#serviceSelect").find("option:selected").text();
+        }
+        var data = {
+          'projectid':this.projectSelect,
+          'starttime':this.starttime,
+          'endtime':this.endtime,
+          "areaid":this.selectArea,
+          "forgroup":this.orgSelect,
+          "servicetype":this.serviceTypeSelect,
+          'servicetypeval':typeName,
+        };
+        this.utilscommit.request_onlyaxios('nvsi_getVolServicePDF',data, this.downloadBack)
+      },
+      downloadBack:function (result) {
+        if (result) {
+          if (result.data) {
+            window.open(result.data); 
+          } else {
+            this.$swal(result.message,{buttons:'确定'});
+          }
+        }
+      },
+    }
+  }
+
+</script>
+
+<style scoped>
+  .form{
+    margin: 10px 0 0 20px;
+  }
+</style>
+
+
+

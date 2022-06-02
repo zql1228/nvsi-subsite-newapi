@@ -1,0 +1,121 @@
+<template>
+  <li class="col v-t white tab-container">
+    <updatemenu></updatemenu>
+    <form id="pwForm">
+      <div class="grid g-14 auto">
+        <div class="form mb-10">
+          <p class="form-label"><em>*</em>原密码：</p>
+          <input type="password" v-model="oldPw" @blur="oldPwCheck" id="oldPw" maxlength="20"  placeholder="请输入原密码"><!-- oninput="this.value=this.value.replace(/[^\w_.]/g,'');" -->
+          <p class="form-error" id="oldPwTips"></p>
+        </div>
+        <div class="form mb-10">
+          <p class="form-label"><em>*</em>新密码：</p>
+          <input type="password" v-model="newPw" @blur="newPwCheck" id="newPw" maxlength="20"  placeholder="请输入新密码"><!-- oninput="this.value=this.value.replace(/[^\w_.]/g,'');" -->
+          <p class="form-error" id="newPwTips"></p>
+        </div>
+        <div class="form mb-10">
+          <p class="form-label"><em>*</em>确认新密码：</p>
+          <input type="password" v-model="confirmPw" @blur="confirmPwCheck" id="confirmPw" maxlength="20" placeholder="请输入确认新密码" ><!-- oninput="this.value=this.value.replace(/[^\w_.]/g,'');" -->
+          <p class="form-error" id="confirmPwTips"></p>
+        </div>
+        <div class="pt-30 pb-40 t-c"><a href="javascript:void(0);" class="button" style="width:200px;" @click="changePw">修改密码</a></div>
+      </div>
+    </form>
+    <!--<div class="tabbar tabbar-tight mb-20"><span>绑定手机</span></div>
+    <div class="grid g-14 auto">
+      <div class="form">
+        <p class="form-label"><em>*</em>手机</p>
+        <input type="text">
+      </div>
+      <div class="form">
+        <p class="form-label"><em>*</em>短信验证码</p>
+        <div class="row w">
+          <div class="col v-m"><input type="text"></div>
+          <div class="col v-m pl-10" style="width:100px"><a href="javascript:void(0);" style="width:90px" class="button button-line">获取验证码</a></div>
+        </div>
+      </div>
+      <div class="pt-30 pb-40 t-c"><a href="#" class="button" style="width:200px;">绑定手机</a></div>
+    </div>-->
+  </li>
+</template>
+
+<script>
+  const updatemenu =()=>import('@/components/usercenter/updatemenu.vue');//横向菜单栏
+
+  export default {
+    components : {updatemenu},
+    data(){
+      return {
+        userInfo:this.$store.getters.getUser,//账号信息
+        oldPw:"",
+        newPw:"",
+        confirmPw:"",
+      };
+    },
+    created() {
+      window.Vues = this;//主体vue实例挂载
+    },
+    methods:{
+      changePw:function(){
+        if (this.userInfo){
+          if(this.oldPwCheck() && this.newPwCheck() && this.confirmPwCheck()){
+            this.utilscommit.request("nvsi_modifyPassword",{"oldpw":this.oldPw,"newpw":this.newPw},this.changeBack);
+          }
+        }
+      },
+      changeBack:function (result) {
+        if (result) {
+          if (result.data) {
+            this.$swal('修改成功,请重新登录',{buttons:'确定'}).then(function(value) {
+              Vueh.loginOut();//触发页眉的退出事件
+            });
+          } else {
+            this.$swal(result.message,{buttons:'确定'});
+          }
+        } else {
+          this.$swal('修改失败',{buttons:'确定'});
+        }
+      },
+      oldPwCheck:function () {
+        var tip='';
+        var flag = true;
+        if(!this.oldPw) {
+          tip='原密码不能为空';
+          flag = false;
+        }
+        this.formTip("oldPw",tip);
+        return flag;
+      },
+      newPwCheck:function () {
+        var tip='';
+        var flag = true;
+        if(!this.newPw) {
+          tip='新密码不能为空';
+          flag = false;
+        } else if (!this.common.checkPW(this.newPw)) {
+          tip='密码长度为8-20个字符，且必须同时包含数字、大写字母和小写字母';
+          flag = false;
+        }
+        this.formTip("newPw",tip);
+        return flag;
+      },
+      confirmPwCheck:function () {
+        var tip='';
+        var flag = true;
+        if(!this.confirmPw) {
+          tip='确认新密码不能为空';
+          flag = false;
+        } else if (this.confirmPw!=this.newPw) {
+          tip='两次输入密码不一致';
+          flag = false;
+        }
+        this.formTip("confirmPw",tip);
+        return flag;
+      },
+      formTip:function(el,tip) {
+        $('#' + el + 'Tips').html(tip).css("color", "red");
+      }
+    }
+  }
+</script>
+

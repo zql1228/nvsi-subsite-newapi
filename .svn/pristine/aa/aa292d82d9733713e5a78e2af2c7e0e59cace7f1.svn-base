@@ -1,0 +1,29 @@
+.js-top-bar .login-box{
+  margin-bottom: 10px !important;
+}
+.g-width{
+  width: 998px;
+}
+select::-ms-expand { display: none; }
+.picScroll-left{top: 30px !important;}
+
+.js-top-bar .js-search{
+  margin-top:16px !important;
+}
+
+#header .top_title{
+  position:static;
+}
+#header .top_title1{
+  left: 80px;
+  top:60px;
+}
+
+#header .span_little{
+  bottom:-13px !important;width: 30%!important;
+}
+
+
+#header .span_more{
+  bottom:-13px !important;width: 40%!important;
+}

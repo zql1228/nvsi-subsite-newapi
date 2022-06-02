@@ -1,0 +1,104 @@
+<template>
+    <div id="footers">
+      <div class="footer">
+        <div class="mid-layout row">
+          <div class="col v-m">
+            <div class="link-list">
+              <span>友情链接：</span>
+              <a v-for="item in yqljNewList" :key="item.id" :href="item.linkurl" :title="item.name" target="_blank">{{item.name}}</a>
+            </div>
+            <ul class="row w">
+              <li class="col v-m t-l g-16">
+                <!--<p>ICP备案编号：京ICP备13012430号-7</p>-->
+                <p>客服电话：4006818148转8<b style="margin-left:35px">技术支持：深圳市永兴元科技股份有限公司</b></p>
+                <p>客服QQ群：555025273<b style="margin-left:35px">推荐浏览器：<span style="cursor: pointer;color: #fff;" title="点击下载谷歌浏览器稳定版" @click="toOpenUrl('https://baoku.360.cn/sinfo/104384025_4000914.html')">谷歌浏览器（点击安装）</span></b></p>
+                <p>版权所有：中华人民共和国民政部<b style="margin-left:35px">ICP备案编号：京ICP备13012430号 </b></p>
+              </li>
+              <li class="col v-m">
+                <h2>浏览网站人数统计</h2>
+                <div class="count">
+                  <span v-for="item in numList" :key="item.id"> {{item}}</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div class="col v-m t-c" style="width:20%;" v-if="$store.getters.getArea.cnname=='江苏'">
+            <img style="width: 119px;height: 115px;" src="@/assets/img/js_erwei.png" alt="">
+            <h2>扫码安装“江苏政务服务”APP</h2>
+          </div>
+          <div class="col v-m t-c" style="width:13%;" >
+            <!-- <img style="width: 119px;height: 115px;" src="@/assets/img/codezs.png" alt="">
+            <h2>扫码安装“中国志愿”APP</h2> -->
+            <img src="@/assets/img/erwei.jpg" alt="" style="width: 119px;height: 115px;">
+            <h2>扫码关注在线客服公众号</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+</template>
+
+<script>
+    export default {
+        name: "footers",
+        data:function(){
+          return {
+            yqljNewList:[],
+            numList:["0","0","0","0","0","0","0","0"]//人数
+          }
+        },
+        beforeCreate(){
+          window.Vuef=this;
+        },
+        created(){
+          this.getdatafooter();
+        },
+        methods:{
+          getdatafooter(){
+            var yqljParams= {"istabloid":1, "pageSize":6, "pageNow":1,areaid:this.$store.getters.getArea.areaid}//友情链接
+            this.utilscommit.request("nvsi_listFriendLink",yqljParams,this.callbackfooter1);
+            let name=this.$route.params.define?this.$route.params.define:this.$store.getters.getArea.enname;
+            this.utilscommit.request("nvsi_insertWebPageView",{name:name},this.callbackfooter2);//在线人数
+          },
+          callbackfooter1(data) {
+            if (data && data.data) {
+              this.yqljNewList=data.data;
+            }
+          },
+          toOpenUrl(url){//打开相关链接
+            window.open(url);
+          },
+          callbackfooter2(data) {
+            if (data && data.data) {
+              this.pageViewCount(data.data.sum);
+            }
+          },
+          pageViewCount(result,list) {//计算人数
+
+            var re = result;
+            if (re > 2147483648)
+            {
+              re = 2147483648 //int 长度限制没有改
+            }
+            var lists = list ? list : new Array();
+            var num = parseInt(re / 10);
+            lists.push(re % 10);
+            if(num != 0) {
+              this.pageViewCount(num, lists)
+            } else{
+              for(var m = 0; m < 8; m++) {
+                if(m<lists.length && lists[m]){
+                  this.$set(this.numList, 7-m, lists[m]);
+                }
+              }
+            }
+          }
+        }
+
+    }
+</script>
+
+<style scoped>
+  /* @import "../../assets/css/base.css";
+  @import "../../assets/css/main.css"; 
+  @import "../../assets/fonts/UniveConBol.css";*/
+</style>

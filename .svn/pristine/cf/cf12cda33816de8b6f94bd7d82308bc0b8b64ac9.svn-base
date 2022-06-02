@@ -1,0 +1,249 @@
+<template>
+  <li class="col v-t white tab-container">
+    <div class="tabbar tabbar-tight mb-20 row w">
+      <span class="col v-m active">加入队伍</span>
+      <span class="col v-m">队伍脱离</span>
+      <div class="col v-m t-r">
+        <!-- <a class="button button-normal" href="javascript:void(0);" @click="getOrg">队伍同步</a> -->
+        <router-link tag="a" class="button button-normal" href="javascript:void(0);" :to="{name:'group',params:{define:routeDefine}}">参加更多队伍</router-link>
+      </div>
+    </div>
+    <table class="user-table" id="orgTable">
+      <colgroup>
+        <col width="30%">
+        <col width="20%">
+        <col width="20%">
+        <col width="15%">
+        <col width="15%">
+      </colgroup>
+      <tr>
+        <th>队伍名称</th>
+        <th>联系方式</th>
+        <th>加入时间</th>
+        <th>状态</th>
+        <th>操作</th>
+      </tr>
+      <tr v-if="!myOrgList.length"><td colspan="5" style="text-align: center;border-bottom: 1px #F6F3F7;"><img src="../../assets/img/js-wujilu.png"/></td></tr>
+      <tr v-for="(el,index) in myOrgList" :key="index">
+        <td class="left">
+          <em @click="$utilroutes.toGroupInfo(el.id,el.albe0012)" class="pointer">{{el.albe0002 | ellipsis(18)}}</em>
+          <p>{{el.albe0038 || ''}}</p>
+        </td>
+        <td class="left">
+          <p>
+            <span>{{el.albe0022 || ''}}</span>
+            <span style="margin: 0 6px;">{{(el.albe0047 == '1' && el.albe0024) || (el.albe0048 == '1' && el.albe0020) || ''}}</span>
+          </p>
+          <span><button @click="sendMessage(el.id,el.albe0037)" class="button button-line button-line-mini pointer">给他发站内信</button></span>
+        </td>
+        <td class="left">{{(el.albe0134==1 && el.albe0136) || (el.albe0134==2 && el.albe0135) || (el.albe0134==3 && el.albe0137) | ellipsisNos(10)}}</td>
+        <td class="left">
+          <i v-if="el.albe0134 == 1">已加入</i>
+          <span v-if="el.albe0134 == 2" style="color: #cc0000">申请审核中</span>
+          <span v-if="el.albe0134 == 3" style="color: #cc0000">申请被拒绝</span>
+        </td>
+        <td class="left">
+          <em v-if="el.albe0134==3" @click="applyOrgAgain(el.buineseid)" class="pointer">再次申请</em>
+          <em v-if="el.albe0134>=2" @click="deleteApplyOrg(el.buineseid)" class="pointer">删除</em>
+          <em v-if="el.albe0134==1" @click="outOfOrg(el.buineseid)" class="pointer">脱离</em>
+        </td>
+      </tr>
+    </table>
+    <table class="user-table" id="orgOutTable" style="display:none;">
+      <colgroup>
+        <col width="25%">
+        <col width="25%">
+        <col width="25%">
+        <col width="25%">
+      </colgroup>
+      <tr>
+        <th>队伍名称</th>
+        <th>联系方式</th>
+        <th>加入时间</th>
+        <th>脱离时间</th>
+      </tr>
+      <tr v-if="!myOrgList.length"><td colspan="4" style="text-align: center;border-bottom: 1px #F6F3F7;"><img src="../../assets/img/js-wujilu.png"/></td></tr>
+      <tr v-for="(el,index) in myOrgList" :key="index">
+        <td class="left">
+          <em @click="$utilroutes.toGroupInfo(el.id,el.albe0012)" class="pointer">{{el.albe0002 | ellipsis(18)}}</em>
+          <p>{{el.albe0038 || ''}}</p>
+        </td>
+        <td class="left">
+          <p>
+            <span>{{el.albe0022 || ''}}</span>
+            <span style="margin: 0 6px;">{{(el.albe0047 == '1' && el.albe0024) || (el.albe0048 == '1' && el.albe0020) || ''}}</span>
+          </p>
+          <span><button @click="sendMessage(el.id,el.albe0037)" class="button button-line button-line-mini pointer">给他发站内信</button></span>
+        </td>
+        <td class="left">{{el.albx6606 | ellipsisNos(10)}}</td>
+        <td class="left">{{el.albx6605 | ellipsisNos(10)}}</td>
+      </tr>
+    </table>
+    <paging :pageCount="tolPage"
+            :rangePage="pageSize"
+            :initPage="pageNow"
+            :totals="tolCount"
+            :val="jumpPage"
+            @pageEvent="pageEvent">
+    </paging>
+  </li>
+</template>
+
+<script>
+  const paging =()=>import('@/components/page/paginationRed.vue');//分页
+
+  export default {
+    components : {paging},
+    data(){
+      return {
+        routeDefine: this.$route.params.define,
+        userInfo:this.$store.getters.getUser,//账号信息
+        basicInfo:this.$store.getters.getBasic,//志愿者信息
+        myOrgList:[],//已加入列表
+        myOrgOutList:[],//已脱离列表
+        nowIndex:1,//下标
+        //分页参数
+        tolCount:0,//总条数
+        tolPage:0,//总页数
+        pageSize:8,//每页条数
+        pageNow:1,//当前页
+        jumpPage:1,
+      };
+    },
+    created() {
+      window.Vues = this;//主体vue实例挂载
+      window.deleteApplyOrg = this.deleteApplyOrg;
+      this.getOrgList();
+    },
+    mounted() {
+      this.setData();
+    },
+    methods:{
+      pageEvent:function(e){//分页
+        this.getOrgList();
+      },
+      getOrgList() {
+        //console.log("this.nowIndex   ",this.nowIndex)
+        this.utilscommit.request('nvsi_listVolMyGroupForWeb',{pageNow:this.pageNow,pageSize:this.pageSize,joinstate:this.nowIndex},this.orgListBack)
+      },
+      orgListBack(result) {
+        if(result && result.data) {
+          /* var myOrgList = result.data;
+          myOrgList.forEach(element => {
+            if(element && element.albe0024){
+               element.albe0024=this.common.ecryptPhone(element.albe0024);
+            }
+             if(element && element.albe0020)element.albe0020=this.common.ecryptPhone(element.albe0020);
+          });
+          this.myOrgList = myOrgList; */
+          this.myOrgList = result.data;
+          //console.log("this.myOrgList",this.myOrgList);
+          this.common.getTolData(this,result);
+        } else {
+          this.myOrgList = {};
+          this.common.getTolData(this);
+        }
+      },
+      deleteApplyOrg(buineseid) {
+        if(this.userInfo) {
+          this.$swal('确认删除申请？',{buttons:['取消','确定']}).then((value) => {
+            if(value)Vue.utilscommit.request("nvsi_operateVolMyGroupForWeb",{type:1,buineseid:buineseid}, Vues.deleteApplyOrgBack);
+          });
+        } else {
+          Vuec.checkUser();
+        }
+      },
+      deleteApplyOrgBack(result) {
+        if(result && result.data) {
+          this.getOrgList();
+          this.$swal('删除成功',{buttons:'确定'});
+        }else{
+          this.$swal('删除失败',{buttons:'确定'});
+        }
+      },
+      outOfOrg(groupid) { 
+        if(this.userInfo) {
+          this.$swal('确认脱离？',{buttons:['取消','确定']}).then((value) =>{
+             if(value) Vues.outOfOrgConfirm(groupid);
+          });
+        } else {
+          this.$utilroutes.toLogin();
+        }
+      },
+      outOfOrgConfirm(groupid) {
+          var data = {buineseid:groupid};
+          this.utilscommit.request("nvsi_chostVolOutOrgByWeb",data, this.outOfOrgBack);
+      },
+      outOfOrgBack(result) {
+        if(result.data) {
+          this.getOrgList();
+          this.$swal('脱离成功',{buttons:'确定'});
+        }else{
+          this.$swal('脱离失败',{buttons:'确定'});
+        }
+      },
+      applyOrgAgain(id){//再次申请队伍
+          this.utilscommit.request("nvsi_operateVolMyGroupForWeb",{type:2,buineseid:id}, this.applyOrgAgainBack);
+      },
+      applyOrgAgainBack(data){
+        if(data && data.data){
+          this.getOrgList();
+          this.$swal('申请成功',{buttons:'确定'});
+        }else{
+          this.$swal('申请失败',{buttons:'确定'});
+        }
+      },
+      sendMessage(acceptId,userid) {//发站内信
+        if(this.userInfo) {
+          this.common.addCookie("msg",2,0.2);
+          this.$router.push({ name:'message',params:{define:this.routeDefine,data1:acceptId,data2:userid}});
+        } else {          
+          this.$utilroutes.toLogin();
+        }
+      },
+      setData:function () {
+        $('.tabbar span').each(function (idx, el) {
+          if(Vues.nowIndex) {
+            $(el).removeClass('active');
+            var nowidx=0;
+            if(Vues.nowIndex==4)nowidx=1;
+            if(idx == nowidx){
+              $(el).addClass('active');
+            }
+            $('.user-table').eq(nowidx).show().siblings('.user-table').hide();
+          } 
+          $(el).click(function () {
+            if(idx==0)Vues.nowIndex =1;//已加入
+            if(idx==1)Vues.nowIndex =4;//已脱离
+            $(this).addClass('active').siblings().removeClass('active');
+            $('.user-table').eq(idx).show().siblings('.user-table').hide();
+          })
+        });
+      },
+      /* getOrg(){//同步队伍
+          let id=this.basicInfo.id;
+          this.utilscommit.request('nvsi_findOldOrg',{'albx0053':id},this.getOrgConfirmBack)
+      },
+      getOrgConfirmBack(res){
+          if(res.data){
+              this.$swal('同步成功',{buttons:'确定'})
+          }else{
+              this.$swal('同步失败',{buttons:'确定'})
+          }
+      }, */
+    },
+    watch: {
+      nowIndex: function(newval, oldval) { //监听tab页面
+        this.getOrgList();//重新加载列表
+      }
+    }
+  }
+
+</script>
+
+<style scoped>
+  .user-table th{
+    text-align: left;
+    padding: 10px;
+  }
+</style>

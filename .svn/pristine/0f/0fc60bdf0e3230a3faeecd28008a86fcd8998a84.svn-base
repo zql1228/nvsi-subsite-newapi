@@ -1,0 +1,7 @@
+.mask-info{
+    top: 10% !important;
+}
+
+.address dd{
+    left:25% !important;
+}

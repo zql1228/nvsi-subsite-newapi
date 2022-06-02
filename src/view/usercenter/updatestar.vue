@@ -1,0 +1,90 @@
+<template>
+  <li class="col v-t white tab-container">
+    <updatemenu></updatemenu>
+    <form id="pwForm">
+      <div class="grid g-14 auto">
+        <div class="form mb-10">
+          <p class="form-label">总服务时长：<em>(无需填写)</em></p>
+          <input type="text" v-model="timenum" readonly />
+        </div>
+        <div class="form mb-10">
+          <p class="form-label"><em>*</em>兑换星级：</p>
+          <star :row="1" :starOn="starOn" ref="showNum" :starOff="starOff"></star>
+          <p class="form-error" style="margin-top: 10px">
+            注：服务时长超过100小时、300小时、600小时、1000小时、1500小时分别可兑换一星级、二星级、三星级、四星级、五星级
+          </p>
+        </div>
+        <div class="pt-30 pb-40 t-c">
+          <a href="javascript:void(0);" class="button" style="width: 200px" @click="submitStar">兑换</a>
+        </div>
+      </div>
+    </form>
+  </li>
+</template>
+
+<script>
+const updatemenu = () => import("@/components/usercenter/updatemenu.vue"); //横向菜单栏
+const star = () => import("@/view/home/star.vue"); //星星
+import { mapState } from "vuex";
+
+export default {
+  components: { updatemenu, star },
+  data() {
+    return {
+      basicInfo: this.$store.getters.getBasic, //志愿者信息
+      timenum: "0.00", //时长
+      row1: "0",
+      starOn: require("../../assets/img/star.png"),
+      starOff: require("../../assets/img/star1.png"),
+    };
+  },
+  created() {
+    this.getInfo();
+  },
+  methods: {
+    getInfo: function (result) {
+      if (this.basicInfo.albp0089) this.timenum = this.basicInfo.albp0089;
+      this.$nextTick(() => {
+        if (this.basicInfo.albp0026)
+          this.$refs.showNum.getShowRating(this.basicInfo.albp0026);
+      });
+    },
+    submitStar() {
+      //修改兑换星级
+      if (this.row1 == "0") {
+        return this.$swal("请申请星级", { buttons: "确定" });
+      } else if (this.timenum < 1500 && this.row1 == 5) {
+        return this.$swal("您的时长不可兑换五星级", { buttons: "确定" });
+      } else if (this.timenum < 1000 && this.row1 >= 4) {
+        return this.$swal("您的时长不可兑换四星级", { buttons: "确定" });
+      } else if (this.timenum < 600 && this.row1 >= 3) {
+        return this.$swal("您的时长不可兑换三星级", { buttons: "确定" });
+      } else if (this.timenum < 300 && this.row1 >= 2) {
+        return this.$swal("您的时长不可兑换二星级", { buttons: "确定" });
+      } else if (this.timenum < 100 && this.row1 >= 1) {
+        return this.$swal("您的时长不可兑换一星级", { buttons: "确定" });
+      }
+      // console.log(this.row1)
+      let params = { albp0005: this.userinfo.albp0005, albp0026: this.row1 };
+      this.utilscommit.requestapi("updateVolunInforOnWeb", params, this.modifyStarBack);
+    },
+    modifyStarBack(result) {
+      //返回兑换星级
+      if (result) {
+        if (result.code == 0) {
+          this.$swal("兑换成功", { buttons: "确定" }).then(function (value) {
+            Vue.$router.go(0); //刷新页面
+          });
+        } else {
+          this.$swal("兑换失败", { buttons: "确定" }).then(function (value) {
+            Vue.$router.go(0); //刷新页面
+          });
+        }
+      }
+    },
+  },
+  computed: {
+    ...mapState(["userinfo"]),
+  },
+};
+</script>
